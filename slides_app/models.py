@@ -30,17 +30,14 @@ class Presentation(models.Model):
     title = models.CharField(null=False, blank=False)
     content = models.JSONField(null=False, blank=False)
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
+    tags = models.CharField(null=True, blank=True)
     description = models.JSONField(null=False, blank=False)
     privacy = models.IntegerField(choices=Privacy.choices, null=False, blank=False)
 
 
-class Slide(models.Model):
-    presentation = models.ForeignKey(Presentation, null=False, blank=False, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=f'/slides/{presentation.user.username}/', null=False, blank=False)
-
-
 class Lead(models.Model):
     presentation = models.ForeignKey(Presentation, null=False, blank=False, on_delete=models.CASCADE)
+    slide = models.IntegerField(null=False, blank=False)
     email = models.EmailField(null=True, blank=True)
     phone = models.CharField(null=True, blank=True)
     first_name = models.CharField(null=True, blank=True)
