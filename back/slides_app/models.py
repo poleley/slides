@@ -27,10 +27,10 @@ class Privacy(models.IntegerChoices):
 
 class Presentation(models.Model):
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
-    title = models.CharField(null=False, blank=False)
+    title = models.CharField(null=False, blank=False, max_length=255)
     content = models.JSONField(null=False, blank=False)
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
-    tags = models.CharField(null=True, blank=True)
+    tags = models.CharField(null=True, blank=True, max_length=100)
     description = models.JSONField(null=False, blank=False)
     privacy = models.IntegerField(choices=Privacy.choices, null=False, blank=False)
 
@@ -39,6 +39,6 @@ class Lead(models.Model):
     presentation = models.ForeignKey(Presentation, null=False, blank=False, on_delete=models.CASCADE)
     slide = models.IntegerField(null=False, blank=False)
     email = models.EmailField(null=True, blank=True)
-    phone = models.CharField(null=True, blank=True)
-    first_name = models.CharField(null=True, blank=True)
-    last_name = models.CharField(null=True, blank=True)
+    phone = models.CharField(null=True, blank=True, max_length=30)
+    first_name = models.CharField(null=True, blank=True, max_length=100)
+    last_name = models.CharField(null=True, blank=True, max_length=100)
