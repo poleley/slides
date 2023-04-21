@@ -1,0 +1,34 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.button-submit {
+    background-color: #81673e !important;
+    color: #ffffff !important;
+}
+
+.button-submit:hover {
+    background-color: #695534 !important;
+    color: #ffffff !important;
+}
+
+.form-control:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #81673e !important;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(129, 103, 62, 0.25) !important;
+}
