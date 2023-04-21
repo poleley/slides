@@ -35,7 +35,11 @@ class Presentation(models.Model):
         blank=False
     )
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
-    tags = models.CharField(null=True, blank=True, max_length=100)
+    tags = ArrayField(
+        models.CharField(null=False, blank=False, max_length=100),
+        null=True,
+        blank=True
+    )
     description = models.JSONField(null=False, blank=False)
     privacy = models.IntegerField(choices=Privacy.choices, null=False, blank=False)
 
@@ -47,7 +51,3 @@ class Lead(models.Model):
     phone = models.CharField(null=True, blank=True, max_length=30)
     first_name = models.CharField(null=True, blank=True, max_length=100)
     last_name = models.CharField(null=True, blank=True, max_length=100)
-
-
-class File(models.Model):
-    id = models.CharField(primary_key=True, max_length=64)
