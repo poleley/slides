@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 
 class Topic(models.IntegerChoices):
@@ -28,7 +29,11 @@ class Privacy(models.IntegerChoices):
 class Presentation(models.Model):
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     title = models.CharField(null=False, blank=False, max_length=255)
-    content = models.JSONField(null=False, blank=False)
+    slides = ArrayField(
+        models.CharField(max_length=64, null=False, blank=False),
+        null=False,
+        blank=False
+    )
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
     tags = models.CharField(null=True, blank=True, max_length=100)
     description = models.JSONField(null=False, blank=False)
@@ -42,3 +47,7 @@ class Lead(models.Model):
     phone = models.CharField(null=True, blank=True, max_length=30)
     first_name = models.CharField(null=True, blank=True, max_length=100)
     last_name = models.CharField(null=True, blank=True, max_length=100)
+
+
+class File(models.Model):
+    id = models.CharField(primary_key=True, max_length=64)
