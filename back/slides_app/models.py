@@ -21,7 +21,7 @@ class Topic(models.IntegerChoices):
 
 
 class Privacy(models.IntegerChoices):
-    PUBLIC = 1, _("Достуно всем")
+    PUBLIC = 1, _("Доступно всем")
     LIMITED = 2, _("Ограниченный доступ")
     PRIVATE = 3, _("Приватно")
 
@@ -42,6 +42,8 @@ class Presentation(models.Model):
     )
     description = models.JSONField(null=False, blank=False)
     privacy = models.IntegerField(choices=Privacy.choices, null=False, blank=False)
+    url = models.URLField(null=True, blank=True)
+    date_created = models.DateField(auto_now_add=True)
 
 
 class Lead(models.Model):
