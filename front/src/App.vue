@@ -1,25 +1,15 @@
 <script>
 
-import axios from "axios";
 import MyInput from "@/components/UI/UIInput.vue";
-import {defineComponent, ref} from "vue";
+import {defineComponent} from "vue";
+import {useUserStore} from "@/stores";
 
 export default defineComponent({
   name: 'app',
   components: {MyInput},
-  beforeCreate() {
-    this.$store.commit('initializeStore');
-
-    const token = this.$store.state.token;
-
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = 'Token ' + token;
-    } else {
-      axios.defaults.headers.common['Authorization'] = '';
-    }
-  },
   setup() {
-
+    const userStore = useUserStore();
+    return {userStore}
   }
 })
 
@@ -40,7 +30,7 @@ export default defineComponent({
 
         <div>
           <ul class="navbar-nav">
-            <template v-if="!$store.state.isAuthenticated">
+            <template v-if="!userStore.user">
               <li class="nav-item">
                 <a class="nav-link" href="/signup">Регистрация</a>
               </li>
@@ -50,13 +40,13 @@ export default defineComponent({
             </template>
             <li v-else class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ $store.state.user.lastName }} {{ $store.state.user.firstName }}
+                {{ userStore.user.lastName }} {{ userStore.user.firstName }}
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="#">Моя коллекция</a></li>
                 <li><a class="dropdown-item" href="#">Загрузить презентацию</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Выйти</a></li>
+                <li><a class="dropdown-item" href="#" @click="userStore.logOut()">Выйти</a></li>
               </ul>
             </li>
           </ul>

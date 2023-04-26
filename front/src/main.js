@@ -5,8 +5,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
 import router from "@/routers/router";
 import axios from "axios";
-import store from "@/store";
-
+import {createPinia} from "pinia";
 
 axios.defaults.BASE_URL = "http://127.0.0.1:8000"
 
@@ -17,7 +16,7 @@ components.forEach(component => {
 })
 
 app
-    .use(store)
+    .use(createPinia())
     .use(router, axios)
     .mount("#app")
 
