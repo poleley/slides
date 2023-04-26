@@ -16,6 +16,7 @@ from slides_app.utils import IsOwner, PdfConverter, NoCsrfSessionAuthentication
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
+    authentication_classes = [NoCsrfSessionAuthentication]
 
     def create(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -24,23 +25,21 @@ class UserViewSet(ModelViewSet):
                 data={"detail: User already authenticated."}
             )
 
-        super().create(request)
+        res = super().create(request)
         user = User.objects.get(email=request.data["email"])
         login(request, user)
-        return Response(status=status.HTTP_201_CREATED)
+        return res
 
     def login(self, request):
-        if request.user.is_authenticated:
-            return Response(
-                status=status.HTTP_200_OK,
-                data={"detail: User already authenticated."}
-            )
-
-        user = User.objects.get(email=request.data["email"])
+        user = get_object_or_404(User.objects.all(), email=request.data["email"])
         if user.check_password(request.data["password"]):
             login(request, user)
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+            serializer = UserSerializer(user)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            data={"detail: Wrong password."},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
     def logout(self, request):
         if request.user.is_authenticated:
