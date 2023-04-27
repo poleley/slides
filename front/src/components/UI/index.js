@@ -1,4 +1,4 @@
-import MyInput from "@/components/UI/UIInput.vue";
+import MyInput from "@/components/UI/UiInput.vue";
 
 export default [
     MyInput

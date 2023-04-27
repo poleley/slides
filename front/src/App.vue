@@ -1,6 +1,6 @@
 <script>
 
-import MyInput from "@/components/UI/UIInput.vue";
+import MyInput from "@/components/UI/UiInput.vue";
 import {defineComponent} from "vue";
 import {useUserStore} from "@/stores";
 
@@ -24,7 +24,7 @@ export default defineComponent({
       <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Галерея презентаций</a>
+            <a class="nav-link active" aria-current="page" href="/">Галерея презентаций</a>
           </li>
         </ul>
 
@@ -43,7 +43,7 @@ export default defineComponent({
                 {{ userStore.user.lastName }} {{ userStore.user.firstName }}
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#">Моя коллекция</a></li>
+                <li><a class="dropdown-item" href="/library">Моя коллекция</a></li>
                 <li><a class="dropdown-item" href="#">Загрузить презентацию</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="#" @click="userStore.logOut()">Выйти</a></li>

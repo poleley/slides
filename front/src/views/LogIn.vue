@@ -77,7 +77,13 @@ function submit() {
           </div>
         </div>
 
-        <ui-button type="submit" class="button-submit">Войти</ui-button>
+        <ui-button
+            type="submit"
+            class="button-submit"
+            :disabled="!form.valid"
+        >
+          Войти
+        </ui-button>
       </form>
     </div>
   </div>
