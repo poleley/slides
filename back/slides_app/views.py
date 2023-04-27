@@ -87,6 +87,7 @@ class PresentationViewSet(ModelViewSet):
 
         if self.request.query_params.get("user_id") is None:
             queryset = queryset.filter(privacy=1)
+            queryset = queryset.order_by("description__views__total_views", "-date_created")
 
         return queryset
 
@@ -94,7 +95,7 @@ class PresentationViewSet(ModelViewSet):
         description = {
             "lead": False,
             "stars": 0,
-            "views": {}
+            "views": {"total_views": 0}
         }
         serializer.save(user=self.request.user, description=description)
 
@@ -121,9 +122,10 @@ class FileImport(ViewSet):
     serializer_class = FileUploadSerializer
     parser_classes = [MultiPartParser]
     permission_classes = [IsAuthenticated]
+    authentication_classes = [NoCsrfSessionAuthentication]
 
     def convert(self, request):
         file_to_import = request.FILES.get("file")
         converter = PdfConverter()
         slides = converter.convert(file_to_import)
-        return Response(slides)
+        return Response(data={"slides": slides})

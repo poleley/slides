@@ -11,7 +11,7 @@ class IsOwner(BasePermission):
         if view.action == "list":
             user_id = request.query_params.get("user_id")
             if user_id is not None:
-                if user_id != request.user.id:
+                if int(user_id) != request.user.id:
                     return False
         return True
 

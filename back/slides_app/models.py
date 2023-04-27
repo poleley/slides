@@ -30,7 +30,7 @@ class Presentation(models.Model):
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     title = models.CharField(null=False, blank=False, max_length=255)
     slides = ArrayField(
-        models.CharField(max_length=64, null=False, blank=False),
+        models.CharField(max_length=68, null=False, blank=False),
         null=False,
         blank=False
     )

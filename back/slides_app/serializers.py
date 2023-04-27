@@ -17,7 +17,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password']
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -41,7 +41,7 @@ class PresentationSerializer(ModelSerializer):
 class CreatePresentationSerializer(ModelSerializer):
     class Meta:
         model = Presentation
-        fields = ['title', 'slides', 'topic', 'tags', 'description', 'privacy', 'url']
+        fields = ['title', 'slides', 'topic', 'tags', 'privacy']
 
 
 class LeadSerializer(ModelSerializer):
