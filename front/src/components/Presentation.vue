@@ -1,5 +1,7 @@
 <script setup>
 
+import router from "@/routers/router";
+
 const props = defineProps({
   presentation: {
     type: Object,
@@ -15,11 +17,15 @@ const props = defineProps({
 });
 
 const imgSrc = `/media/${props.presentation.slides[0]}`;
+
+function presentationDetail(id) {
+  router.replace({path: `/presentation/${id}`})
+}
 </script>
 
 <template>
   <div class="col-4">
-    <div class="presentation">
+    <div class="presentation" @dblclick="presentationDetail(presentation.id)">
       <div class="preview">
         <img class="img-preview" alt="Превью" :src="imgSrc">
       </div>
@@ -69,9 +75,10 @@ const imgSrc = `/media/${props.presentation.slides[0]}`;
 
 <style scoped>
 .presentation {
+  cursor: pointer;
   width: 90%;
   margin: 1rem auto;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 12px 12px;
   border: 1px solid #e1d6c6;
 }
 

@@ -4,6 +4,7 @@ import {ref} from "vue";
 export function usePresentations() {
     const presentationsPublic = ref([])
     const userPresentations = ref([])
+    const presentation = ref({})
 
     const getPublicPresentations = async () => {
         return await axios.get("/api/v1/presentation/")
@@ -21,5 +22,20 @@ export function usePresentations() {
             .catch((e) => console.log(e))
     }
 
-    return {presentationsPublic, userPresentations, getPublicPresentations, getUserPresentations}
+    const getPresentation = async (id) => {
+        return await axios.get(`/api/v1/presentation/${id}/`)
+            .then((res) => {
+                presentation.value = res.data
+            })
+            .catch((e) => console.log(e))
+    }
+
+    return {
+        presentationsPublic,
+        userPresentations,
+        presentation,
+        getPublicPresentations,
+        getUserPresentations,
+        getPresentation
+    }
 }

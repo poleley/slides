@@ -47,6 +47,7 @@ function submit() {
               placeholder="Электронная почта"
               class="form-control"
               :class="{'is-invalid': !form.email.valid && form.email.touched}"
+              @blur="form.email.blur"
           />
           <template v-if="form.email.errors.isEmail">
             <div class="invalid-feedback">
@@ -67,6 +68,7 @@ function submit() {
               placeholder="Пароль"
               class="form-control"
               :class="{'is-invalid': !form.password.valid && form.password.touched}"
+              @blur="form.password.blur"
           />
           <div class="invalid-feedback">
             <template v-if="form.password.errors.required">

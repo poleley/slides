@@ -48,7 +48,6 @@ const {form} = useForm({
 })
 
 function submit() {
-  console.log(userStore)
   if (form.valid) {
     userStore.signUp(
         form.email.value,

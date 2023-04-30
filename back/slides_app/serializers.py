@@ -20,13 +20,16 @@ class UserSerializer(ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'email', 'password']
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        try:
+            user = User.objects.create_user(
             username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name']
-        )
+            )
+        except:
+            raise serializers.ValidationError({"email": "User with this email already exists"})
         return user
 
 

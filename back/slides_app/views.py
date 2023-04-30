@@ -24,7 +24,6 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_200_OK,
                 data={"detail: User already authenticated."}
             )
-
         res = super().create(request)
         user = User.objects.get(email=request.data["email"])
         login(request, user)
