@@ -44,17 +44,10 @@ class PresentationSerializer(ModelSerializer):
 class CreatePresentationSerializer(ModelSerializer):
     class Meta:
         model = Presentation
-        fields = ['title', 'slides', 'topic', 'tags', 'privacy']
+        fields = ['title', 'topic', 'tags', 'privacy']
 
 
 class LeadSerializer(ModelSerializer):
     class Meta:
         model = Lead
         fields = '__all__'
-
-
-class FileUploadSerializer(serializers.Serializer):
-    file_uploaded = serializers.FileField()
-
-    class Meta:
-        fields = ["file_uploaded"]
