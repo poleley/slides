@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -9,8 +11,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from slides_app.models import Presentation, Lead
-from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
-    FileUploadSerializer
+from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer
 from slides_app.utils import IsOwner, PdfConverter, NoCsrfSessionAuthentication
 
 
@@ -53,6 +54,7 @@ class PresentationViewSet(ModelViewSet):
     queryset = Presentation.objects.all()
     authentication_classes = [NoCsrfSessionAuthentication]
     permission_classes = [IsOwner]
+    parser_classes = [MultiPartParser]
 
     def get_permissions(self):
         permission_classes = super().get_permissions()
@@ -64,6 +66,11 @@ class PresentationViewSet(ModelViewSet):
         if self.action == "create":
             return CreatePresentationSerializer
         return super().get_serializer_class()
+
+    def get_object(self):
+        obj = get_object_or_404(Presentation.objects.all(), pk=self.kwargs["presentation_id"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -96,7 +103,18 @@ class PresentationViewSet(ModelViewSet):
             "stars": 0,
             "views": {"total_views": 0}
         }
-        serializer.save(user=self.request.user, description=description)
+        file_to_import = self.request.FILES.get("file")
+        converter = PdfConverter()
+        slides = converter.convert(file_to_import)
+        serializer.save(user=self.request.user, slides=slides, description=description)
+
+    def perform_destroy(self, instance):
+        for slide in instance.slides:
+            presentations = Presentation.objects.filter(slides__contains=[slide]).exclude(pk=instance.pk)
+            if len(presentations) == 0:
+                os.remove(f'slides_app/slides/{slide}')
+        instance.delete()
+
 
 
 class LeadViewSet(ModelViewSet):
@@ -115,16 +133,3 @@ class LeadViewSet(ModelViewSet):
         #     user = self.request.user
         #     serializer.save(email=user.email, last_name=user.last_name, first_name=user.first_name)
         serializer.save(presentation=presentation)
-
-
-class FileImport(ViewSet):
-    serializer_class = FileUploadSerializer
-    parser_classes = [MultiPartParser]
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [NoCsrfSessionAuthentication]
-
-    def convert(self, request):
-        file_to_import = request.FILES.get("file")
-        converter = PdfConverter()
-        slides = converter.convert(file_to_import)
-        return Response(data={"slides": slides})

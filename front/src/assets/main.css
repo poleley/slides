@@ -25,10 +25,19 @@ html, body {
     color: #ffffff !important;
 }
 
-.form-control:focus {
+.form-control:focus, .form-select:focus {
     color: #212529;
     background-color: #fff;
     border-color: #81673e !important;
     outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(129, 103, 62, 0.25) !important;
+}
+
+.form-check-input:checked {
+    background-color: #81673e !important;
+    border-color: #81673e !important;
+}
+
+.form-check-input:focus {
     box-shadow: 0 0 0 0.25rem rgba(129, 103, 62, 0.25) !important;
 }

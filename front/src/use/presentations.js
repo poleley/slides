@@ -30,12 +30,20 @@ export function usePresentations() {
             .catch((e) => console.log(e))
     }
 
+    const createPresentation = async (data) => {
+        return await axios.post(
+            "/api/v1/presentation/",
+            data
+        ).then((res) => console.log(res))
+    }
+
     return {
         presentationsPublic,
         userPresentations,
         presentation,
         getPublicPresentations,
         getUserPresentations,
-        getPresentation
+        getPresentation,
+        createPresentation
     }
 }

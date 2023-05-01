@@ -166,7 +166,7 @@ function submit() {
         </div>
         <ui-button
             type="submit"
-            class="button-submit"
+            class="button-submit w-100"
             :disabled="!form.valid"
         >
           Зарегистрироваться
@@ -179,10 +179,6 @@ function submit() {
 <style scoped>
 .input-item {
   margin: 1rem 0;
-}
-
-form button {
-  width: 100%;
 }
 
 .registration-outer {

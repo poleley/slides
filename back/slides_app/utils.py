@@ -16,10 +16,8 @@ class IsOwner(BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
-        if view.action == "retrieve" and obj.privacy == 1:
-            return True
-        else:
-            return obj.user == request.user
+        a = obj.privacy == 1 or obj.user == request.user
+        return a
 
 
 class NoCsrfSessionAuthentication(SessionAuthentication):

@@ -1,6 +1,6 @@
 import { createApp } from "vue"
 import App from "./App.vue"
-import components from "@/components/UI"
+// import components from "@/components/UI"
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
 import 'bootstrap-icons/font/bootstrap-icons.css'
@@ -12,9 +12,9 @@ axios.defaults.BASE_URL = "http://127.0.0.1:8000"
 
 const app = createApp(App);
 
-components.forEach(component => {
-    app.component(component.name, component)
-})
+// components.forEach(component => {
+//     app.component(component.name, component)
+// })
 
 app
     .use(createPinia())
