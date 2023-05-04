@@ -6,6 +6,7 @@ import MyCollection from "@/views/MyCollection.vue";
 import {useUserStore} from "@/stores";
 import PresentationDetail from "@/views/PresentationDetail.vue";
 import Converter from "@/views/Converter.vue";
+import EditPresentation from "@/views/EditPresentation.vue";
 
 const routes = [
     {
@@ -28,9 +29,14 @@ const routes = [
         name: 'library'
     },
     {
-        path: '/presentation/:id',
+        path: '/presentation/:id/',
         component: PresentationDetail,
         name: 'presentation'
+    },
+    {
+        path: '/presentation/:id/edit/',
+        component: EditPresentation,
+        name: 'presentation-edit'
     },
     {
         path: '/upload/',

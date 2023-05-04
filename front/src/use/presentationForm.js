@@ -9,10 +9,12 @@ export function usePresentationForm(init = {}) {
     }
 
     form.valid = computed(() => {
-        return Object.keys(form).filter(k => k !== "valid").reduce((acc, key) => {
-            acc = form[key].valid
-            return acc
-        }, true)
+        for (let key in form) {
+            if (!form[key].valid && key !== "valid") {
+                return false
+            }
+        }
+        return true
     })
 
     return {form}

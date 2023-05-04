@@ -1,6 +1,7 @@
 <script setup>
 
 import router from "@/routers/router";
+import UiTooltip from '@/components/UI/UiTooltip.vue'
 
 const props = defineProps({
   presentation: {
@@ -25,16 +26,16 @@ function presentationDetail(id) {
 
 <template>
   <div class="col-4">
-    <div class="presentation" @dblclick="presentationDetail(presentation.id)">
-      <div class="preview">
+    <div class="presentation">
+      <div class="preview" @dblclick="presentationDetail(presentation.id)">
         <img class="img-preview" alt="Превью" :src="imgSrc">
       </div>
       <div class="info">
         <template v-if="currentRoute === '/'">
           <div class="row-1">
             <div class="title">
-              <template v-if="presentation.title.length > 19">
-                {{ presentation.title.slice(0, 19) }}...
+              <template v-if="presentation.title.length > 25">
+                {{ presentation.title.slice(0, 24) }}...
               </template>
               <template v-else>
                 {{ presentation.title }}
@@ -56,12 +57,25 @@ function presentationDetail(id) {
         <template v-else>
           <div class="row-1">
             <div class="title">
-              <template v-if="presentation.title.length > 19">
-                {{ presentation.title.slice(0, 19) }}...
+              <template v-if="presentation.title.length > 25">
+                {{ presentation.title.slice(0, 24) }}...
               </template>
               <template v-else>
                 {{ presentation.title }}
               </template>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <div class="buttons">
+            <i class="bi bi-bar-chart-line-fill ui-tooltip">
+              <ui-tooltip>Статистика</ui-tooltip>
+            </i>
+            <i class="bi bi-share-fill ui-tooltip">
+              <ui-tooltip>Поделиться</ui-tooltip>
+            </i>
+            <i class="bi bi-pencil-fill ui-tooltip">
+              <ui-tooltip>Редактировать</ui-tooltip>
+            </i>
             </div>
             <div class="views">
               {{ presentation.description.views.total_views || 0 }} <i class="bi bi-eye"></i>
@@ -75,7 +89,6 @@ function presentationDetail(id) {
 
 <style scoped>
 .presentation {
-  cursor: pointer;
   width: 90%;
   margin: 1rem auto;
   border-radius: 0 0 12px 12px;
@@ -93,8 +106,10 @@ function presentationDetail(id) {
 }
 
 .img-preview, .preview {
+  cursor: pointer;
   max-width: 100%;
   width: 100%;
+  height: 11rem;
 }
 
 .title {
@@ -114,4 +129,27 @@ function presentationDetail(id) {
   border-top: 1px solid #e1d6c6;
   padding: 0.5rem 1rem;
 }
+
+.bi {
+  color: #81673e;
+}
+
+.bi-share-fill, .bi-pencil-fill {
+  margin-left: 8px;
+}
+
+.buttons > .bi:hover {
+  cursor: pointer;
+  color: #564425;
+}
+
+.ui-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.ui-tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
 </style>

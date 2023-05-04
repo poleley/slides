@@ -10,7 +10,6 @@ const userStore = useUserStore();
 
 onMounted(async () => {
   await presentations.getUserPresentations(userStore.user.id);
-  console.log(presentations.userPresentations.value)
 })
 
 </script>
@@ -27,5 +26,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
+.help-text {
+  color: #564425;
+}
 </style>

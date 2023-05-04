@@ -4,6 +4,10 @@ import UiButton from "@/components/UI/UiButton.vue";
 
 import {useForm} from "@/use/form";
 import {useUserStore} from "@/stores";
+import UiToast from "@/components/UI/UiToast.vue";
+import router from "@/routers/router";
+import {ref} from "vue";
+
 
 const passLength = 8
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
@@ -47,20 +51,36 @@ const {form} = useForm({
   validators: [isEqual('password', 'passwordConfirm', 'passwordConfirm')]
 })
 
-function submit() {
+const isShowToast = ref(false)
+
+function hideToast() {
+  isShowToast.value = false
+}
+
+async function submit() {
   if (form.valid) {
-    userStore.signUp(
+    await userStore.signUp(
         form.email.value,
         form.password.value,
         form.firstName.value,
         form.lastName.value,
     )
+    if (userStore.error === null)
+      await router.replace({name: 'library'})
+    else {
+      isShowToast.value = true
+      setTimeout(hideToast, 3000)
+    }
   }
 }
 
 </script>
 
 <template>
+  <ui-toast :show="isShowToast">
+    <template v-slot:header>Уведомление</template>
+    <template v-slot:body>{{ userStore.error }}</template>
+  </ui-toast>
   <div class="registration-outer">
     <div class="registration-inner">
       <h2 class="registration-title fw-bold">Регистрация</h2>

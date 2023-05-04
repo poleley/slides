@@ -75,8 +75,4 @@ export default defineComponent({
   flex: 0 0 auto;
 }
 
-/*.dropdown-menu {*/
-/*  left: -600% !important;*/
-/*}*/
-
 </style>

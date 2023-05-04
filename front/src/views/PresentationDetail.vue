@@ -41,11 +41,36 @@
         >
         </div>
       </div>
+      <div class="info justify-content-between">
+        <div class="stats">
+          <div class="total-views">
+            <i class="bi bi-eye"></i>{{ totalViews }}
+          </div>
+          <div class="total-favorite">
+            <i class="bi bi-star"></i>{{ totalFavorite }}
+          </div>
+        </div>
+        <div v-if="isUserOwner" class="buttons">
+          <i class="bi bi-bar-chart-line-fill ui-tooltip">
+            <ui-tooltip>Статистика</ui-tooltip>
+          </i>
+          <i class="bi bi-share-fill ui-tooltip">
+            <ui-tooltip>Поделиться</ui-tooltip>
+          </i>
+          <i class="bi bi-pencil-fill ui-tooltip">
+            <ui-tooltip>Редактировать</ui-tooltip>
+          </i>
+        </div>
+        <div v-else>
+
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import UiTooltip from '@/components/UI/UiTooltip.vue'
 import Router from "@/routers/router";
 import {usePresentations} from "@/use/presentations";
 import {useUserStore} from "@/stores";
@@ -57,6 +82,9 @@ const userStore = useUserStore();
 const imgSrc = ref('');
 const slideNum = ref(0);
 const isLast = ref(false);
+const totalViews = ref(0);
+const totalFavorite = ref(0);
+const isUserOwner = ref(false);
 
 const dateCreated = computed(() => {
   return (new Date(presentations.presentation.value.date_created))
@@ -67,6 +95,10 @@ onMounted(async () => {
   await presentations.getPresentation(Router.currentRoute.value.params.id);
   imgSrc.value = `/media/${presentations.presentation.value.slides[slideNum.value]}`;
   isLast.value = slideNum.value === presentations.presentation.value.slides.length - 1;
+  totalViews.value = presentations.presentation.value.description.views.total_views || 0;
+  totalFavorite.value = presentations.presentation.value.description.total_favorite || 0;
+  if (presentations.presentation.value.user.id === userStore.user.id)
+    isUserOwner.value = true
 })
 
 function nextSlide() {
@@ -90,6 +122,15 @@ watch(slideNum, () => {
 </script>
 
 <style scoped>
+.ui-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.ui-tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
 .presentation-outer {
   display: flex;
   justify-content: center;
@@ -139,9 +180,15 @@ watch(slideNum, () => {
 }
 
 .title {
+  width: 70%;
   text-align: left;
   font-size: 32px;
   font-weight: bold;
+}
+
+.date {
+  text-align: right;
+  width: 30%;
 }
 
 img {
@@ -173,6 +220,40 @@ img {
 
 .current-progress-item {
   background-color: #81673e;
+}
+
+.info {
+  position: relative;
+  display: flex;
+  width: 62%;
+  margin: 1rem auto;
+  align-items: center;
+}
+
+.bi-eye, .bi-star {
+  margin-right: 4px;
+}
+
+.total-favorite {
+  margin-left: 8px;
+}
+
+.buttons {
+  color: #81673e;
+}
+
+.buttons > .bi {
+  margin: 0 8px;
+}
+
+.buttons > .bi:hover {
+  cursor: pointer;
+  color: #564425;
+}
+
+.stats {
+  display: flex;
+  color: #81673e;
 }
 
 </style>

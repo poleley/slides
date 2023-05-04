@@ -8,7 +8,6 @@ const presentations = usePresentations();
 
 onMounted(async () => {
   await presentations.getPublicPresentations();
-  console.log(presentations.presentationsPublic.value)
 })
 
 const currentRoute = Router.currentRoute.value.path

@@ -4,6 +4,9 @@ import UiButton from "@/components/UI/UiButton.vue";
 
 import {useForm} from "@/use/form";
 import {useUserStore} from "@/stores";
+import router from "@/routers/router";
+import {ref} from "vue";
+import UiToast from "@/components/UI/UiToast.vue";
 
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
@@ -23,23 +26,38 @@ const {form} = useForm({
   },
 }, {}, true)
 
-function submit() {
+const isShowToast = ref(false)
+
+function hideToast() {
+  isShowToast.value = false
+}
+
+async function submit() {
   if (form.valid) {
-    userStore.logIn(
+    await userStore.logIn(
         form.email.value,
         form.password.value,
     )
+    if (userStore.error === null)
+      await router.replace({name: 'library'})
+    else {
+      isShowToast.value = true
+      setTimeout(hideToast, 3000)
+    }
   }
 }
 
 </script>
 
 <template>
+  <ui-toast :show="isShowToast">
+    <template v-slot:header>Уведомление</template>
+    <template v-slot:body>{{ userStore.error }}</template>
+  </ui-toast>
   <div class="registration-outer">
     <div class="registration-inner">
       <h2 class="registration-title fw-bold">Войти</h2>
       <form @submit.prevent="submit">
-
         <div class="input-item">
           <input
               v-model="form.email.value"

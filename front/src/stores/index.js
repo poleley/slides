@@ -4,6 +4,7 @@ import axios from "axios";
 
 export const useUserStore = defineStore('userStore', () => {
     const user = ref(null)
+    const error = ref(null)
 
     if (localStorage.getItem('user')) {
         try {
@@ -26,21 +27,26 @@ export const useUserStore = defineStore('userStore', () => {
             email: email,
             password: password
         }
-        const res = await axios.post("/api/v1/user/signup/", formData)
+        await axios.post("/api/v1/user/signup/", formData)
             .then((res) => {
-                if (res.status === 201) {
-                    user.value = {
-                        id: res.data.id,
-                        firstName: res.data.first_name,
-                        lastName: res.data.last_name,
-                        email: res.data.email,
+                    if (res.status === 201) {
+                        error.value = null;
+                        user.value = {
+                            id: res.data.id,
+                            firstName: res.data.first_name,
+                            lastName: res.data.last_name,
+                            email: res.data.email,
+                        }
+                        saveUserToLocalStorage(user.value)
                     }
-                    saveUserToLocalStorage(user.value)
                 }
-            }
-        ).catch((err) => {
-            console.log(err)
-        })
+            ).catch((err) => {
+                if (err.response.status === 400) {
+                    error.value = "Пользователь с такой почтой уже зарегистрирован"
+                } else {
+                    error.value = "Произошла неизвестная ошибка. Попробуйте еще раз"
+                }
+            })
     }
 
     const logIn = async (email, password) => {
@@ -48,33 +54,39 @@ export const useUserStore = defineStore('userStore', () => {
             email: email,
             password: password
         }
-        const res = await axios.post("/api/v1/user/login/", formData)
+        await axios.post("/api/v1/user/login/", formData)
             .then((res) => {
-                if (res.status === 201) {
-                    user.value = {
-                        id: res.data.id,
-                        firstName: res.data.first_name,
-                        lastName: res.data.last_name,
-                        email: res.data.email,
+                    if (res.status === 201) {
+                        error.value = null;
+                        user.value = {
+                            id: res.data.id,
+                            firstName: res.data.first_name,
+                            lastName: res.data.last_name,
+                            email: res.data.email,
+                        }
+                        saveUserToLocalStorage(user.value)
                     }
-                    saveUserToLocalStorage(user.value)
                 }
-            }
-        ).catch((err) => {
-            console.log(err)
-        })
+            ).catch((err) => {
+                if (err.response.status === 401 || err.response.status === 404) {
+                    error.value = "Неверная почта или пароль"
+                } else {
+                    error.value = "Произошла неизвестная ошибка. Попробуйте еще раз"
+                }
+            })
     }
 
     const logOut = () => {
-        const res = axios.get("/api/v1/user/logout/")
+        axios.get("/api/v1/user/logout/")
             .then((res) => {
-                user.value = null
-                saveUserToLocalStorage(user.value)
-            }
-        ).catch((err) => {
+                    error.value = null;
+                    user.value = null
+                    saveUserToLocalStorage(user.value)
+                }
+            ).catch((err) => {
             console.log(err)
         })
     }
 
-    return {user, signUp, logIn, logOut}
+    return {user, error, signUp, logIn, logOut}
 });

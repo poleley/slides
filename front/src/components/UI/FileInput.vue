@@ -8,7 +8,7 @@ defineProps({
   },
 })
 
-const fileName = ref('')
+var fileName = ref('')
 
 watch(() => fileName.value, () => {
   if (fileName.value.length > 50)
@@ -18,7 +18,7 @@ watch(() => fileName.value, () => {
 </script>
 
 <template>
-  <div class="file-upload mb-2">
+  <div class="file-upload mb-2" :class="{'invalid': !modelValue.valid && modelValue.touched}">
     <div class="container-fluid">
       <div class="row">
         <template v-if="!modelValue.touched">
@@ -34,7 +34,15 @@ watch(() => fileName.value, () => {
         </template>
         <template v-else>
           <div class="col col-12">
+            <template v-if="modelValue.errors.isPdf">
+              Расширение должно быть .pdf
+            </template>
+            <template v-else-if="modelValue.errors.maxSize">
+              Размер файла не должен превышать 5 МБайт
+            </template>
+            <template v-else>
             {{ fileName }}
+            </template>
           </div>
         </template>
       </div>
@@ -76,6 +84,11 @@ watch(() => fileName.value, () => {
   transition: 0.2s;
   background-color: rgba(121, 95, 71, 0.14);
   text-align: center;
+}
+
+.invalid {
+  border: 1px dashed red;
+  color: red;
 }
 
 </style>

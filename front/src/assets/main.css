@@ -20,6 +20,15 @@ html, body {
     color: #ffffff !important;
 }
 
+a {
+    color: #81673e !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: #695534 !important;
+}
+
 .button-submit:hover {
     background-color: #695534 !important;
     color: #ffffff !important;
@@ -39,5 +48,9 @@ html, body {
 }
 
 .form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(129, 103, 62, 0.25) !important;
+}
+
+.btn-close:focus {
     box-shadow: 0 0 0 0.25rem rgba(129, 103, 62, 0.25) !important;
 }
