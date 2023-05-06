@@ -29,11 +29,6 @@ class Privacy(models.IntegerChoices):
 class Presentation(models.Model):
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     title = models.CharField(null=False, blank=False, max_length=255)
-    slides = ArrayField(
-        models.CharField(max_length=68, null=False, blank=False),
-        null=False,
-        blank=False
-    )
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
     tags = ArrayField(
         models.CharField(null=False, blank=False, max_length=100),
@@ -46,10 +41,26 @@ class Presentation(models.Model):
     date_created = models.DateField(auto_now_add=True)
 
 
+class Slide(models.Model):
+    presentation = models.ForeignKey(Presentation, null=False, blank=False, on_delete=models.CASCADE)
+    name = models.CharField(max_length=68, null=False, blank=False)
+    ordering = models.IntegerField(null=False, blank=False)
+
+
 class Lead(models.Model):
     presentation = models.ForeignKey(Presentation, null=False, blank=False, on_delete=models.CASCADE)
-    slide = models.IntegerField(null=False, blank=False)
-    email = models.EmailField(null=True, blank=True)
-    phone = models.CharField(null=True, blank=True, max_length=30)
-    first_name = models.CharField(null=True, blank=True, max_length=100)
-    last_name = models.CharField(null=True, blank=True, max_length=100)
+    slide = models.ForeignKey(Slide, null=False, blank=False, on_delete=models.CASCADE)
+    email = models.EmailField(null=False, blank=False)
+    first_name = models.CharField(null=False, blank=False, max_length=100)
+    last_name = models.CharField(null=False, blank=False, max_length=100)
+
+
+class Question(models.Model):
+    slide = models.OneToOneField(Slide, null=False, blank=False, on_delete=models.CASCADE)
+    question_text = models.CharField(null=False, blank=False, max_length=255)
+
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    slide = models.ForeignKey(Slide, null=False, blank=False, on_delete=models.CASCADE)
+    answer_text = models.CharField(null=False, blank=False, max_length=255)

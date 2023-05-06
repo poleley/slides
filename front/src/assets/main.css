@@ -20,12 +20,12 @@ html, body {
     color: #ffffff !important;
 }
 
-a {
+a.ui-link {
     color: #81673e !important;
     text-decoration: none !important;
 }
 
-a:hover {
+a.ui-link:hover {
     color: #695534 !important;
 }
 

@@ -22,8 +22,8 @@ export function usePresentations() {
             .catch((e) => console.log(e))
     }
 
-    const getPresentation = async (id) => {
-        return await axios.get(`/api/v1/presentation/${id}/`)
+    const getPresentation = async (id, params={}) => {
+        return await axios.get(`/api/v1/presentation/${id}/`, {params: params})
             .then((res) => {
                 presentation.value = res.data
             })
@@ -37,6 +37,19 @@ export function usePresentations() {
         ).then((res) => console.log(res))
     }
 
+    const editPresentation = async (id, data) => {
+        return await axios.patch(
+            `/api/v1/presentation/${id}/`,
+            data
+        ).then((res) => console.log(res))
+    }
+
+    const deletePresentation = async (id) => {
+        return await axios.delete(
+            `/api/v1/presentation/${id}/`
+        ).then((res) => console.log(res))
+    }
+
     return {
         presentationsPublic,
         userPresentations,
@@ -44,6 +57,8 @@ export function usePresentations() {
         getPublicPresentations,
         getUserPresentations,
         getPresentation,
-        createPresentation
+        createPresentation,
+        editPresentation,
+        deletePresentation
     }
 }

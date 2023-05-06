@@ -1,5 +1,5 @@
 <script setup>
-import {usePresentationForm} from "@/use/presentationForm";
+import {useDefaultForm} from "@/use/defaultForm";
 import {onMounted, ref, watch} from "vue";
 import {usePresentations} from "@/use/presentations";
 import PresentationForm from "@/components/PresentationForm.vue";
@@ -21,7 +21,7 @@ const MaxTagLength = v => {
 
 const presentations = usePresentations()
 
-const {form} = usePresentationForm({
+const {form} = useDefaultForm({
   title: {
     value: '',
     validators: {required, MaxTitleLength}
@@ -44,14 +44,16 @@ const {form} = usePresentationForm({
 })
 
 const checked = ref([])
+const description = ref({})
 
 onMounted(async () => {
-  await presentations.getPresentation(Router.currentRoute.value.params.id);
+  await presentations.getPresentation(Router.currentRoute.value.params.id, {'edit': 'true'});
   form.title.value = presentations.presentation.value.title;
   form.privacy.value = presentations.presentation.value.privacy;
   form.tags.value = presentations.presentation.value.tags.join(', ');
   form.topic.value = presentations.presentation.value.topic;
-  form.lead.value = presentations.presentation.value.description.lead;
+  form.lead.value = String(presentations.presentation.value.description.lead);
+  description.value = presentations.presentation.value.description;
   checked.value = [1 === form.privacy.value, 2 === form.privacy.value, 3 === form.privacy.value];
 })
 
@@ -61,6 +63,10 @@ watch(() => form.privacy.value, () => {
 
 watch(() => form.topic.value, () => {
   form.topic.value = Number(form.topic.value)
+})
+
+watch(() => form.lead.value, () => {
+  description.value.lead = form.lead.value === "true"
 })
 
 const topicOptions = ref([
@@ -79,18 +85,22 @@ const topicOptions = ref([
   {val: 13, text: 'Путешествия'}
 ])
 
-function submit() {
+function edit() {
   if (form.valid) {
-    let tags = []
-    for (let t of form.tags.value.split(',')) {
-      tags.push(t.trim())
-    }
     let formData = new FormData();
+    let tags = []
+    if (form.tags.value !== '') {
+      for (let t of form.tags.value.split(',')) {
+        tags.push(t.trim())
+      }
+      formData.append('tags', tags)
+    }
     formData.append('title', form.title.value)
     formData.append('topic', form.topic.value)
     formData.append('tags', tags)
     formData.append('privacy', form.privacy.value)
-    // presentations.createPresentation(formData)
+    formData.append('description', JSON.stringify(description.value))
+    presentations.editPresentation(presentations.presentation.value.id, formData)
   }
 }
 </script>
@@ -99,7 +109,7 @@ function submit() {
   <div class="edit-outer">
     <div class="edit-inner">
       <h2 class="fw-bold mb-4">Редактировать презентацию</h2>
-      <form @submit.prevent="submit">
+      <form @submit.prevent="edit">
         <div class="container p-0">
           <presentation-form
               :model-value="form"
@@ -122,9 +132,9 @@ function submit() {
                       id="lead-yes"
                       type="radio"
                       name="lead"
-                      value="1"
+                      value="true"
                       class="form-check-input"
-                      :checked="form.lead.value"
+                      v-model="form.lead.value"
                   >
                 </div>
                 <div class="form-check form-check-inline">
@@ -135,15 +145,15 @@ function submit() {
                       id="lead-no"
                       type="radio"
                       name="lead"
-                      value="0"
+                      value="false"
                       class="form-check-input"
-                      :checked="!form.lead.value"
+                      v-model="form.lead.value"
                   >
                 </div>
               </div>
             </div>
             <div class="col-6">
-              <a href="#" class="interactivity">
+              <a href="#" class="ui-link interactivity">
                 Настроить интерактивность
               </a>
             </div>

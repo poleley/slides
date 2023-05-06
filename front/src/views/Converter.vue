@@ -2,10 +2,11 @@
 
 import UiButton from "@/components/UI/UiButton.vue";
 import FileInput from "@/components/UI/FileInput.vue";
-import {usePresentationForm} from "@/use/presentationForm";
+import {useDefaultForm} from "@/use/defaultForm";
 import {ref, watch} from "vue";
 import {usePresentations} from "@/use/presentations";
 import PresentationForm from "@/components/PresentationForm.vue";
+import router from "@/routers/router";
 
 const MAX_TITLE_LENGTH = 255
 const MAX_TAG_LENGTH = 100
@@ -32,7 +33,7 @@ const maxSize = v => {
   return v.size <= MAX_FILE_SIZE
 }
 
-const {form} = usePresentationForm({
+const {form} = useDefaultForm({
   file: {
     value: '',
     validators: {required, isPdf, maxSize}
@@ -81,19 +82,23 @@ const topicOptions = ref([
 
 const presentations = usePresentations()
 
-function submit() {
+async function submit() {
   if (form.valid) {
-    let tags = []
-    for (let t of form.tags.value.split(',')) {
-      tags.push(t.trim())
-    }
     let formData = new FormData();
+    if (form.tags.value !== '') {
+      let formTags = []
+      for (let t of form.tags.value.split(',')) {
+        formTags.push(t.trim())
+      }
+      let tags = formTags.join(',')
+      formData.append('tags', tags)
+    }
     formData.append('file', form.file.value)
     formData.append('title', form.title.value)
     formData.append('topic', form.topic.value)
-    formData.append('tags', tags)
     formData.append('privacy', form.privacy.value)
-    presentations.createPresentation(formData)
+    await presentations.createPresentation(formData)
+    await router.replace({path: 'library'})
   }
 }
 

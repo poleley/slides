@@ -1,7 +1,7 @@
 import {computed, reactive} from "vue";
 import {useField} from "@/use/field";
 
-export function usePresentationForm(init = {}) {
+export function useDefaultForm(init = {}) {
     const form = reactive({})
 
     for (const [key, val] of Object.entries(init)) {

@@ -1,4 +1,78 @@
 <template>
+  <ui-toast :show="isShowToast">
+    <template v-slot:header>Успешно</template>
+    <template v-slot:body>Контактные данные оставлены</template>
+  </ui-toast>
+  <ui-dialog
+      v-model="isShowModal"
+  >
+    <template v-slot:title>
+      Хотите узнать больше?
+    </template>
+    <template v-slot:body>
+      <div class="help-text">
+        Оставьте свои контактные данные и мы свяжемся с вами
+      </div>
+      <form @submit.prevent="sendLead">
+        <div class="input-item">
+          <input
+              v-model="leadForm.firstName.value"
+              type="text"
+              placeholder="Имя"
+              class="form-control"
+              :class="{'is-invalid': !leadForm.firstName.valid && leadForm.firstName.touched}"
+              @blur="leadForm.firstName.blur"
+          />
+          <div class="invalid-feedback">
+            Заполните это поле
+          </div>
+        </div>
+
+        <div class="input-item">
+          <input
+              v-model="leadForm.lastName.value"
+              type="text"
+              placeholder="Фамилия"
+              class="form-control"
+              :class="{'is-invalid': !leadForm.lastName.valid && leadForm.lastName.touched}"
+              @blur="leadForm.lastName.blur"
+          />
+          <div class="invalid-feedback">
+            Заполните это поле
+          </div>
+        </div>
+
+        <div class="input-item">
+          <input
+              v-model="leadForm.email.value"
+              type="email"
+              placeholder="Электронная почта"
+              class="form-control"
+              :class="{'is-invalid': !leadForm.email.valid && leadForm.email.touched}"
+              @blur="leadForm.email.blur"
+          />
+          <template v-if="leadForm.email.errors.required">
+            <div class="invalid-feedback">
+              Заполните это поле
+            </div>
+          </template>
+          <template v-else-if="leadForm.email.errors.isEmail">
+            <div class="invalid-feedback">
+              Введите корректную электронную почту
+            </div>
+          </template>
+        </div>
+
+        <ui-button
+            type="submit"
+            :disabled="!leadForm.valid"
+            class="button-submit"
+        >
+          Отправить
+        </ui-button>
+      </form>
+    </template>
+  </ui-dialog>
   <div class="presentation-outer">
     <div class="presentation-inner">
       <div class="title-date">
@@ -32,9 +106,8 @@
       </div>
       <div class="presentation-progress">
         <div
-            v-for="(slide, index) in presentations.presentation.value.slides"
+            v-for="(slide, index) in presentations.presentation.value.slide_set"
             class="progress-item"
-            :key="slide"
             :class="{
               'current-progress-item': index === slideNum
             }"
@@ -57,12 +130,17 @@
           <i class="bi bi-share-fill ui-tooltip">
             <ui-tooltip>Поделиться</ui-tooltip>
           </i>
-          <i class="bi bi-pencil-fill ui-tooltip">
+          <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value.id)">
             <ui-tooltip>Редактировать</ui-tooltip>
           </i>
         </div>
-        <div v-else>
-
+        <div v-else-if="presentations.presentation.value.description">
+          <ui-button
+              class="button-submit"
+              @click="leadStart"
+          >
+            Оставить контакты
+          </ui-button>
         </div>
       </div>
     </div>
@@ -75,6 +153,12 @@ import Router from "@/routers/router";
 import {usePresentations} from "@/use/presentations";
 import {useUserStore} from "@/stores";
 import {computed, onMounted, ref, watch} from "vue";
+import UiButton from "@/components/UI/UiButton.vue";
+import UiDialog from "@/components/UI/UiDialog.vue";
+import UiToast from "@/components/UI/UiToast.vue";
+import {useDefaultForm} from "@/use/defaultForm";
+import {useLead} from "@/use/leads";
+import router from "@/routers/router";
 
 const presentations = usePresentations();
 const userStore = useUserStore();
@@ -85,38 +169,110 @@ const isLast = ref(false);
 const totalViews = ref(0);
 const totalFavorite = ref(0);
 const isUserOwner = ref(false);
+const isShowModal = ref(false);
+const currentSlideId = ref('');
+const isShowToast = ref(false);
+
+const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
+
+const required = v => !!v
+const isEmail = v => EMAIL_REGEXP.test(v)
+
+const leadForm = useDefaultForm({
+  firstName: {
+    value: '',
+    validators: {required}
+  },
+  lastName: {
+    value: '',
+    validators: {required}
+  },
+  email: {
+    value: '',
+    validators: {required, isEmail}
+  },
+}).form
 
 const dateCreated = computed(() => {
   return (new Date(presentations.presentation.value.date_created))
       .toLocaleDateString('ru', {dateStyle: "long"})
 })
 
+function editPresentation(id) {
+  router.replace({name: 'presentation-edit', params: {id: id}})
+}
+
 onMounted(async () => {
   await presentations.getPresentation(Router.currentRoute.value.params.id);
-  imgSrc.value = `/media/${presentations.presentation.value.slides[slideNum.value]}`;
-  isLast.value = slideNum.value === presentations.presentation.value.slides.length - 1;
+  currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
+  imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`;
+  isLast.value = slideNum.value === presentations.presentation.value.slide_set.length - 1;
   totalViews.value = presentations.presentation.value.description.views.total_views || 0;
   totalFavorite.value = presentations.presentation.value.description.total_favorite || 0;
-  if (presentations.presentation.value.user.id === userStore.user.id)
-    isUserOwner.value = true
+  if (userStore.user)
+    if (presentations.presentation.value.user.id === userStore.user.id)
+      isUserOwner.value = true
 })
 
 function nextSlide() {
-  if (slideNum.value < presentations.presentation.value.slides.length - 1) {
+  if (slideNum.value < presentations.presentation.value.slide_set.length - 1) {
     slideNum.value += 1
-    imgSrc.value = `/media/${presentations.presentation.value.slides[slideNum.value]}`
+    imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`
+    currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
   }
 }
 
 function prevSlide() {
   if (slideNum.value > 0) {
     slideNum.value -= 1
-    imgSrc.value = `/media/${presentations.presentation.value.slides[slideNum.value]}`
+    imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`
+    currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
+  }
+}
+
+const leads = useLead()
+
+function hideToast() {
+  isShowToast.value = false
+}
+
+function leadStart() {
+  if (userStore.user) {
+    const formData = {
+      'slide': currentSlideId.value,
+      'first_name': userStore.user.firstName,
+      'last_name': userStore.user.lastName,
+      'email': userStore.user.email
+    }
+    leads.createLead(presentations.presentation.value.id, formData)
+    isShowToast.value = true
+    setTimeout(hideToast, 3000)
+  } else {
+    isShowModal.value = true
+  }
+}
+
+
+function sendLead() {
+  if (leadForm.valid) {
+    const formData = {
+      'slide': currentSlideId.value,
+      'first_name': leadForm.firstName.value,
+      'last_name': leadForm.lastName.value,
+      'email': leadForm.email.value
+    }
+    leads.createLead(presentations.presentation.value.id, formData)
+    isShowModal.value = false
+    isShowToast.value = true
+    setTimeout(hideToast, 3000)
+    leadForm.firstName.value = '';
+    leadForm.lastName.value = '';
+    leadForm.email.value = '';
   }
 }
 
 watch(slideNum, () => {
-  isLast.value = slideNum.value === presentations.presentation.value.slides.length - 1;
+  isLast.value = slideNum.value === presentations.presentation.value.slide_set.length - 1;
 })
 
 </script>
@@ -254,6 +410,10 @@ img {
 .stats {
   display: flex;
   color: #81673e;
+}
+
+.input-item {
+  margin: 1rem 0;
 }
 
 </style>

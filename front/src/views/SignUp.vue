@@ -39,6 +39,10 @@ const {form} = useForm({
     value: '',
     validators: {required, isEmail}
   },
+  username: {
+    value: '',
+    validators: {required}
+  },
   password: {
     value: '',
     validators: {required, minLength: minLength(passLength)}
@@ -61,6 +65,7 @@ async function submit() {
   if (form.valid) {
     await userStore.signUp(
         form.email.value,
+        form.username.value,
         form.password.value,
         form.firstName.value,
         form.lastName.value,
@@ -116,7 +121,7 @@ async function submit() {
         <div class="input-item">
           <input
               v-model="form.email.value"
-              type="text"
+              type="email"
               placeholder="Электронная почта"
               class="form-control"
               :class="{'is-invalid': !form.email.valid && form.email.touched}"
@@ -132,6 +137,20 @@ async function submit() {
               Заполните это поле
             </div>
           </template>
+        </div>
+
+        <div class="input-item">
+          <input
+              v-model="form.username.value"
+              type="text"
+              placeholder="Никнейм"
+              class="form-control"
+              :class="{'is-invalid': !form.username.valid && form.username.touched}"
+              @blur="form.username.blur"
+          />
+          <div class="invalid-feedback">
+            Заполните это поле
+          </div>
         </div>
 
         <div class="input-item">

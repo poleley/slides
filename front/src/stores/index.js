@@ -20,11 +20,12 @@ export const useUserStore = defineStore('userStore', () => {
         localStorage.setItem('user', parsed);
     }
 
-    const signUp = async (email, password, firstName, lastName) => {
+    const signUp = async (email, username, password, firstName, lastName) => {
         const formData = {
             first_name: firstName,
             last_name: lastName,
             email: email,
+            username: username,
             password: password
         }
         await axios.post("/api/v1/user/signup/", formData)
@@ -42,7 +43,10 @@ export const useUserStore = defineStore('userStore', () => {
                 }
             ).catch((err) => {
                 if (err.response.status === 400) {
-                    error.value = "Пользователь с такой почтой уже зарегистрирован"
+                    if ("email" in err.response.data)
+                        error.value = "Пользователь с такой почтой уже зарегистрирован"
+                    else
+                        error.value = "Пользователь с таким никнеймом уже зарегистрирован"
                 } else {
                     error.value = "Произошла неизвестная ошибка. Попробуйте еще раз"
                 }

@@ -17,10 +17,14 @@ const props = defineProps({
   }
 });
 
-const imgSrc = `/media/${props.presentation.slides[0]}`;
+const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
 
 function presentationDetail(id) {
   router.replace({path: `/presentation/${id}`})
+}
+
+function editPresentation(id) {
+  router.replace({name: 'presentation-edit', params: {id: id}})
 }
 </script>
 
@@ -47,7 +51,7 @@ function presentationDetail(id) {
           </div>
           <div class="row-2">
             <div class="creator">
-              {{ presentation.user.last_name }} {{ presentation.user.first_name }}
+              {{ presentation.user.username }}
             </div>
             <div class="views">
               {{ presentation.description.views.total_views || 0 }} <i class="bi bi-eye"></i>
@@ -73,7 +77,7 @@ function presentationDetail(id) {
             <i class="bi bi-share-fill ui-tooltip">
               <ui-tooltip>Поделиться</ui-tooltip>
             </i>
-            <i class="bi bi-pencil-fill ui-tooltip">
+            <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentation.id)">
               <ui-tooltip>Редактировать</ui-tooltip>
             </i>
             </div>

@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.contrib.auth import login, logout
@@ -10,13 +11,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
 
-from slides_app.models import Presentation, Lead
-from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer
+from slides_app.models import Presentation, Lead, Slide
+from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
+    SlideSerializer, CreateUserSerializer
 from slides_app.utils import IsOwner, PdfConverter, NoCsrfSessionAuthentication
 
 
 class UserViewSet(ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = CreateUserSerializer
     authentication_classes = [NoCsrfSessionAuthentication]
 
     def create(self, request, *args, **kwargs):
@@ -72,6 +74,14 @@ class PresentationViewSet(ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    def retrieve(self, request, *args, **kwargs):
+        presentation = self.get_object()
+        if request.query_params.get("edit") is None:
+            presentation.description["views"]["total_views"] += 1
+            presentation.save()
+        serializer = self.get_serializer(presentation)
+        return Response(serializer.data)
+
     def get_queryset(self):
         queryset = super().get_queryset()
         keys = ["tags__contains", "topic", "user_id"]
@@ -100,13 +110,20 @@ class PresentationViewSet(ModelViewSet):
     def perform_create(self, serializer):
         description = {
             "lead": False,
+            "interactivity": False,
             "stars": 0,
             "views": {"total_views": 0}
         }
+        presentation = serializer.save(user=self.request.user, description=description)
         file_to_import = self.request.FILES.get("file")
         converter = PdfConverter()
         slides = converter.convert(file_to_import)
-        serializer.save(user=self.request.user, slides=slides, description=description)
+        for index, img_name in enumerate(slides):
+            Slide.objects.create(presentation_id=presentation.id, name=img_name, ordering=index)
+
+    def perform_update(self, serializer):
+        description = json.loads(self.request.data["description"])
+        serializer.save(description=description)
 
     def perform_destroy(self, instance):
         for slide in instance.slides:
@@ -116,8 +133,8 @@ class PresentationViewSet(ModelViewSet):
         instance.delete()
 
 
-
 class LeadViewSet(ModelViewSet):
+    authentication_classes = [NoCsrfSessionAuthentication]
     serializer_class = LeadSerializer
     queryset = Lead.objects.all()
 
@@ -129,7 +146,9 @@ class LeadViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         presentation = get_object_or_404(Presentation, id=self.kwargs["presentation_id"])
-        # if self.request.user.is_authenticated:
-        #     user = self.request.user
-        #     serializer.save(email=user.email, last_name=user.last_name, first_name=user.first_name)
-        serializer.save(presentation=presentation)
+        slide = get_object_or_404(Slide, id=self.request.data["slide"])
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            serializer.save(presentation=presentation, slide=slide, email=user.email, last_name=user.last_name, first_name=user.first_name)
+        else:
+            serializer.save(presentation=presentation, slide=slide)
