@@ -53,7 +53,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     if (
-        (to.name === 'library' || to.name === 'converter')
+        (to.name === 'library' || to.name === 'converter' || to.name === 'presentation-edit')
         && userStore.user === null
     )
         return next('/signup')

@@ -46,9 +46,20 @@ class SlideSerializer(ModelSerializer):
         fields = ['id', 'name', 'ordering']
 
 
+class StringArrayField(ListField):
+    def to_representation(self, obj):
+        obj = super().to_representation(obj)
+        return ",".join([str(element) for element in obj])
+
+    def to_internal_value(self, data):
+        data = data[0].split(",")
+        return super().to_internal_value(data)
+
+
 class PresentationSerializer(ModelSerializer):
     user = UserSerializer()
     slide_set = SlideSerializer(many=True)
+    tags = StringArrayField()
 
     class Meta:
         model = Presentation
@@ -56,14 +67,11 @@ class PresentationSerializer(ModelSerializer):
 
 
 class CreatePresentationSerializer(ModelSerializer):
+    tags = StringArrayField()
+
     class Meta:
         model = Presentation
         fields = ['title', 'topic', 'tags', 'privacy']
-
-    def create(self, validated_data):
-        if 'tags' in validated_data:
-            validated_data['tags'] = validated_data['tags'][0].split(',')
-        return super().create(validated_data)
 
 
 class LeadSerializer(ModelSerializer):

@@ -5,6 +5,8 @@ import {usePresentations} from "@/use/presentations";
 import PresentationForm from "@/components/PresentationForm.vue";
 import UiButton from "@/components/UI/UiButton.vue";
 import Router from "@/routers/router";
+import {useUserStore} from "@/stores";
+import router from "@/routers/router";
 
 const MAX_TITLE_LENGTH = 255
 const MAX_TAG_LENGTH = 100
@@ -46,15 +48,21 @@ const {form} = useDefaultForm({
 const checked = ref([])
 const description = ref({})
 
+const userStore = useUserStore();
+
 onMounted(async () => {
   await presentations.getPresentation(Router.currentRoute.value.params.id, {'edit': 'true'});
-  form.title.value = presentations.presentation.value.title;
-  form.privacy.value = presentations.presentation.value.privacy;
-  form.tags.value = presentations.presentation.value.tags.join(', ');
-  form.topic.value = presentations.presentation.value.topic;
-  form.lead.value = String(presentations.presentation.value.description.lead);
-  description.value = presentations.presentation.value.description;
-  checked.value = [1 === form.privacy.value, 2 === form.privacy.value, 3 === form.privacy.value];
+  if (userStore.user.id !== presentations.presentation.value.user.id)
+    await router.replace({name: 'signup'})
+  else {
+    form.title.value = presentations.presentation.value.title;
+    form.privacy.value = presentations.presentation.value.privacy;
+    form.tags.value = presentations.presentation.value.tags;
+    form.topic.value = presentations.presentation.value.topic;
+    form.lead.value = String(presentations.presentation.value.description.lead);
+    description.value = presentations.presentation.value.description;
+    checked.value = [1 === form.privacy.value, 2 === form.privacy.value, 3 === form.privacy.value];
+  }
 })
 
 watch(() => form.privacy.value, () => {
