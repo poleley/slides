@@ -103,7 +103,7 @@ class PresentationViewSet(ModelViewSet):
 
         if self.request.query_params.get("user_id") is None:
             queryset = queryset.filter(privacy=1)
-            queryset = queryset.order_by("description__views__total_views", "-date_created")
+            queryset = queryset.order_by("-description__views__total_views", "-date_created")
 
         return queryset
 
@@ -126,10 +126,11 @@ class PresentationViewSet(ModelViewSet):
         serializer.save(description=description)
 
     def perform_destroy(self, instance):
-        for slide in instance.slides:
-            presentations = Presentation.objects.filter(slides__contains=[slide]).exclude(pk=instance.pk)
-            if len(presentations) == 0:
-                os.remove(f'slides_app/slides/{slide}')
+        slides = Slide.objects.filter(presentation_id=instance.id)
+        for slide in slides:
+            slides2 = Slide.objects.filter(name__exact=slide.name).exclude(pk=slide.pk)
+            if len(slides2) == 0:
+                os.remove(f'slides_app/slides/{slide.name}')
         instance.delete()
 
 
