@@ -2,6 +2,7 @@
 
 import router from "@/routers/router";
 import UiTooltip from '@/components/UI/UiTooltip.vue'
+import {usePresentations} from "@/use/presentations";
 
 const props = defineProps({
   presentation: {
@@ -17,7 +18,10 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['delete']);
+
 const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
+const presentations = usePresentations()
 
 function presentationDetail(id) {
   router.replace({path: `/presentation/${id}`})
@@ -26,6 +30,7 @@ function presentationDetail(id) {
 function editPresentation(id) {
   router.replace({name: 'presentation-edit', params: {id: id}})
 }
+
 </script>
 
 <template>
@@ -71,15 +76,21 @@ function editPresentation(id) {
           </div>
           <div class="d-flex justify-content-between">
             <div class="buttons">
-            <i class="bi bi-bar-chart-line-fill ui-tooltip">
-              <ui-tooltip>Статистика</ui-tooltip>
-            </i>
-            <i class="bi bi-share-fill ui-tooltip">
-              <ui-tooltip>Поделиться</ui-tooltip>
-            </i>
-            <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentation.id)">
-              <ui-tooltip>Редактировать</ui-tooltip>
-            </i>
+              <i class="bi bi-bar-chart-line-fill ui-tooltip">
+                <ui-tooltip>Статистика</ui-tooltip>
+              </i>
+              <i class="bi bi-share-fill ui-tooltip">
+                <ui-tooltip>Поделиться</ui-tooltip>
+              </i>
+              <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentation.id)">
+                <ui-tooltip>Редактировать</ui-tooltip>
+              </i>
+              <i
+                  class="bi bi-trash3-fill ui-tooltip"
+                  @click="emit('delete', presentation)"
+              >
+                <ui-tooltip>Удалить</ui-tooltip>
+              </i>
             </div>
             <div class="views">
               {{ presentation.description.views.total_views || 0 }} <i class="bi bi-eye"></i>
@@ -138,7 +149,7 @@ function editPresentation(id) {
   color: #81673e;
 }
 
-.bi-share-fill, .bi-pencil-fill {
+.bi-share-fill, .bi-pencil-fill, .bi-trash3-fill {
   margin-left: 8px;
 }
 

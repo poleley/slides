@@ -1,12 +1,13 @@
 <script setup>
 import {useDefaultForm} from "@/use/defaultForm";
-import {onMounted, ref, watch} from "vue";
+import {ref, watch} from "vue";
 import {usePresentations} from "@/use/presentations";
 import PresentationForm from "@/components/PresentationForm.vue";
 import UiButton from "@/components/UI/UiButton.vue";
-import Router from "@/routers/router";
 import {useUserStore} from "@/stores";
-import router from "@/routers/router";
+import {useRouter} from "vue-router";
+
+const router = useRouter()
 
 const MAX_TITLE_LENGTH = 255
 const MAX_TAG_LENGTH = 100
@@ -50,20 +51,20 @@ const description = ref({})
 
 const userStore = useUserStore();
 
-onMounted(async () => {
-  await presentations.getPresentation(Router.currentRoute.value.params.id, {'edit': 'true'});
-  if (userStore.user.id !== presentations.presentation.value.user.id)
-    await router.replace({name: 'signup'})
-  else {
-    form.title.value = presentations.presentation.value.title;
-    form.privacy.value = presentations.presentation.value.privacy;
-    form.tags.value = presentations.presentation.value.tags;
-    form.topic.value = presentations.presentation.value.topic;
-    form.lead.value = String(presentations.presentation.value.description.lead);
-    description.value = presentations.presentation.value.description;
-    checked.value = [1 === form.privacy.value, 2 === form.privacy.value, 3 === form.privacy.value];
-  }
-})
+presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'true'})
+    .then(() => {
+      if (userStore.user.id !== presentations.presentation.value.user.id)
+        router.replace({name: 'signup'})
+      else {
+        form.title.value = presentations.presentation.value.title;
+        form.privacy.value = presentations.presentation.value.privacy;
+        form.tags.value = presentations.presentation.value.tags;
+        form.topic.value = presentations.presentation.value.topic;
+        form.lead.value = String(presentations.presentation.value.description.lead);
+        description.value = presentations.presentation.value.description;
+        checked.value = [1 === form.privacy.value, 2 === form.privacy.value, 3 === form.privacy.value];
+      }
+    })
 
 watch(() => form.privacy.value, () => {
   form.privacy.value = Number(form.privacy.value)
@@ -161,9 +162,12 @@ function edit() {
               </div>
             </div>
             <div class="col-6">
-              <a href="#" class="ui-link interactivity">
+              <router-link
+                  :to="{name: 'interactivity', params: {id: router.currentRoute.value.params.id}}"
+                  class="ui-link interactivity"
+              >
                 Настроить интерактивность
-              </a>
+              </router-link>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import {useUserStore} from "@/stores";
 import PresentationDetail from "@/views/PresentationDetail.vue";
 import Converter from "@/views/Converter.vue";
 import EditPresentation from "@/views/EditPresentation.vue";
+import Interactivity from "@/views/Interactivity.vue";
 
 const routes = [
     {
@@ -37,6 +38,11 @@ const routes = [
         path: '/presentation/:id/edit/',
         component: EditPresentation,
         name: 'presentation-edit'
+    },
+    {
+        path: '/presentation/:id/edit/interactivity/',
+        component: Interactivity,
+        name: 'interactivity'
     },
     {
         path: '/upload/',

@@ -26,7 +26,7 @@ const isEqual = (firstField, secondField, validatedField) => (form) => {
 
 const userStore = useUserStore();
 
-const {form} = useForm({
+const {formQuestion} = useForm({
   firstName: {
     value: '',
     validators: {required}
@@ -62,13 +62,13 @@ function hideToast() {
 }
 
 async function submit() {
-  if (form.valid) {
+  if (formQuestion.valid) {
     await userStore.signUp(
-        form.email.value,
-        form.username.value,
-        form.password.value,
-        form.firstName.value,
-        form.lastName.value,
+        formQuestion.email.value,
+        formQuestion.username.value,
+        formQuestion.password.value,
+        formQuestion.firstName.value,
+        formQuestion.lastName.value,
     )
     if (userStore.error === null)
       await router.replace({name: 'library'})
@@ -92,12 +92,12 @@ async function submit() {
       <form @submit.prevent="submit">
         <div class="input-item">
           <input
-              v-model="form.firstName.value"
+              v-model="formQuestion.firstName.value"
               type="text"
               placeholder="Имя"
               class="form-control"
-              :class="{'is-invalid': !form.firstName.valid && form.firstName.touched}"
-              @blur="form.firstName.blur"
+              :class="{'is-invalid': !formQuestion.firstName.valid && formQuestion.firstName.touched}"
+              @blur="formQuestion.firstName.blur"
           />
           <div class="invalid-feedback">
             Заполните это поле
@@ -106,12 +106,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.lastName.value"
+              v-model="formQuestion.lastName.value"
               type="text"
               placeholder="Фамилия"
               class="form-control"
-              :class="{'is-invalid': !form.lastName.valid && form.lastName.touched}"
-              @blur="form.lastName.blur"
+              :class="{'is-invalid': !formQuestion.lastName.valid && formQuestion.lastName.touched}"
+              @blur="formQuestion.lastName.blur"
           />
           <div class="invalid-feedback">
             Заполните это поле
@@ -120,19 +120,19 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.email.value"
+              v-model="formQuestion.email.value"
               type="email"
               placeholder="Электронная почта"
               class="form-control"
-              :class="{'is-invalid': !form.email.valid && form.email.touched}"
-              @blur="form.email.blur"
+              :class="{'is-invalid': !formQuestion.email.valid && formQuestion.email.touched}"
+              @blur="formQuestion.email.blur"
           />
-          <template v-if="form.email.errors.isEmail">
+          <template v-if="formQuestion.email.errors.isEmail">
             <div class="invalid-feedback">
               Введите корректную электронную почту
             </div>
           </template>
-          <template v-else-if="form.email.errors.required">
+          <template v-else-if="formQuestion.email.errors.required">
             <div class="invalid-feedback">
               Заполните это поле
             </div>
@@ -141,12 +141,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.username.value"
+              v-model="formQuestion.username.value"
               type="text"
               placeholder="Никнейм"
               class="form-control"
-              :class="{'is-invalid': !form.username.valid && form.username.touched}"
-              @blur="form.username.blur"
+              :class="{'is-invalid': !formQuestion.username.valid && formQuestion.username.touched}"
+              @blur="formQuestion.username.blur"
           />
           <div class="invalid-feedback">
             Заполните это поле
@@ -155,20 +155,20 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.password.value"
+              v-model="formQuestion.password.value"
               type="password"
               placeholder="Пароль"
               class="form-control"
-              :class="{'is-invalid': !form.password.valid && form.password.touched}"
-              @blur="form.password.blur"
+              :class="{'is-invalid': !formQuestion.password.valid && formQuestion.password.touched}"
+              @blur="formQuestion.password.blur"
           />
           <div class="invalid-feedback">
-            <template v-if="form.password.errors.minLength">
+            <template v-if="formQuestion.password.errors.minLength">
               <div>
                 Длина пароля дожна быть больше {{ passLength }} символов
               </div>
             </template>
-            <template v-if="form.password.errors.required">
+            <template v-if="formQuestion.password.errors.required">
               <div>
                 Заполните это поле
               </div>
@@ -178,25 +178,25 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.passwordConfirm.value"
+              v-model="formQuestion.passwordConfirm.value"
               type="password"
               placeholder="Подтвердите пароль"
               class="form-control"
-              :class="{'is-invalid': !form.passwordConfirm.valid && form.passwordConfirm.touched}"
-              @blur="form.passwordConfirm.blur"
+              :class="{'is-invalid': !formQuestion.passwordConfirm.valid && formQuestion.passwordConfirm.touched}"
+              @blur="formQuestion.passwordConfirm.blur"
           />
           <div class="invalid-feedback">
-            <template v-if="form.passwordConfirm.errors.isEqual">
+            <template v-if="formQuestion.passwordConfirm.errors.isEqual">
               <div>
                 Пароли не совпадают
               </div>
             </template>
-            <template v-if="form.passwordConfirm.errors.minLength">
+            <template v-if="formQuestion.passwordConfirm.errors.minLength">
               <div>
                 Длина пароля дожна быть больше {{ passLength }} символов
               </div>
             </template>
-            <template v-if="form.passwordConfirm.errors.required">
+            <template v-if="formQuestion.passwordConfirm.errors.required">
               <div>
                 Заполните это поле
               </div>
@@ -206,7 +206,7 @@ async function submit() {
         <ui-button
             type="submit"
             class="button-submit w-100"
-            :disabled="!form.valid"
+            :disabled="!formQuestion.valid"
         >
           Зарегистрироваться
         </ui-button>

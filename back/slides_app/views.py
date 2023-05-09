@@ -11,9 +11,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
 
-from slides_app.models import Presentation, Lead, Slide
+from slides_app.models import Presentation, Lead, Slide, Question, Answer
 from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
-    SlideSerializer, CreateUserSerializer
+    SlideSerializer, CreateUserSerializer, QuestionSerializer, CreateQuestionSerializer, AnswerSerializer, \
+    CreateAnswerSerializer
 from slides_app.utils import IsOwner, PdfConverter, NoCsrfSessionAuthentication
 
 
@@ -128,10 +129,53 @@ class PresentationViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         slides = Slide.objects.filter(presentation_id=instance.id)
         for slide in slides:
-            slides2 = Slide.objects.filter(name__exact=slide.name).exclude(pk=slide.pk)
-            if len(slides2) == 0:
+            slides_in_other_presentations = Slide.objects.filter(name__exact=slide.name).exclude(pk=slide.pk)
+            if len(slides_in_other_presentations) == 0:
                 os.remove(f'slides_app/slides/{slide.name}')
         instance.delete()
+
+
+class QuestionViewSet(ModelViewSet):
+    authentication_classes = [NoCsrfSessionAuthentication]
+    serializer_class = QuestionSerializer
+    queryset = Question.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateQuestionSerializer
+        return super().get_serializer_class()
+
+    def get_object(self):
+        question = get_object_or_404(Question.objects.all(), pk=self.kwargs["question_id"])
+        return question
+
+    def retrieve(self, request, *args, **kwargs):
+        question = self.get_object()
+        serializer = self.get_serializer(question)
+        return Response(serializer.data)
+
+
+class AnswerViewSet(ModelViewSet):
+    authentication_classes = [NoCsrfSessionAuthentication]
+    serializer_class = AnswerSerializer
+    queryset = Answer.objects.all()
+    lookup_url_kwarg = "answer_id"
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateAnswerSerializer
+        return super().get_serializer_class()
+
+    def perform_create(self, serializer):
+        question = get_object_or_404(Question.objects.all(), pk=self.kwargs["question_id"])
+        if "slides_ids" not in self.request.data:
+            raise serializers.ValidationError({"slides_ids": "This field is required"})
+        answer = serializer.save(question_id=question.id)
+        for slide_id in self.request.data["slides_ids"]:
+            try:
+                answer.slides.add(Slide.objects.get(pk=slide_id))
+            except Slide.DoesNotExist:
+                raise serializers.ValidationError({"slides_ids": f"Slide with id {slide_id} doesn't exist"})
 
 
 class LeadViewSet(ModelViewSet):

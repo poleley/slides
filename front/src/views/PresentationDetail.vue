@@ -133,6 +133,9 @@
           <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value.id)">
             <ui-tooltip>Редактировать</ui-tooltip>
           </i>
+          <i class="bi bi-trash3-fill ui-tooltip" @click="deletePresentation(presentations.presentation.value.id)">
+            <ui-tooltip>Удалить</ui-tooltip>
+          </i>
         </div>
         <div v-else-if="presentations.presentation.value.description">
           <ui-button
@@ -202,17 +205,23 @@ function editPresentation(id) {
   router.replace({name: 'presentation-edit', params: {id: id}})
 }
 
-onMounted(async () => {
-  await presentations.getPresentation(Router.currentRoute.value.params.id);
-  currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
-  imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`;
-  isLast.value = slideNum.value === presentations.presentation.value.slide_set.length - 1;
-  totalViews.value = presentations.presentation.value.description.views.total_views || 0;
-  totalFavorite.value = presentations.presentation.value.description.total_favorite || 0;
-  if (userStore.user)
-    if (presentations.presentation.value.user.id === userStore.user.id)
-      isUserOwner.value = true
-})
+function deletePresentation(id) {
+  presentations.deletePresentation(id)
+      .then(() => router.replace({name: 'library'}))
+}
+
+presentations.getPresentation(Router.currentRoute.value.params.id)
+    .then(() => {
+      currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
+      imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`;
+      isLast.value = slideNum.value === presentations.presentation.value.slide_set.length - 1;
+      totalViews.value = presentations.presentation.value.description.views.total_views || 0;
+      totalFavorite.value = presentations.presentation.value.description.total_favorite || 0;
+      if (userStore.user)
+        if (presentations.presentation.value.user.id === userStore.user.id)
+          isUserOwner.value = true
+    })
+
 
 function nextSlide() {
   if (slideNum.value < presentations.presentation.value.slide_set.length - 1) {

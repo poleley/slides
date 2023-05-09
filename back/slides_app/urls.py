@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
-from slides_app.views import UserViewSet, PresentationViewSet, LeadViewSet
+from slides_app.views import UserViewSet, PresentationViewSet, LeadViewSet, QuestionViewSet, AnswerViewSet
 
 urlpatterns = [
     path('api/v1/user/signup/', UserViewSet.as_view({"post": "create"})),
@@ -17,6 +17,10 @@ urlpatterns = [
             "patch": "partial_update"
         }
     )),
+    path('api/v1/question/<int:question_id>/', QuestionViewSet.as_view({"get": "retrieve"})),
+    path('api/v1/question/', QuestionViewSet.as_view({"post": "create"})),
+    path('api/v1/question/<int:question_id>/answer/', AnswerViewSet.as_view({"post": "create"})),
+    path('api/v1/question/<int:question_id>/answer/<int:answer_id>/', AnswerViewSet.as_view({"delete": "destroy"})),
     path('api/v1/presentation/<int:presentation_id>/lead/', LeadViewSet.as_view({"get": "list", "post": "create"})),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

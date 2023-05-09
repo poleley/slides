@@ -43,7 +43,7 @@ class UserSerializer(ModelSerializer):
 class SlideSerializer(ModelSerializer):
     class Meta:
         model = Slide
-        fields = ['id', 'name', 'ordering']
+        fields = ['id', 'name', 'ordering', 'question_id']
 
 
 class StringArrayField(ListField):
@@ -67,7 +67,7 @@ class PresentationSerializer(ModelSerializer):
 
 
 class CreatePresentationSerializer(ModelSerializer):
-    tags = StringArrayField()
+    tags = StringArrayField(default=[], allow_empty=True)
 
     class Meta:
         model = Presentation
@@ -80,13 +80,52 @@ class LeadSerializer(ModelSerializer):
         fields = ['email', 'first_name', 'last_name']
 
 
-class QuestionSerializer(ModelSerializer):
-    class Meta:
-        model = Question
-        fields = ['question_text']
-
-
 class AnswerSerializer(ModelSerializer):
+    slides = SlideSerializer(many=True)
+
     class Meta:
         model = Answer
-        fields = ['answer_text']
+        fields = ['id', 'slides', 'answer_text']
+
+
+class QuestionSerializer(ModelSerializer):
+    answer_set = AnswerSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Question
+        fields = ['question_text', 'answer_set']
+
+
+class CreateAnswerSerializer(ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['question_id', 'answer_text']
+
+    def create(self, validated_data):
+        try:
+            question = Question.objects.get(pk=validated_data["question_id"])
+        except KeyError:
+            raise serializers.ValidationError({"question_id": "This field is required"})
+        except Question.DoesNotExist:
+            raise serializers.ValidationError({"question_id": "Question with this id doesn't exist"})
+        answer = Answer.objects.create(question=question, answer_text=validated_data["answer_text"])
+        return answer
+
+
+class CreateQuestionSerializer(ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ['slide_id', 'question_text']
+
+    def create(self, validated_data):
+        try:
+            slide = Slide.objects.get(pk=validated_data["slide_id"])
+        except KeyError:
+            raise serializers.ValidationError({"slide_id": "This field is required"})
+        except Slide.DoesNotExist:
+            raise serializers.ValidationError({"slide_id": "Slide with this id doesn't exist"})
+        if len(Question.objects.filter(slide=slide)) != 0:
+            raise serializers.ValidationError({"slide_id": "Slide with this id already has a question"})
+        return Question.objects.create(slide=slide, question_text=validated_data["question_text"])
+
+

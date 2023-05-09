@@ -48,7 +48,6 @@ class Slide(models.Model):
 
 
 class Lead(models.Model):
-    presentation = models.ForeignKey(Presentation, null=False, blank=False, on_delete=models.CASCADE)
     slide = models.ForeignKey(Slide, null=False, blank=False, on_delete=models.CASCADE)
     email = models.EmailField(null=False, blank=False)
     first_name = models.CharField(null=False, blank=False, max_length=100)
@@ -56,11 +55,11 @@ class Lead(models.Model):
 
 
 class Question(models.Model):
-    slide = models.OneToOneField(Slide, null=False, blank=False, on_delete=models.CASCADE)
+    slide = models.OneToOneField(Slide, null=False, blank=False, on_delete=models.CASCADE, related_name='question_id')
     question_text = models.CharField(null=False, blank=False, max_length=255)
 
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    slide = models.ForeignKey(Slide, null=False, blank=False, on_delete=models.CASCADE)
+    slides = models.ManyToManyField(Slide)
     answer_text = models.CharField(null=False, blank=False, max_length=255)

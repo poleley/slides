@@ -1,16 +1,21 @@
 <script setup>
 import Presentation from "@/components/Presentation.vue";
 import {usePresentations} from "@/use/presentations";
-import {onMounted} from "vue";
 import {useUserStore} from "@/stores";
 
 const presentations = usePresentations();
 
 const userStore = useUserStore();
 
-onMounted(async () => {
-  await presentations.getUserPresentations(userStore.user.id);
-})
+presentations.getUserPresentations(userStore.user.id);
+
+const updatePresentations = (deletedPresentation) => {
+  presentations.deletePresentation(deletedPresentation.id).then(() => {
+    presentations.userPresentations.value = presentations.userPresentations.value.filter(
+        presentation => presentation.id !== deletedPresentation.id
+    )
+  })
+}
 
 </script>
 
@@ -20,6 +25,7 @@ onMounted(async () => {
       <presentation
           v-for="presentation in presentations.userPresentations.value"
           :presentation="presentation"
+          @delete="updatePresentations"
       />
     </div>
   </div>

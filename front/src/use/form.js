@@ -27,5 +27,5 @@ export function useForm(init = {}, config = {}, isLogin = false) {
         }, true)
     })
 
-    return {form}
+    return {formQuestion: form}
 }
