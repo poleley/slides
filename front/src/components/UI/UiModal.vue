@@ -5,9 +5,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isModalAnswer: {
-    type: Boolean,
-    default: false
+  isOthersModal: {
+    type: Array,
+    default: [false]
   },
   is70rem: {
     type: Boolean,
@@ -18,7 +18,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="dialog" v-if="modelValue && !isModalAnswer" @click="$emit('update:modelValue', false)">
+  <div class="dialog" v-if="modelValue && !isOthersModal.includes(true)" @click="$emit('update:modelValue', false)">
     <div @click.stop class="dialog-body"
          :class="{'width-70-rem': is70rem}"
     >

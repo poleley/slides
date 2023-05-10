@@ -2,9 +2,8 @@
   <div class="presentation-outer">
     <div class="presentation-inner">
       <slide-preview
-          v-for="(slide, index) in slides"
+          v-for="(slide, index) in slides.slice(0, slides.length - 1)"
           :slide="slide"
-          :slide-num="index + 1"
           :slides="slides"
       />
     </div>

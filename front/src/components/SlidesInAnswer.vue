@@ -2,7 +2,13 @@
   <div class="row row-slides">
       <div class="col col-4 slide-item" v-for="slide in slides">
         <div class="img-slide-preview">
-          <input class="form-check-input input-check-slide" type="checkbox" :value="slide.id">
+          <input
+              class="form-check-input input-check-slide"
+              type="checkbox"
+              :value="slide.id"
+              :checked="selectedSlidesIds.includes(slide.id)"
+              @change="$emit('changeSlidesIds', slide, $event)"
+          >
           <img class="img-slide" :src="`/media/${slide.name}`" alt="Слайд">
         </div>
     </div>
@@ -15,8 +21,14 @@ const props = defineProps({
   slides: {
     type: Array,
     required: true
+  },
+  selectedSlidesIds: {
+    type: Array,
+    default: []
   }
 })
+
+defineEmits(['changeSlidesIds'])
 
 </script>
 

@@ -16,7 +16,7 @@ export function useQuestion() {
 
     const createQuestion = async (data) => {
         return await axios.post(`/api/v1/question/`, data)
-            .then((res) => console.log(res))
+            .then((res) => question.value = res.data)
     }
 
     return {
