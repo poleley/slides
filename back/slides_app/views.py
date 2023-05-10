@@ -14,7 +14,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from slides_app.models import Presentation, Lead, Slide, Question, Answer
 from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
     SlideSerializer, CreateUserSerializer, QuestionSerializer, CreateQuestionSerializer, AnswerSerializer, \
-    CreateAnswerSerializer
+    CreateUpdateAnswerSerializer
 from slides_app.utils import IsOwner, PdfConverter, NoCsrfSessionAuthentication
 
 
@@ -154,6 +154,17 @@ class QuestionViewSet(ModelViewSet):
         serializer = self.get_serializer(question)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        try:
+            slide = get_object_or_404(Slide.objects.all(), pk=self.request.data["slide_id"])
+        except KeyError:
+            raise serializers.ValidationError({"slide_id": "This field is required"})
+        except Slide.DoesNotExist:
+            raise serializers.ValidationError({"slide_id": "Slide with this id doesn't exist"})
+        if len(Question.objects.filter(slide=slide)) != 0:
+            raise serializers.ValidationError({"slide_id": "Slide with this id already has a question"})
+        serializer.save(slide=slide)
+
 
 class AnswerViewSet(ModelViewSet):
     authentication_classes = [NoCsrfSessionAuthentication]
@@ -162,20 +173,39 @@ class AnswerViewSet(ModelViewSet):
     lookup_url_kwarg = "answer_id"
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return CreateAnswerSerializer
+        if self.action == "create" or self.action == "partial_update":
+            return CreateUpdateAnswerSerializer
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
         question = get_object_or_404(Question.objects.all(), pk=self.kwargs["question_id"])
         if "slides_ids" not in self.request.data:
             raise serializers.ValidationError({"slides_ids": "This field is required"})
-        answer = serializer.save(question_id=question.id)
+        answer = serializer.save(question=question)
         for slide_id in self.request.data["slides_ids"]:
             try:
                 answer.slides.add(Slide.objects.get(pk=slide_id))
             except Slide.DoesNotExist:
                 raise serializers.ValidationError({"slides_ids": f"Slide with id {slide_id} doesn't exist"})
+
+    def perform_update(self, serializer):
+        answer = self.get_object()
+        if "slides_ids" in self.request.data:
+            slides = Slide.objects.filter(answer__id=answer.id)
+            old_slides_ids = []
+            for slide in slides:
+                old_slides_ids.append(slide.id)
+
+            for slide_id in old_slides_ids:
+                answer.slides.remove(Slide.objects.get(pk=slide_id))
+
+            for slide_id in self.request.data["slides_ids"]:
+                if slide_id not in old_slides_ids:
+                    try:
+                        answer.slides.add(Slide.objects.get(pk=slide_id))
+                    except Slide.DoesNotExist:
+                        raise serializers.ValidationError({"slides_ids": f"Slide with id {slide_id} doesn't exist"})
+        serializer.save()
 
 
 class LeadViewSet(ModelViewSet):

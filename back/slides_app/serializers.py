@@ -44,6 +44,7 @@ class SlideSerializer(ModelSerializer):
     class Meta:
         model = Slide
         fields = ['id', 'name', 'ordering', 'question_id']
+        ordering = ['ordering']
 
 
 class StringArrayField(ListField):
@@ -58,12 +59,16 @@ class StringArrayField(ListField):
 
 class PresentationSerializer(ModelSerializer):
     user = UserSerializer()
-    slide_set = SlideSerializer(many=True)
+    slide_set = serializers.SerializerMethodField()
     tags = StringArrayField()
 
     class Meta:
         model = Presentation
         fields = ['id', 'user', 'title', 'slide_set', 'topic', 'tags', 'description', 'privacy', 'url', 'date_created']
+
+    def get_slide_set(self, instance):
+        slides = instance.slide_set.all().order_by('ordering')
+        return SlideSerializer(slides, many=True).data
 
 
 class CreatePresentationSerializer(ModelSerializer):
@@ -81,11 +86,15 @@ class LeadSerializer(ModelSerializer):
 
 
 class AnswerSerializer(ModelSerializer):
-    slides = SlideSerializer(many=True)
+    slides = serializers.SerializerMethodField()
 
     class Meta:
         model = Answer
         fields = ['id', 'slides', 'answer_text']
+
+    def get_slides(self, instance):
+        slides = instance.slides.all().order_by('ordering')
+        return SlideSerializer(slides, many=True).data
 
 
 class QuestionSerializer(ModelSerializer):
@@ -96,36 +105,13 @@ class QuestionSerializer(ModelSerializer):
         fields = ['question_text', 'answer_set']
 
 
-class CreateAnswerSerializer(ModelSerializer):
+class CreateUpdateAnswerSerializer(ModelSerializer):
     class Meta:
         model = Answer
-        fields = ['question_id', 'answer_text']
-
-    def create(self, validated_data):
-        try:
-            question = Question.objects.get(pk=validated_data["question_id"])
-        except KeyError:
-            raise serializers.ValidationError({"question_id": "This field is required"})
-        except Question.DoesNotExist:
-            raise serializers.ValidationError({"question_id": "Question with this id doesn't exist"})
-        answer = Answer.objects.create(question=question, answer_text=validated_data["answer_text"])
-        return answer
+        fields = ['id', 'answer_text']
 
 
 class CreateQuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
-        fields = ['slide_id', 'question_text']
-
-    def create(self, validated_data):
-        try:
-            slide = Slide.objects.get(pk=validated_data["slide_id"])
-        except KeyError:
-            raise serializers.ValidationError({"slide_id": "This field is required"})
-        except Slide.DoesNotExist:
-            raise serializers.ValidationError({"slide_id": "Slide with this id doesn't exist"})
-        if len(Question.objects.filter(slide=slide)) != 0:
-            raise serializers.ValidationError({"slide_id": "Slide with this id already has a question"})
-        return Question.objects.create(slide=slide, question_text=validated_data["question_text"])
-
-
+        fields = ['id', 'slide_id', 'question_text']
