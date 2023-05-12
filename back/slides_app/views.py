@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -9,13 +10,13 @@ from rest_framework import serializers, status
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from slides_app.models import Presentation, Lead, Slide, Question, Answer
 from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
-    SlideSerializer, CreateUserSerializer, QuestionSerializer, CreateQuestionSerializer, AnswerSerializer, \
-    CreateUpdateAnswerSerializer
-from slides_app.utils import IsOwner, PdfConverter, NoCsrfSessionAuthentication
+    CreateUserSerializer, QuestionSerializer, AnswerSerializer, CreateUpdateAnswerSerializer, SlideSerializer
+from slides_app.utils import IsPresentationOwner, PdfConverter, NoCsrfSessionAuthentication, \
+    IsQuestionOwner, IsAnswerOwner
 
 
 class UserViewSet(ModelViewSet):
@@ -56,12 +57,12 @@ class PresentationViewSet(ModelViewSet):
     serializer_class = PresentationSerializer
     queryset = Presentation.objects.all()
     authentication_classes = [NoCsrfSessionAuthentication]
-    permission_classes = [IsOwner]
+    permission_classes = [IsPresentationOwner]
     parser_classes = [MultiPartParser]
 
     def get_permissions(self):
         permission_classes = super().get_permissions()
-        if self.action in ["create", "partial_update", "destroy"]:
+        if self.action in ["create", "partial_update", "destroy", "statistics"]:
             permission_classes.append(IsAuthenticated())
         return permission_classes
 
@@ -78,6 +79,11 @@ class PresentationViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         presentation = self.get_object()
         if request.query_params.get("edit") is None:
+            date = datetime.datetime.now().isoformat()[:10]
+            if date in presentation.description["views"]:
+                presentation.description["views"][date] += 1
+            else:
+                presentation.description["views"][date] = 1
             presentation.description["views"]["total_views"] += 1
             presentation.save()
         serializer = self.get_serializer(presentation)
@@ -111,7 +117,6 @@ class PresentationViewSet(ModelViewSet):
     def perform_create(self, serializer):
         description = {
             "lead": False,
-            "interactivity": False,
             "stars": 0,
             "views": {"total_views": 0}
         }
@@ -134,19 +139,44 @@ class PresentationViewSet(ModelViewSet):
                 os.remove(f'slides_app/slides/{slide.name}')
         instance.delete()
 
+    def statistics(self, request, *args, **kwargs):
+        presentation = self.get_object()
+        date_2_weeks_ago = datetime.datetime.now() - datetime.timedelta(days=14)
+        views_by_date = {}
+        for i in range(0, 15):
+            date = date_2_weeks_ago + datetime.timedelta(days=i)
+            views_by_date[date.strftime("%d.%m")] = presentation.description["views"].get(date.isoformat()[:10], 0)
+        data = {
+            "user_id": presentation.user.id,
+            "title": presentation.title,
+            "date_created": presentation.date_created,
+            "total_views": presentation.description["views"]["total_views"],
+            "views": views_by_date,
+            "first_slide": SlideSerializer(presentation.slide_set.first()).data,
+            "leads": []
+        }
+        if presentation.description["lead"]:
+            for slide in presentation.slide_set.all():
+                leads = slide.lead_set.all()
+                data["leads"] += LeadSerializer(leads, many=True).data
+        return Response(data, status.HTTP_200_OK)
+
 
 class QuestionViewSet(ModelViewSet):
     authentication_classes = [NoCsrfSessionAuthentication]
+    permission_classes = [IsQuestionOwner]
     serializer_class = QuestionSerializer
     queryset = Question.objects.all()
 
-    def get_serializer_class(self):
-        if self.action == "create":
-            return CreateQuestionSerializer
-        return super().get_serializer_class()
+    def get_permissions(self):
+        permission_classes = super().get_permissions()
+        if self.action in ["create", "partial_update", "destroy"]:
+            permission_classes.append(IsAuthenticated())
+        return permission_classes
 
     def get_object(self):
         question = get_object_or_404(Question.objects.all(), pk=self.kwargs["question_id"])
+        self.check_object_permissions(self.request, question)
         return question
 
     def retrieve(self, request, *args, **kwargs):
@@ -157,6 +187,11 @@ class QuestionViewSet(ModelViewSet):
     def perform_create(self, serializer):
         try:
             slide = get_object_or_404(Slide.objects.all(), pk=self.request.data["slide_id"])
+            if slide.presentation.user != self.request.user:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"detail": "You are not owner of the presentation"}
+                )
         except KeyError:
             raise serializers.ValidationError({"slide_id": "This field is required"})
         except Slide.DoesNotExist:
@@ -168,6 +203,7 @@ class QuestionViewSet(ModelViewSet):
 
 class AnswerViewSet(ModelViewSet):
     authentication_classes = [NoCsrfSessionAuthentication]
+    permission_classes = [IsAnswerOwner & IsAuthenticated]
     serializer_class = AnswerSerializer
     queryset = Answer.objects.all()
     lookup_url_kwarg = "answer_id"
@@ -179,6 +215,8 @@ class AnswerViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         question = get_object_or_404(Question.objects.all(), pk=self.kwargs["question_id"])
+        if question.slide.presentation.user != self.request.user:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"detail": "You are not owner of the presentation"})
         if "slides_ids" not in self.request.data:
             raise serializers.ValidationError({"slides_ids": "This field is required"})
         answer = serializer.save(question=question)
@@ -197,7 +235,8 @@ class AnswerViewSet(ModelViewSet):
                 old_slides_ids.append(slide.id)
 
             for slide_id in old_slides_ids:
-                answer.slides.remove(Slide.objects.get(pk=slide_id))
+                if slide_id not in self.request.data["slides_ids"]:
+                    answer.slides.remove(Slide.objects.get(pk=slide_id))
 
             for slide_id in self.request.data["slides_ids"]:
                 if slide_id not in old_slides_ids:
@@ -214,16 +253,14 @@ class LeadViewSet(ModelViewSet):
     queryset = Lead.objects.all()
 
     def get_queryset(self):
-        leads = get_object_or_404(
-            Presentation.objects.all(), id=self.kwargs["presentation_id"]
-        ).lead_set.defer("presentation").all()
+        slide = get_object_or_404(Slide.objects.all(), id=self.kwargs["slide_id"])
+        leads = slide.lead_set.all()
         return leads
 
     def perform_create(self, serializer):
-        presentation = get_object_or_404(Presentation, id=self.kwargs["presentation_id"])
-        slide = get_object_or_404(Slide, id=self.request.data["slide"])
+        slide = get_object_or_404(Slide.objects.all(), id=self.kwargs["slide_id"])
         if self.request.user.is_authenticated:
             user = self.request.user
-            serializer.save(presentation=presentation, slide=slide, email=user.email, last_name=user.last_name, first_name=user.first_name)
+            serializer.save(slide=slide, email=user.email, last_name=user.last_name, first_name=user.first_name)
         else:
-            serializer.save(presentation=presentation, slide=slide)
+            serializer.save(slide=slide)

@@ -1,8 +1,42 @@
 <template>
   <ui-toast :show="isShowToast">
-    <template v-slot:header>Успешно</template>
-    <template v-slot:body>Контактные данные оставлены</template>
+    <template v-slot:header>{{ leads.leadCreateMessage.value.header }}</template>
+    <template v-slot:body>{{ leads.leadCreateMessage.value.body }}</template>
   </ui-toast>
+
+  <question v-model="isShowQuestion">
+    <template v-slot:question>
+      {{ questions.question.value.question_text }}
+    </template>
+    <template v-slot:answers>
+      <div v-for="answer in questions.question.value.answer_set">
+        <div class="form-check">
+          <input
+              class="form-check-input"
+              type="radio"
+              name="flexRadioDefault"
+              :id="answer.id"
+              :value="answer.id"
+              v-model="answerId"
+          >
+          <label class="form-check-label" :for="answer.id">
+            {{ answer.answer_text }}
+          </label>
+        </div>
+      </div>
+    </template>
+    <template v-slot:footer>
+      <ui-button
+          type="submit"
+          class="button-submit"
+          @click.prevent="answerTheQuestion"
+          :disabled="answerId.value === ''"
+      >
+        Ответить
+      </ui-button>
+    </template>
+  </question>
+
   <ui-dialog
       v-model="isShowModal"
   >
@@ -106,7 +140,7 @@
       </div>
       <div class="presentation-progress">
         <div
-            v-for="(slide, index) in presentations.presentation.value.slide_set"
+            v-for="(slide, index) in slides"
             class="progress-item"
             :class="{
               'current-progress-item': index === slideNum
@@ -124,20 +158,30 @@
           </div>
         </div>
         <div v-if="isUserOwner" class="buttons">
+          <router-link
+              :to="{name: 'statistics', params: {id: router.currentRoute.value.params.id}}"
+              class="ui-link to-item"
+          >
           <i class="bi bi-bar-chart-line-fill ui-tooltip">
             <ui-tooltip>Статистика</ui-tooltip>
           </i>
+          </router-link>
           <i class="bi bi-share-fill ui-tooltip">
             <ui-tooltip>Поделиться</ui-tooltip>
           </i>
+          <router-link
+              :to="{name: 'presentation-edit', params: {id: router.currentRoute.value.params.id}}"
+              class="ui-link to-item"
+          >
           <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value.id)">
             <ui-tooltip>Редактировать</ui-tooltip>
           </i>
+          </router-link>
           <i class="bi bi-trash3-fill ui-tooltip" @click="deletePresentation(presentations.presentation.value.id)">
             <ui-tooltip>Удалить</ui-tooltip>
           </i>
         </div>
-        <div v-else-if="presentations.presentation.value.description">
+        <div v-else-if="isLead">
           <ui-button
               class="button-submit"
               @click="leadStart"
@@ -155,19 +199,22 @@ import UiTooltip from '@/components/UI/UiTooltip.vue'
 import Router from "@/routers/router";
 import {usePresentations} from "@/use/presentations";
 import {useUserStore} from "@/stores";
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import UiButton from "@/components/UI/UiButton.vue";
 import UiDialog from "@/components/UI/UiDialog.vue";
 import UiToast from "@/components/UI/UiToast.vue";
 import {useDefaultForm} from "@/use/defaultForm";
 import {useLead} from "@/use/leads";
 import router from "@/routers/router";
+import {useQuestion} from "@/use/question";
+import Question from "@/components/UI/Question.vue";
 
 const presentations = usePresentations();
 const userStore = useUserStore();
+const questions = useQuestion();
 
 const imgSrc = ref('');
-const slideNum = ref(0);
+const slideNum = ref(null);
 const isLast = ref(false);
 const totalViews = ref(0);
 const totalFavorite = ref(0);
@@ -175,6 +222,10 @@ const isUserOwner = ref(false);
 const isShowModal = ref(false);
 const currentSlideId = ref('');
 const isShowToast = ref(false);
+const isShowQuestion = ref(false);
+const slides = ref([])
+const answerId = ref('')
+const isLead = ref(false)
 
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
@@ -196,6 +247,14 @@ const leadForm = useDefaultForm({
   },
 }).form
 
+watch(slideNum, () => {
+  if (presentations.presentation.value.slide_set[slideNum.value].question_id) {
+    questions.getQuestion(presentations.presentation.value.slide_set[slideNum.value].question_id).then(() => {
+      isShowQuestion.value = true
+    })
+  }
+})
+
 const dateCreated = computed(() => {
   return (new Date(presentations.presentation.value.date_created))
       .toLocaleDateString('ru', {dateStyle: "long"})
@@ -212,9 +271,12 @@ function deletePresentation(id) {
 
 presentations.getPresentation(Router.currentRoute.value.params.id)
     .then(() => {
-      currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
-      imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`;
-      isLast.value = slideNum.value === presentations.presentation.value.slide_set.length - 1;
+      isLead.value = presentations.presentation.value.description.lead
+      slides.value = presentations.presentation.value.slide_set
+      slideNum.value = 0
+      currentSlideId.value = slides.value[slideNum.value].id;
+      imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
+      isLast.value = slideNum.value === slides.value.length - 1;
       totalViews.value = presentations.presentation.value.description.views.total_views || 0;
       totalFavorite.value = presentations.presentation.value.description.total_favorite || 0;
       if (userStore.user)
@@ -222,20 +284,21 @@ presentations.getPresentation(Router.currentRoute.value.params.id)
           isUserOwner.value = true
     })
 
-
 function nextSlide() {
-  if (slideNum.value < presentations.presentation.value.slide_set.length - 1) {
+  if (slideNum.value < slides.value.length - 1) {
     slideNum.value += 1
-    imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`
-    currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
+    imgSrc.value = `/media/${slides.value[slideNum.value].name}`
+    currentSlideId.value = slides.value[slideNum.value].id
+    answerId.value = ''
   }
 }
 
 function prevSlide() {
   if (slideNum.value > 0) {
     slideNum.value -= 1
-    imgSrc.value = `/media/${presentations.presentation.value.slide_set[slideNum.value].name}`
-    currentSlideId.value = presentations.presentation.value.slide_set[slideNum.value].id;
+    imgSrc.value = `/media/${slides.value[slideNum.value].name}`
+    currentSlideId.value = slides.value[slideNum.value].id
+    answerId.value = ''
   }
 }
 
@@ -248,12 +311,11 @@ function hideToast() {
 function leadStart() {
   if (userStore.user) {
     const formData = {
-      'slide': currentSlideId.value,
       'first_name': userStore.user.firstName,
       'last_name': userStore.user.lastName,
       'email': userStore.user.email
     }
-    leads.createLead(presentations.presentation.value.id, formData)
+    leads.createLead(currentSlideId.value, formData)
     isShowToast.value = true
     setTimeout(hideToast, 3000)
   } else {
@@ -265,12 +327,11 @@ function leadStart() {
 function sendLead() {
   if (leadForm.valid) {
     const formData = {
-      'slide': currentSlideId.value,
       'first_name': leadForm.firstName.value,
       'last_name': leadForm.lastName.value,
       'email': leadForm.email.value
     }
-    leads.createLead(presentations.presentation.value.id, formData)
+    leads.createLead(currentSlideId.value, formData)
     isShowModal.value = false
     isShowToast.value = true
     setTimeout(hideToast, 3000)
@@ -281,8 +342,21 @@ function sendLead() {
 }
 
 watch(slideNum, () => {
-  isLast.value = slideNum.value === presentations.presentation.value.slide_set.length - 1;
+  isLast.value = slideNum.value === slides.value.length - 1;
 })
+
+function answerTheQuestion() {
+  if (answerId.value !== '') {
+    let answer = questions.question.value.answer_set.find(({id}) => id === Number(answerId.value))
+    slides.value = [...slides.value.slice(0, slideNum.value + 1), ...answer.slides]
+    slideNum.value = slides.value.indexOf(answer.slides[0])
+    currentSlideId.value = slides.value[slideNum.value].id;
+    imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
+    isLast.value = slideNum.value === slides.value.length - 1;
+    isShowQuestion.value = false
+    answerId.value = ''
+  }
+}
 
 </script>
 
@@ -407,7 +481,7 @@ img {
   color: #81673e;
 }
 
-.buttons > .bi {
+.buttons > .bi, .to-item {
   margin: 0 8px;
 }
 

@@ -26,7 +26,7 @@
     <template class="dialog-footer" v-slot:footer>
       <button
           class="btn btn-secondary footer-button"
-          @click.prevent="isShowDialogAnswerEdit = false"
+          @click.prevent="isShowDialogAnswerEdit.value = false"
       >
         Отмена
       </button>
@@ -44,7 +44,6 @@
   <ui-modal
       v-model="isShowDialogAnswer"
       :is70rem="true"
-
   >
     <template v-slot:title>Добавить ответ</template>
     <template v-slot:body>
@@ -67,14 +66,14 @@
     <template class="dialog-footer" v-slot:footer>
       <button
           class="btn btn-secondary footer-button"
-          @click.prevent="isShowDialogAnswer = false"
+          @click.prevent="isShowDialogAnswer.value = false"
       >
         Отмена
       </button>
       <ui-button
           type="submit"
           class="button-submit footer-button"
-          :disabled="slidesIds.length === 0 || !formAnswer.valid"
+          :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
           @click="createAnswer"
       >
         Сохранить
@@ -115,7 +114,7 @@
                 <i class="bi bi-pencil-fill ui-tooltip" @click="startEditAnswer(answer)">
                   <ui-tooltip>Редактировать</ui-tooltip>
                 </i>
-                <i class="bi bi-trash3-fill ui-tooltip">
+                <i class="bi bi-trash3-fill ui-tooltip" @click="deleteAnswer(answer)">
                   <ui-tooltip>Удалить</ui-tooltip>
                 </i>
               </div>
@@ -133,15 +132,15 @@
     <template class="dialog-footer" v-slot:footer>
       <button
           class="btn btn-secondary footer-button"
-          @click="isShowDialogQuestion = false"
+          @click="isShowDialogQuestion.value = false"
       >
         Отмена
       </button>
       <ui-button
           type="submit"
           class="button-submit footer-button"
-          :disabled="!formQuestion.questionText.valid"
-          @click.prevent="createQuestion"
+          :disabled="!formQuestion.questionText.valid || answers.length === 0"
+          @click.prevent="createOrEditQuestion"
       >
         Сохранить
       </ui-button>
@@ -168,6 +167,7 @@
               Редактировать вопрос
             </button>
             <button
+                @click.prevent="deleteQuestion"
                 class="btn button-delete-question"
             >
               <i class="bi bi-trash3-fill ui-tooltip">
@@ -198,6 +198,7 @@ import {useQuestion} from "@/use/question";
 import UiTooltip from '@/components/UI/UiTooltip.vue'
 import {useDefaultForm} from "@/use/defaultForm";
 import {useAnswer} from "@/use/answer";
+import {useOneFieldForm} from "@/use/oneFieldForm";
 
 const props = defineProps({
   slide: {
@@ -210,8 +211,6 @@ const props = defineProps({
   }
 })
 
-const questionAnswers = useQuestion()
-
 const maxLength = 255
 const required = v => !!v
 const isMaxLength = v => v.length <= maxLength
@@ -220,14 +219,14 @@ const question = useQuestion()
 const answer = useAnswer()
 const answers = ref([])
 
-const formQuestion = useDefaultForm({
+const formQuestion = useOneFieldForm({
   questionText: {
     value: '',
     validators: {required, isMaxLength}
   }
 }).form
 
-const formAnswer = useDefaultForm({
+const formAnswer = useOneFieldForm({
   answerText: {
     value: '',
     validators: {required, isMaxLength}
@@ -240,9 +239,9 @@ const isSlideHasQuestion = ref(false)
 
 if (props.slide.question_id) {
   isSlideHasQuestion.value = true
-  questionAnswers.getQuestion(props.slide.question_id).then(() => {
-    formQuestion.questionText.value = questionAnswers.question.value.question_text
-    for (let answer of questionAnswers.question.value.answer_set) {
+  question.getQuestion(props.slide.question_id).then(() => {
+    formQuestion.questionText.value = question.question.value.question_text
+    for (let answer of question.question.value.answer_set) {
       let slideOrdering = ""
       let slidesIDs = []
       for (let slide of answer.slides) {
@@ -251,7 +250,7 @@ if (props.slide.question_id) {
       }
       answers.value.push(
           {
-            answerId: answer.id,
+            id: answer.id,
             isNewAnswer: false,
             isEdited: false,
             answerText: answer.answer_text,
@@ -261,8 +260,6 @@ if (props.slide.question_id) {
       )
     }
   })
-} else {
-  questionAnswers.question.value = {answer_set: []}
 }
 
 
@@ -275,7 +272,7 @@ const showDialogAnswer = () => isShowDialogAnswer.value = true
 
 
 function createAnswer() {
-  if (formAnswer.valid && slidesIds.value.length !== 0) {
+  if (formAnswer.answerText.valid && slidesIds.value.length !== 0) {
     let slideOrdering = []
     for (let slideId of slidesIds.value) {
       for (let slide of props.slides)
@@ -284,7 +281,7 @@ function createAnswer() {
     }
     answers.value.push(
         {
-          answerId: Date.now(),
+          id: Date.now(),
           isNewAnswer: true,
           isEdited: false,
           answerText: formAnswer.answerText.value,
@@ -302,28 +299,69 @@ function createAnswer() {
 }
 
 function createQuestion() {
+  question.createQuestion(
+      {
+        "slide_id": props.slide.id,
+        "question_text": formQuestion.questionText.value
+      }
+  ).then(
+      () => {
+        for (let answerToAdd of answers.value)
+          if (answerToAdd.isNewAnswer) {
+            answer.createAnswer(
+                question.question.value.id,
+                {
+                  "answer_text": answerToAdd.answerText,
+                  "slides_ids": answerToAdd.slidesIds
+                }
+            )
+          }
+        isShowDialogQuestion.value = false
+        isSlideHasQuestion.value = true
+      }
+  )
+}
+
+function editQuestion() {
+  question.editQuestion(
+      question.question.value.id,
+      {
+        "question_text": formQuestion.questionText.value
+      }
+  ).then(
+      () => {
+        for (let answerOfAnswers of answers.value) {
+          if (answerOfAnswers.isNewAnswer) {
+            answer.createAnswer(
+                question.question.value.id,
+                {
+                  "answer_text": answerOfAnswers.answerText,
+                  "slides_ids": answerOfAnswers.slidesIds
+                }
+            )
+          } else if (answerOfAnswers.isEdited) {
+            answer.editAnswer(
+                question.question.value.id,
+                answerOfAnswers.id,
+                {
+                  "answer_text": answerOfAnswers.answerText,
+                  "slides_ids": answerOfAnswers.slidesIds
+                }
+            )
+          }
+        }
+        isShowDialogQuestion.value = false
+      }
+  )
+}
+
+function createOrEditQuestion() {
   if (formQuestion.questionText.valid && answers.value.length !== 0) {
-    question.createQuestion(
-        {
-          "slide_id": props.slide.id,
-          "question_text": formQuestion.questionText.value
-        }
-    ).then(
-        () => {
-          for (let answerToAdd of answers.value)
-            if (answerToAdd.isNewAnswer) {
-              answer.createAnswer(
-                  question.question.value.id,
-                  {
-                    "answer_text": answerToAdd.answerText,
-                    "slides_ids": answerToAdd.slidesIds
-                  }
-              )
-            }
-          isShowDialogQuestion.value = false
-          isSlideHasQuestion.value = true
-        }
-    )
+    if (question.question.value) {
+      editQuestion()
+    } else {
+      createQuestion()
+    }
   }
 }
 
@@ -337,7 +375,7 @@ function startEditAnswer(answer) {
 }
 
 function editAnswer() {
-  if (formAnswer.valid && slidesIds.value.length !== 0) {
+  if (formAnswer.answerText.valid && slidesIds.value.length !== 0) {
     answers.value[editableAnswer.value].isEdited = true
     answers.value[editableAnswer.value].answerText = formAnswer.answerText.value
     answers.value[editableAnswer.value].slidesIds = slidesIds.value
@@ -363,6 +401,17 @@ function updateSlidesIds(slide, event) {
     slidesIds.value.push(slide.id)
   else
     slidesIds.value = slidesIds.value.filter((slideId) => slideId !== slide.id)
+}
+
+function deleteAnswer(answerToDelete) {
+  if (!answerToDelete.isNewAnswer)
+    answer.deleteAnswer(question.question.value.id, answerToDelete.id)
+  answers.value = answers.value.filter((answer) => answer.id !== answerToDelete.id)
+}
+
+function deleteQuestion() {
+  question.deleteQuestion(question.question.value.id)
+  isSlideHasQuestion.value = false
 }
 
 </script>

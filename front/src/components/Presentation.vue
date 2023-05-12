@@ -21,7 +21,6 @@ const props = defineProps({
 const emit = defineEmits(['delete']);
 
 const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
-const presentations = usePresentations()
 
 function presentationDetail(id) {
   router.replace({path: `/presentation/${id}`})

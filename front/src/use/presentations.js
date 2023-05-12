@@ -50,6 +50,14 @@ export function usePresentations() {
         ).then((res) => console.log(res))
     }
 
+    const getStatistics = async (id) => {
+        return await axios.get(`/api/v1/presentation/${id}/statistics`)
+            .then((res) => {
+                presentation.value = res.data
+            })
+            .catch((e) => console.log(e))
+    }
+
     return {
         presentationsPublic,
         userPresentations,
@@ -59,6 +67,7 @@ export function usePresentations() {
         getPresentation,
         createPresentation,
         editPresentation,
-        deletePresentation
+        deletePresentation,
+        getStatistics
     }
 }

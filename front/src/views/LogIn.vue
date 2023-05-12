@@ -15,7 +15,7 @@ const isEmail = v => EMAIL_REGEXP.test(v)
 
 const userStore = useUserStore();
 
-const {formQuestion} = useForm({
+const {form} = useForm({
   email: {
     value: '',
     validators: {required, isEmail}
@@ -33,10 +33,10 @@ function hideToast() {
 }
 
 async function submit() {
-  if (formQuestion.valid) {
+  if (form.valid) {
     await userStore.logIn(
-        formQuestion.email.value,
-        formQuestion.password.value,
+        form.email.value,
+        form.password.value,
     )
     if (userStore.error === null)
       await router.replace({name: 'library'})
@@ -60,19 +60,19 @@ async function submit() {
       <form @submit.prevent="submit">
         <div class="input-item">
           <input
-              v-model="formQuestion.email.value"
+              v-model="form.email.value"
               type="text"
               placeholder="Электронная почта"
               class="form-control"
-              :class="{'is-invalid': !formQuestion.email.valid && formQuestion.email.touched}"
-              @blur="formQuestion.email.blur"
+              :class="{'is-invalid': !form.email.valid && form.email.touched}"
+              @blur="form.email.blur"
           />
-          <template v-if="formQuestion.email.errors.isEmail">
+          <template v-if="form.email.errors.isEmail">
             <div class="invalid-feedback">
               Введите корректную электронную почту
             </div>
           </template>
-          <template v-else-if="formQuestion.email.errors.required">
+          <template v-else-if="form.email.errors.required">
             <div class="invalid-feedback">
               Заполните это поле
             </div>
@@ -81,15 +81,15 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="formQuestion.password.value"
+              v-model="form.password.value"
               type="password"
               placeholder="Пароль"
               class="form-control"
-              :class="{'is-invalid': !formQuestion.password.valid && formQuestion.password.touched}"
-              @blur="formQuestion.password.blur"
+              :class="{'is-invalid': !form.password.valid && form.password.touched}"
+              @blur="form.password.blur"
           />
           <div class="invalid-feedback">
-            <template v-if="formQuestion.password.errors.required">
+            <template v-if="form.password.errors.required">
               <div>
                 Заполните это поле
               </div>
@@ -100,7 +100,7 @@ async function submit() {
         <ui-button
             type="submit"
             class="button-submit"
-            :disabled="!formQuestion.valid"
+            :disabled="!form.valid"
         >
           Войти
         </ui-button>

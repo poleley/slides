@@ -6,7 +6,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import BasePermission
 
 
-class IsOwner(BasePermission):
+class IsPresentationOwner(BasePermission):
     def has_permission(self, request, view):
         if view.action == "list":
             user_id = request.query_params.get("user_id")
@@ -17,6 +17,18 @@ class IsOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.privacy == 1 or obj.user == request.user
+
+
+class IsQuestionOwner(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.slide.presentation.user == request.user or (
+                obj.slide.presentation.privacy == 1 and view.action == "retrieve"
+        )
+
+
+class IsAnswerOwner(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.question.slide.presentation.user == request.user
 
 
 class NoCsrfSessionAuthentication(SessionAuthentication):

@@ -28,7 +28,7 @@ const slides = ref([]);
 presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'true'})
     .then(() => {
       if (userStore.user.id !== presentations.presentation.value.user.id)
-        router.replace({name: 'signup'})
+        router.replace({name: 'all-presentations'})
       slides.value = presentations.presentation.value.slide_set
     })
 

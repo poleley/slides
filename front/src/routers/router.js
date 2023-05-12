@@ -8,11 +8,13 @@ import PresentationDetail from "@/views/PresentationDetail.vue";
 import Converter from "@/views/Converter.vue";
 import EditPresentation from "@/views/EditPresentation.vue";
 import Interactivity from "@/views/Interactivity.vue";
+import Statistics from "@/views/Statistics.vue";
 
 const routes = [
     {
         path: "/",
-        component: PresentationGallery
+        component: PresentationGallery,
+        name: 'all-presentations'
     },
     {
         path: '/signup/',
@@ -45,6 +47,11 @@ const routes = [
         name: 'interactivity'
     },
     {
+        path: '/presentation/:id/statistics/',
+        component: Statistics,
+        name: 'statistics'
+    },
+    {
         path: '/upload/',
         component: Converter,
         name: 'converter'
@@ -59,8 +66,13 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     if (
-        (to.name === 'library' || to.name === 'converter' || to.name === 'presentation-edit')
-        && userStore.user === null
+        (
+            to.name === 'library' ||
+            to.name === 'converter' ||
+            to.name === 'presentation-edit' ||
+            to.name === 'interactivity' ||
+            to.name === 'statistics'
+        ) && userStore.user === null
     )
         return next('/signup')
     else

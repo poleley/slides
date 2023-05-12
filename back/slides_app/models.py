@@ -53,6 +53,13 @@ class Lead(models.Model):
     first_name = models.CharField(null=False, blank=False, max_length=100)
     last_name = models.CharField(null=False, blank=False, max_length=100)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slide', 'email'], name='unique_slide_email_combination'
+            )
+        ]
+
 
 class Question(models.Model):
     slide = models.OneToOneField(Slide, null=False, blank=False, on_delete=models.CASCADE, related_name='question_id')

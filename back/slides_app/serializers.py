@@ -80,9 +80,11 @@ class CreatePresentationSerializer(ModelSerializer):
 
 
 class LeadSerializer(ModelSerializer):
+    slide = SlideSerializer(read_only=True)
+
     class Meta:
         model = Lead
-        fields = ['email', 'first_name', 'last_name']
+        fields = ['slide', 'email', 'first_name', 'last_name']
 
 
 class AnswerSerializer(ModelSerializer):
@@ -99,19 +101,14 @@ class AnswerSerializer(ModelSerializer):
 
 class QuestionSerializer(ModelSerializer):
     answer_set = AnswerSerializer(read_only=True, many=True)
+    slide_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Question
-        fields = ['question_text', 'answer_set']
+        fields = ['id', 'slide_id', 'question_text', 'answer_set']
 
 
 class CreateUpdateAnswerSerializer(ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id', 'answer_text']
-
-
-class CreateQuestionSerializer(ModelSerializer):
-    class Meta:
-        model = Question
-        fields = ['id', 'slide_id', 'question_text']

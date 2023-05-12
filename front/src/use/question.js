@@ -2,10 +2,10 @@ import axios from "axios";
 import {ref} from "vue";
 
 export function useQuestion() {
-    const question = ref({})
+    const question = ref(null)
 
-    const getQuestion = async (question_id) => {
-        return await axios.get(`/api/v1/question/${question_id}/`)
+    const getQuestion = async (questionId) => {
+        return await axios.get(`/api/v1/question/${questionId}/`)
             .then((res) => {
                 question.value = res.data
             })
@@ -19,9 +19,21 @@ export function useQuestion() {
             .then((res) => question.value = res.data)
     }
 
+    const editQuestion = async (questionId, data) => {
+        return await axios.patch(`/api/v1/question/${questionId}/`, data)
+            .then((res) => question.value = res.data)
+    }
+
+    const deleteQuestion = async (questionId) => {
+        return await axios.delete(`/api/v1/question/${questionId}/`)
+            .then((res) => question.value = null)
+    }
+
     return {
         question,
         getQuestion,
-        createQuestion
+        createQuestion,
+        editQuestion,
+        deleteQuestion
     }
 }

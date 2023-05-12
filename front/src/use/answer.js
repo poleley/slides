@@ -14,8 +14,14 @@ export function useAnswer() {
             .then((res) => console.log(res))
     }
 
+    const deleteAnswer = async (question_id, answer_id) => {
+        return await axios.delete(`/api/v1/question/${question_id}/answer/${answer_id}/`)
+            .then((res) => console.log(res))
+    }
+
     return {
         createAnswer,
-        editAnswer
+        editAnswer,
+        deleteAnswer
     }
 }

@@ -109,7 +109,9 @@ function edit() {
     formData.append('tags', tags)
     formData.append('privacy', form.privacy.value)
     formData.append('description', JSON.stringify(description.value))
-    presentations.editPresentation(presentations.presentation.value.id, formData)
+    presentations.editPresentation(presentations.presentation.value.id, formData).then(() => {
+      router.replace({name: 'library'})
+    })
   }
 }
 </script>
