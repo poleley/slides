@@ -27,8 +27,12 @@ urlpatterns = [
         PresentationViewSet.as_view({"get": "retrieve", "delete": "destroy", "patch": "partial_update"})
     ),
     path(
+        'api/v1/presentation/<int:presentation_id>/statistics/',
+        PresentationViewSet.as_view({"get": "statistics"})
+    ),
+    path(
         'api/v1/question/<int:question_id>/',
-        QuestionViewSet.as_view({"get": "retrieve"})
+        QuestionViewSet.as_view({"get": "retrieve", "delete": "destroy", "patch": "partial_update"})
     ),
     path(
         'api/v1/question/',
@@ -43,7 +47,7 @@ urlpatterns = [
         AnswerViewSet.as_view({"delete": "destroy", "patch": "partial_update"})
     ),
     path(
-        'api/v1/presentation/<int:presentation_id>/lead/',
+        'api/v1/slide/<int:slide_id>/lead/',
         LeadViewSet.as_view({"get": "list", "post": "create"})
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

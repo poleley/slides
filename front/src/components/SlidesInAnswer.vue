@@ -65,7 +65,7 @@ img {
 
 .row-slides {
   overflow-y: auto;
-  max-height: 35rem;
+  max-height: 27rem;
 }
 
 </style>
