@@ -75,9 +75,14 @@ function editPresentation(id) {
           </div>
           <div class="d-flex justify-content-between">
             <div class="buttons">
+              <router-link
+                  :to="{name: 'statistics', params: {id: presentation.id}}"
+                  class="ui-link to-item"
+              >
               <i class="bi bi-bar-chart-line-fill ui-tooltip">
                 <ui-tooltip>Статистика</ui-tooltip>
               </i>
+              </router-link>
               <i class="bi bi-share-fill ui-tooltip">
                 <ui-tooltip>Поделиться</ui-tooltip>
               </i>
