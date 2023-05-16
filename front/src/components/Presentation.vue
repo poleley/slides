@@ -103,7 +103,7 @@ function editPresentation(id) {
 
 <style scoped>
 .presentation {
-  width: 90%;
+  width: 19rem;
   margin: 1rem auto;
   border-radius: 0 0 12px 12px;
   border: 1px solid #e1d6c6;
@@ -119,11 +119,23 @@ function editPresentation(id) {
   margin-bottom: 8px;
 }
 
-.img-preview, .preview {
+.img-preview {
   cursor: pointer;
   max-width: 100%;
-  width: 100%;
+  /*width: 100%;*/
   height: 11rem;
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  object-fit:cover;
+  /*margin: 0 auto;*/
+}
+
+.preview {
+  height: 11rem;
+  position: relative;
+  width: 100%;
 }
 
 .title {
