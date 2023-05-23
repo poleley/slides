@@ -26,7 +26,7 @@
     <template class="dialog-footer" v-slot:footer>
       <button
           class="btn btn-secondary footer-button"
-          @click.prevent="isShowDialogAnswerEdit.value = false"
+          @click.prevent="isShowDialogAnswerEdit = false"
       >
         Отмена
       </button>
@@ -66,7 +66,7 @@
     <template class="dialog-footer" v-slot:footer>
       <button
           class="btn btn-secondary footer-button"
-          @click.prevent="isShowDialogAnswer.value = false"
+          @click.prevent="isShowDialogAnswer = false"
       >
         Отмена
       </button>
@@ -132,7 +132,7 @@
     <template class="dialog-footer" v-slot:footer>
       <button
           class="btn btn-secondary footer-button"
-          @click="isShowDialogQuestion.value = false"
+          @click="isShowDialogQuestion = false"
       >
         Отмена
       </button>
