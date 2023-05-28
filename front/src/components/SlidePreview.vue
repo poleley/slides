@@ -306,16 +306,20 @@ function createQuestion() {
       }
   ).then(
       () => {
+        let newAnswers = []
         for (let answerToAdd of answers.value)
           if (answerToAdd.isNewAnswer) {
-            answer.createAnswer(
-                question.question.value.id,
+            newAnswers.push(
                 {
                   "answer_text": answerToAdd.answerText,
                   "slides_ids": answerToAdd.slidesIds
                 }
             )
           }
+        answer.createAnswer(
+            question.question.value.id,
+            newAnswers
+        )
         isShowDialogQuestion.value = false
         isSlideHasQuestion.value = true
       }
@@ -330,10 +334,10 @@ function editQuestion() {
       }
   ).then(
       () => {
+        let newAnswers = []
         for (let answerOfAnswers of answers.value) {
           if (answerOfAnswers.isNewAnswer) {
-            answer.createAnswer(
-                question.question.value.id,
+            newAnswers.push(
                 {
                   "answer_text": answerOfAnswers.answerText,
                   "slides_ids": answerOfAnswers.slidesIds
@@ -350,6 +354,10 @@ function editQuestion() {
             )
           }
         }
+        answer.createAnswer(
+            question.question.value.id,
+            newAnswers
+        )
         isShowDialogQuestion.value = false
       }
   )

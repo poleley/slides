@@ -2,7 +2,10 @@
 
 import router from "@/routers/router";
 import UiTooltip from '@/components/UI/UiTooltip.vue'
-import {usePresentations} from "@/use/presentations";
+import {useUserStore} from "@/stores";
+import {ref} from "vue";
+
+const userStore = useUserStore();
 
 const props = defineProps({
   presentation: {
@@ -18,7 +21,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['delete', 'updateFavorite']);
 
 const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
 
@@ -28,6 +31,18 @@ function presentationDetail(id) {
 
 function editPresentation(id) {
   router.replace({name: 'presentation-edit', params: {id: id}})
+}
+
+const isFavorite = ref(false)
+
+if (userStore.user)
+    isFavorite.value = props.presentation.favorite.includes(userStore.user.id)
+
+function toggleFavorite() {
+  if (userStore.user) {
+    isFavorite.value = !isFavorite.value
+  }
+  emit('updateFavorite', props.presentation)
 }
 
 </script>
@@ -49,8 +64,9 @@ function editPresentation(id) {
                 {{ presentation.title }}
               </template>
             </div>
-            <div class="star">
-              <i class="bi bi-star"></i>
+            <div class="star" @click="toggleFavorite">
+              <i class="bi bi-star" v-if="!isFavorite"></i>
+              <i class="bi bi-star-fill" v-else></i>
             </div>
           </div>
           <div class="row-2">

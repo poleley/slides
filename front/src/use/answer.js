@@ -19,9 +19,15 @@ export function useAnswer() {
             .then((res) => console.log(res))
     }
 
+    const chooseAnswer = async (question_id, answer_id) => {
+        return await axios.patch(`/api/v1/question/${question_id}/answer/${answer_id}/choose/`)
+            .then((res) => console.log(res))
+    }
+
     return {
         createAnswer,
         editAnswer,
-        deleteAnswer
+        deleteAnswer,
+        chooseAnswer
     }
 }

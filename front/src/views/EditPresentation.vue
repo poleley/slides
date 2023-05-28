@@ -14,13 +14,6 @@ const MAX_TAG_LENGTH = 100
 
 const required = v => !!v
 const MaxTitleLength = v => v.length <= MAX_TITLE_LENGTH
-const MaxTagLength = v => {
-  for (let t of v.split(',')) {
-    if (t.trim().length > MAX_TAG_LENGTH)
-      return false
-  }
-  return true
-}
 
 const presentations = usePresentations()
 
@@ -32,10 +25,6 @@ const {form} = useDefaultForm({
   privacy: {
     value: '',
     validators: {required}
-  },
-  tags: {
-    value: '',
-    validators: {MaxTagLength}
   },
   topic: {
     value: '',
@@ -58,11 +47,10 @@ presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'tru
       else {
         form.title.value = presentations.presentation.value.title;
         form.privacy.value = presentations.presentation.value.privacy;
-        form.tags.value = presentations.presentation.value.tags;
         form.topic.value = presentations.presentation.value.topic;
         form.lead.value = String(presentations.presentation.value.description.lead);
         description.value = presentations.presentation.value.description;
-        checked.value = [1 === form.privacy.value, 2 === form.privacy.value, 3 === form.privacy.value];
+        checked.value = [1 === form.privacy.value, 2 === form.privacy.value];
       }
     })
 
@@ -97,16 +85,8 @@ const topicOptions = ref([
 function edit() {
   if (form.valid) {
     let formData = new FormData();
-    let tags = []
-    if (form.tags.value !== '') {
-      for (let t of form.tags.value.split(',')) {
-        tags.push(t.trim())
-      }
-      formData.append('tags', tags)
-    }
     formData.append('title', form.title.value)
     formData.append('topic', form.topic.value)
-    formData.append('tags', tags)
     formData.append('privacy', form.privacy.value)
     formData.append('description', JSON.stringify(description.value))
     presentations.editPresentation(presentations.presentation.value.id, formData).then(() => {
@@ -127,43 +107,11 @@ function edit() {
               :topic-options="topicOptions"
               :max-tag-length="MAX_TAG_LENGTH"
               :max-title-length="MAX_TITLE_LENGTH"
-              :checked3="checked[2]"
               :checked2="checked[1]"
               :checked1="checked[0]"
-          />
-          <div class="row mt-2 align-items-center">
-            <div class="col-6">
-              Собирать лиды
-              <div>
-                <div class="form-check form-check-inline">
-                  <label for="lead-yes">
-                    Да
-                  </label>
-                  <input
-                      id="lead-yes"
-                      type="radio"
-                      name="lead"
-                      value="true"
-                      class="form-check-input"
-                      v-model="form.lead.value"
-                  >
-                </div>
-                <div class="form-check form-check-inline">
-                  <label for="lead-no">
-                    Нет
-                  </label>
-                  <input
-                      id="lead-no"
-                      type="radio"
-                      name="lead"
-                      value="false"
-                      class="form-check-input"
-                      v-model="form.lead.value"
-                  >
-                </div>
-              </div>
-            </div>
-            <div class="col-6">
+              :is-edit="true"
+          >
+            <div class="col-3">
               <router-link
                   :to="{name: 'interactivity', params: {id: router.currentRoute.value.params.id}}"
                   class="ui-link interactivity"
@@ -171,7 +119,48 @@ function edit() {
                 Настроить интерактивность
               </router-link>
             </div>
-          </div>
+          </presentation-form>
+<!--          <div class="row mt-2 align-items-center">-->
+<!--            <div class="col-6">-->
+<!--              Собирать лиды-->
+<!--              <div>-->
+<!--                <div class="form-check form-check-inline">-->
+<!--                  <label for="lead-yes">-->
+<!--                    Да-->
+<!--                  </label>-->
+<!--                  <input-->
+<!--                      id="lead-yes"-->
+<!--                      type="radio"-->
+<!--                      name="lead"-->
+<!--                      value="true"-->
+<!--                      class="form-check-input"-->
+<!--                      v-model="form.lead.value"-->
+<!--                  >-->
+<!--                </div>-->
+<!--                <div class="form-check form-check-inline">-->
+<!--                  <label for="lead-no">-->
+<!--                    Нет-->
+<!--                  </label>-->
+<!--                  <input-->
+<!--                      id="lead-no"-->
+<!--                      type="radio"-->
+<!--                      name="lead"-->
+<!--                      value="false"-->
+<!--                      class="form-check-input"-->
+<!--                      v-model="form.lead.value"-->
+<!--                  >-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <div class="col-6">-->
+<!--              <router-link-->
+<!--                  :to="{name: 'interactivity', params: {id: router.currentRoute.value.params.id}}"-->
+<!--                  class="ui-link interactivity"-->
+<!--              >-->
+<!--                Настроить интерактивность-->
+<!--              </router-link>-->
+<!--            </div>-->
+<!--          </div>-->
         </div>
         <ui-button
             type="submit"

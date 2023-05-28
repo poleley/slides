@@ -21,7 +21,7 @@
         </div>
         <div class="row row-graphic">
           <div class="row-title">
-          График просмотров и добавлений в избранное по дням
+            График просмотров и добавлений в избранное по дням
           </div>
           <div class="graphic">
             <canvas id="graphic"></canvas>
@@ -33,10 +33,10 @@
           <table class="table">
             <thead>
             <tr>
-            <th>Номер слайда</th>
-            <th>Фамилия</th>
-            <th>Имя</th>
-            <th>Email</th>
+              <th>Номер слайда</th>
+              <th>Фамилия</th>
+              <th>Имя</th>
+              <th>Email</th>
             </tr>
             </thead>
             <tbody>
@@ -67,7 +67,8 @@ const userStore = useUserStore()
 const presentations = usePresentations()
 
 const labels = ref([])
-const values = ref([])
+const viewsValues = ref([])
+const favoriteValues = ref([])
 const imgSrc = ref('')
 const isLeads = ref(false)
 
@@ -78,16 +79,26 @@ presentations.getStatistics(router.currentRoute.value.params.id).then(
       isLeads.value = presentations.presentation.value.leads.length !== 0
       imgSrc.value = `/media/${presentations.presentation.value.first_slide.name}`
       labels.value = Object.keys(presentations.presentation.value.views)
-      values.value = Object.values(presentations.presentation.value.views)
+      viewsValues.value = Object.values(presentations.presentation.value.views)
+      favoriteValues.value = Object.values(presentations.presentation.value.favorite)
       const data = {
         labels: labels.value,
-            datasets: [{
-          label: 'Просмотры',
-          data: values.value,
-          fill: false,
-          borderColor: 'rgb(201,163,105)',
-          tension: 0.1
-        }]
+        datasets: [
+          {
+            label: 'Просмотры',
+            data: viewsValues.value,
+            fill: false,
+            borderColor: 'rgb(168,168,168)',
+            tension: 0.1
+          },
+          {
+            label: 'Добавления в избранное',
+            data: favoriteValues.value,
+            fill: false,
+            borderColor: 'rgb(201,163,105)',
+            tension: 0.1
+          }
+        ]
       }
       new Chart(
           document.getElementById('graphic'),

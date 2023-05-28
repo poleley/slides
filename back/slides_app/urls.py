@@ -12,7 +12,8 @@ urlpatterns = [
     ),
     path(
         'api/v1/user/login/',
-        UserViewSet.as_view({"post": "login"})
+        UserViewSet.as_view({"post": "login"}),
+        name='login'
     ),
     path(
         'api/v1/user/logout/',
@@ -20,11 +21,20 @@ urlpatterns = [
     ),
     path(
         'api/v1/presentation/',
-        PresentationViewSet.as_view({"post": "create", "get": "list"})
+        PresentationViewSet.as_view({"post": "create", "get": "list"}),
+        name='presentations'
     ),
     path(
         'api/v1/presentation/<int:presentation_id>/',
         PresentationViewSet.as_view({"get": "retrieve", "delete": "destroy", "patch": "partial_update"})
+    ),
+    path(
+        'api/v1/presentation/<int:presentation_id>/add_to_favorite/',
+        PresentationViewSet.as_view({"patch": "add_to_favorite"})
+    ),
+    path(
+        'api/v1/presentation/<int:presentation_id>/remove_from_favorite/',
+        PresentationViewSet.as_view({"patch": "remove_from_favorite"})
     ),
     path(
         'api/v1/presentation/<int:presentation_id>/statistics/',
@@ -47,8 +57,12 @@ urlpatterns = [
         AnswerViewSet.as_view({"delete": "destroy", "patch": "partial_update"})
     ),
     path(
+        'api/v1/question/<int:question_id>/answer/<int:answer_id>/choose/',
+        AnswerViewSet.as_view({"patch": "choose"})
+    ),
+    path(
         'api/v1/slide/<int:slide_id>/lead/',
-        LeadViewSet.as_view({"get": "list", "post": "create"})
+        LeadViewSet.as_view({"post": "create"})
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -22,22 +22,16 @@ class Topic(models.IntegerChoices):
 
 class Privacy(models.IntegerChoices):
     PUBLIC = 1, _("Доступно всем")
-    LIMITED = 2, _("Ограниченный доступ")
-    PRIVATE = 3, _("Приватно")
+    PRIVATE = 2, _("Приватно")
 
 
 class Presentation(models.Model):
-    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE, related_name='user')
+    favorite = models.ManyToManyField(User, related_name='user_favorite')
     title = models.CharField(null=False, blank=False, max_length=255)
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
-    tags = ArrayField(
-        models.CharField(null=False, blank=False, max_length=100),
-        null=True,
-        blank=True
-    )
     description = models.JSONField(null=False, blank=False)
     privacy = models.IntegerField(choices=Privacy.choices, null=False, blank=False)
-    url = models.URLField(null=True, blank=True)
     date_created = models.DateField(auto_now_add=True)
 
 
@@ -70,3 +64,4 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     slides = models.ManyToManyField(Slide)
     answer_text = models.CharField(null=False, blank=False, max_length=255)
+    chosen_count = models.IntegerField(null=False, blank=False, default=0)

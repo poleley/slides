@@ -2,19 +2,21 @@
 
 import {defineComponent} from "vue";
 import {useUserStore} from "@/stores";
+import {useRouter} from "vue-router";
 
 export default defineComponent({
   name: 'app',
   setup() {
     const userStore = useUserStore();
-    return {userStore}
+    const router = useRouter()
+    return {userStore, router}
   }
 })
 
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <nav v-if="router.currentRoute.value.name !== 'embed'" class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -55,7 +57,7 @@ export default defineComponent({
   <div class="content">
     <router-view></router-view>
   </div>
-  <footer class="footer">
+  <footer v-if="router.currentRoute.value.name !== 'embed'" class="footer">
     <p class="p-2"></p>
   </footer>
 </template>

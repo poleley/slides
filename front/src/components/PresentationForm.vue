@@ -14,29 +14,25 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  maxTagLength: {
-    type: Number,
-    required: true
-  },
-  checked3: {
-    type: Boolean,
-    default: true
-  },
   checked2: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   checked1: {
     type: Boolean,
     default: false
   },
+  isEdit: {
+    type: Boolean,
+    default: false
+  }
 })
 </script>
 
 <template>
   <div class="align-items-center mt-2">
     <div class="row">
-      <div class="col-6">
+      <div class="col col-12">
         <div class="w-100">
           <label for="title">
             Название*
@@ -59,66 +55,9 @@ const props = defineProps({
           </div>
         </div>
       </div>
-      <div class="col-6">
-        Кто может просматривать эту презентацию?
-        <div class="form-check">
-          <label>
-            Только я
-            <input
-                type="radio"
-                name="privacy"
-                value="3"
-                class="form-check-input"
-                :checked="checked3"
-                v-model="modelValue.privacy.value"
-            >
-          </label>
-        </div>
-        <div class="form-check">
-          <label>
-            Только те, у кого есть ссылка
-            <input
-                type="radio"
-                name="privacy"
-                value="2"
-                :checked="checked2"
-                class="form-check-input"
-                v-model="modelValue.privacy.value"
-            >
-          </label>
-        </div>
-        <div class="form-check">
-          <label>
-            Все
-            <input
-                type="radio"
-                name="privacy"
-                value="1"
-                :checked="checked1"
-                class="form-check-input"
-                v-model="modelValue.privacy.value"
-            >
-          </label>
-        </div>
-      </div>
     </div>
-    <div class="row mt-2">
-      <div class="col-6">
-        <div class="w-100">
-          <label for="tags">Теги</label>
-          <input
-              v-model="modelValue.tags.value"
-              class="form-control"
-              id="tags"
-              @blur="modelValue.tags.blur"
-              :class="{'is-invalid': !modelValue.tags.valid && modelValue.tags.touched}"
-          >
-          <div class="invalid-feedback">
-            Длина одного тега не может быть больше {{ maxTagLength }} символов
-          </div>
-        </div>
-      </div>
-      <div class="col-6">
+    <div class="row mt-2" :class="{'align-items-center': isEdit}">
+      <div :class="{'col-6': !isEdit, 'col-4': isEdit}">
         <div class="w-100">
           <label for="topic">
             Тема презентации*
@@ -138,6 +77,38 @@ const props = defineProps({
           </div>
         </div>
       </div>
+      <div :class="{'col-6': !isEdit, 'col-5': isEdit}">
+        Кто может просматривать эту презентацию?
+        <div class="form-check">
+          <label>
+            Только я
+            <input
+                type="radio"
+                name="privacy"
+                value="2"
+                class="form-check-input"
+                :checked="checked2"
+                v-model="modelValue.privacy.value"
+            >
+          </label>
+        </div>
+        <div class="form-check">
+          <label>
+            Все
+            <input
+                type="radio"
+                name="privacy"
+                value="1"
+                :checked="checked1"
+                class="form-check-input"
+                v-model="modelValue.privacy.value"
+            >
+          </label>
+        </div>
+      </div>
+      <slot>
+
+      </slot>
     </div>
   </div>
 </template>

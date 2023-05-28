@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ListSerializer
 from rest_framework import serializers
-from rest_framework.fields import ListField
 
 from slides_app.models import Presentation, Lead, Slide, Question, Answer
 
@@ -47,36 +46,31 @@ class SlideSerializer(ModelSerializer):
         ordering = ['ordering']
 
 
-class StringArrayField(ListField):
-    def to_representation(self, obj):
-        obj = super().to_representation(obj)
-        return ",".join([str(element) for element in obj])
-
-    def to_internal_value(self, data):
-        data = data[0].split(",")
-        return super().to_internal_value(data)
+class IdsSerializer(serializers.Serializer):
+    id = serializers.IntegerField(allow_null=False)
 
 
 class PresentationSerializer(ModelSerializer):
     user = UserSerializer()
-    slide_set = serializers.SerializerMethodField()
-    tags = StringArrayField()
+    slide_set = serializers.SerializerMethodField(method_name='get_slide_set')
+    favorite = serializers.SerializerMethodField(method_name='get_favorite_ids')
 
     class Meta:
         model = Presentation
-        fields = ['id', 'user', 'title', 'slide_set', 'topic', 'tags', 'description', 'privacy', 'url', 'date_created']
+        fields = ['id', 'user', 'favorite', 'title', 'slide_set', 'topic', 'description', 'privacy', 'date_created']
 
     def get_slide_set(self, instance):
         slides = instance.slide_set.all().order_by('ordering')
         return SlideSerializer(slides, many=True).data
 
+    def get_favorite_ids(self, instance):
+        return instance.favorite.values_list("id", flat=True)
+
 
 class CreatePresentationSerializer(ModelSerializer):
-    tags = StringArrayField(default=[], allow_empty=True)
-
     class Meta:
         model = Presentation
-        fields = ['title', 'topic', 'tags', 'privacy']
+        fields = ['title', 'topic', 'privacy']
 
 
 class LeadSerializer(ModelSerializer):
@@ -92,7 +86,7 @@ class AnswerSerializer(ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id', 'slides', 'answer_text']
+        fields = ['id', 'slides', 'answer_text', 'chosen_count']
 
     def get_slides(self, instance):
         slides = instance.slides.all().order_by('ordering')
@@ -111,4 +105,12 @@ class QuestionSerializer(ModelSerializer):
 class CreateUpdateAnswerSerializer(ModelSerializer):
     class Meta:
         model = Answer
-        fields = ['id', 'answer_text']
+        fields = ['id', 'answer_text', 'chosen_count']
+
+
+class QuestionInStatisticsSerializer(ModelSerializer):
+    answer_set = CreateUpdateAnswerSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Question
+        fields = ['id', 'question_text', 'answer_set']

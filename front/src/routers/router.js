@@ -9,6 +9,7 @@ import Converter from "@/views/Converter.vue";
 import EditPresentation from "@/views/EditPresentation.vue";
 import Interactivity from "@/views/Interactivity.vue";
 import Statistics from "@/views/Statistics.vue";
+import Embed from "@/views/Embed.vue";
 
 const routes = [
     {
@@ -55,6 +56,11 @@ const routes = [
         path: '/upload/',
         component: Converter,
         name: 'converter'
+    },
+    {
+        path: '/embed/:id/',
+        component: Embed,
+        name: 'embed'
     }
 ]
 

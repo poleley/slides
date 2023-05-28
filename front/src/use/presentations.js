@@ -50,6 +50,18 @@ export function usePresentations() {
         ).then((res) => console.log(res))
     }
 
+    const addToFavorite = async (id) => {
+        return await axios.patch(
+            `/api/v1/presentation/${id}/add_to_favorite/`
+        ).then((res) => console.log(res))
+    }
+
+    const removeFromFavorite = async (id) => {
+        return await axios.patch(
+            `/api/v1/presentation/${id}/remove_from_favorite/`
+        ).then((res) => console.log(res))
+    }
+
     const getStatistics = async (id) => {
         return await axios.get(`/api/v1/presentation/${id}/statistics`)
             .then((res) => {
@@ -68,6 +80,8 @@ export function usePresentations() {
         createPresentation,
         editPresentation,
         deletePresentation,
+        addToFavorite,
+        removeFromFavorite,
         getStatistics
     }
 }
