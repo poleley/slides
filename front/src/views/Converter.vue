@@ -9,18 +9,10 @@ import PresentationForm from "@/components/PresentationForm.vue";
 import router from "@/routers/router";
 
 const MAX_TITLE_LENGTH = 255
-const MAX_TAG_LENGTH = 100
 const MAX_FILE_SIZE = 5242880
 
 const required = v => !!v
 const MaxTitleLength = v => v.length <= MAX_TITLE_LENGTH
-const MaxTagLength = v => {
-  for (let t of v.split(',')) {
-    if (t.trim().length > MAX_TAG_LENGTH)
-      return false
-  }
-  return true
-}
 const isPdf = v => {
   if (v === '')
     return false
@@ -43,12 +35,8 @@ const {form} = useDefaultForm({
     validators: {required, MaxTitleLength}
   },
   privacy: {
-    value: 3,
+    value: "2",
     validators: {required}
-  },
-  tags: {
-    value: '',
-    validators: {MaxTagLength}
   },
   topic: {
     value: '',
@@ -85,14 +73,6 @@ const presentations = usePresentations()
 async function submit() {
   if (form.valid) {
     let formData = new FormData();
-    if (form.tags.value !== '') {
-      let formTags = []
-      for (let t of form.tags.value.split(',')) {
-        formTags.push(t.trim())
-      }
-      let tags = formTags.join(',')
-      formData.append('tags', tags)
-    }
     formData.append('file', form.file.value)
     formData.append('title', form.title.value)
     formData.append('topic', form.topic.value)
@@ -120,7 +100,6 @@ async function submit() {
           <presentation-form
           :model-value="form"
           :topic-options="topicOptions"
-          :max-tag-length="MAX_TAG_LENGTH"
           :max-title-length="MAX_TITLE_LENGTH"
           />
         </div>
