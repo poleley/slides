@@ -10,6 +10,7 @@ import EditPresentation from "@/views/EditPresentation.vue";
 import Interactivity from "@/views/Interactivity.vue";
 import Statistics from "@/views/Statistics.vue";
 import Embed from "@/views/Embed.vue";
+import Favorite from "@/views/Favorite.vue";
 
 const routes = [
     {
@@ -31,6 +32,11 @@ const routes = [
         path: '/library/',
         component: MyCollection,
         name: 'library'
+    },
+    {
+        path: '/favorite/',
+        component: Favorite,
+        name: 'favorite'
     },
     {
         path: '/presentation/:id/',

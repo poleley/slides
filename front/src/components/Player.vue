@@ -8,8 +8,11 @@
             }"
     >
     </i>
-    <div class="slide">
+    <div class="slide" @mouseover="isShowControls = true" @mouseleave="isShowControls = false">
       <img :src="imgSrc" alt="Слайд">
+      <div class="controls text-end" :class="{'d-none': !isShowControls && !isFullScreen || isFullScreen}">
+        <i class="bi bi-fullscreen" @click="fullScreen($event)"></i>
+      </div>
     </div>
     <i
         class="switch bi bi-caret-right-fill"
@@ -23,6 +26,8 @@
 </template>
 
 <script setup>
+
+import {ref} from "vue";
 
 defineProps({
   slideNum: {
@@ -43,7 +48,45 @@ defineProps({
   }
 })
 
-defineEmits(['next', 'prev'])
+const emit = defineEmits(['next', 'prev'])
+
+const isShowControls = ref(false)
+const isFullScreen = ref(false)
+
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'ArrowRight')
+    emit('next')
+  if (event.code === 'ArrowLeft')
+    emit('prev')
+})
+
+if (document.addEventListener)
+{
+  document.addEventListener('fullscreenchange', exitHandler, false);
+  document.addEventListener('mozfullscreenchange', exitHandler, false);
+  document.addEventListener('MSFullscreenChange', exitHandler, false);
+  document.addEventListener('webkitfullscreenchange', exitHandler, false);
+}
+
+function exitHandler()
+{
+  if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement)
+  {
+    isFullScreen.value = false
+  }
+}
+
+function fullScreen(event) {
+  const fullScreenElement = document.querySelector('.slide')
+  isFullScreen.value = true
+  if (event.target.requestFullscreen) {
+    fullScreenElement.requestFullscreen();
+  } else if (event.target.webkitrequestFullscreen) {
+    fullScreenElement.webkitRequestFullscreen();
+  } else if (event.target.mozRequestFullscreen) {
+    fullScreenElement.mozRequestFullScreen();
+  }
+}
 
 </script>
 
@@ -60,9 +103,41 @@ defineEmits(['next', 'prev'])
   width: 70%;
 }
 
+.slide {
+  position: relative;
+}
+
 img {
   width: 100%;
   max-width: 100%;
+}
+
+.controls {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 4px 8px;
+  z-index: 1;
+}
+
+.slideBottom {
+  position: absolute;
+  height: 30%;
+  background-color: transparent;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.bi-fullscreen {
+  color: #fff;
+  cursor: pointer;
+}
+
+.z-index-2 {
+  z-index: 2;
 }
 
 .switch {

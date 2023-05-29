@@ -6,8 +6,8 @@ export function usePresentations() {
     const userPresentations = ref([])
     const presentation = ref({})
 
-    const getPublicPresentations = async () => {
-        return await axios.get("/api/v1/presentation/")
+    const getPublicPresentations = async (params = {}) => {
+        return await axios.get("/api/v1/presentation/", {params: params})
             .then((res) => {
                 presentationsPublic.value = res.data
             })

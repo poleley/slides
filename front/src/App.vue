@@ -44,6 +44,7 @@ export default defineComponent({
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="/library">Моя коллекция</a></li>
+                <li><a class="dropdown-item" href="/favorite">Избранное</a></li>
                 <li><a class="dropdown-item" href="/upload">Загрузить презентацию</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="#" @click="userStore.logOut()">Выйти</a></li>

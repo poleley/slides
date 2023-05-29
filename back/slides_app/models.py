@@ -27,7 +27,7 @@ class Privacy(models.IntegerChoices):
 
 class Presentation(models.Model):
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE, related_name='user')
-    favorite = models.ManyToManyField(User, related_name='user_favorite')
+    favorite = models.ManyToManyField(User, related_name='favorite')
     title = models.CharField(null=False, blank=False, max_length=255)
     topic = models.IntegerField(choices=Topic.choices, null=False, blank=False)
     description = models.JSONField(null=False, blank=False)
