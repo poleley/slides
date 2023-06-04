@@ -156,34 +156,54 @@
         </div>
       </div>
     </div>
-    <div class="col col-6">
-      <div class="question d-flex justify-content-start align-items-center h-100">
-        <template v-if="isSlideHasQuestion">
-          <button class="button-submit my-button w-16">
-            <button
+    <div class="col col-6 d-flex justify-content-start align-items-center">
+      <div class="align-items-center" id="buttons-interactivity">
+        <div>
+          <template v-if="isSlideHasQuestion">
+            <button class="button-submit my-button w-16">
+              <button
+                  @click.prevent="showDialogQuestion"
+                  class="btn button-edit-question"
+              >
+                Редактировать вопрос
+              </button>
+              <button
+                  @click.prevent="deleteQuestion"
+                  class="btn button-delete-question"
+              >
+                <i class="bi bi-trash3-fill ui-tooltip">
+                  <ui-tooltip>Удалить вопрос</ui-tooltip>
+                </i>
+              </button>
+            </button>
+          </template>
+          <template v-else>
+            <ui-button
+                class="button-submit text-center w-16"
                 @click.prevent="showDialogQuestion"
-                class="btn button-edit-question"
+                :disabled="isLeadOn"
             >
-              Редактировать вопрос
-            </button>
-            <button
-                @click.prevent="deleteQuestion"
-                class="btn button-delete-question"
-            >
-              <i class="bi bi-trash3-fill ui-tooltip">
-                <ui-tooltip>Удалить вопрос</ui-tooltip>
-              </i>
-            </button>
-          </button>
-        </template>
-        <template v-else>
+              Добавить вопрос
+            </ui-button>
+          </template>
+        </div>
+        <div>
           <ui-button
               class="button-submit text-center w-16"
-              @click.prevent="showDialogQuestion"
+              v-if="!isLeadOn"
+              @click="$emit('leadOn', props.slide.id)"
+              :disabled="isSlideHasQuestion"
           >
-            Добавить вопрос
+            Добавить сбор контактов
           </ui-button>
-        </template>
+          <ui-button
+              class="button-submit text-center w-16"
+              v-else
+              @click="$emit('leadOff', props.slide.id)"
+          >
+            Отключить сбор контактов
+          </ui-button>
+        </div>
       </div>
     </div>
   </div>
@@ -196,7 +216,6 @@ import UiModal from "@/components/UI/UiModal.vue";
 import SlidesInAnswer from "@/components/SlidesInAnswer.vue";
 import {useQuestion} from "@/use/question";
 import UiTooltip from '@/components/UI/UiTooltip.vue'
-import {useDefaultForm} from "@/use/defaultForm";
 import {useAnswer} from "@/use/answer";
 import {useOneFieldForm} from "@/use/oneFieldForm";
 
@@ -208,8 +227,14 @@ const props = defineProps({
   slides: {
     type: Array,
     required: true
+  },
+  isLeadOn: {
+    type: Boolean,
+    default: false
   }
 })
+
+defineEmits(['leadOn', 'leadOff'])
 
 const maxLength = 255
 const required = v => !!v
@@ -428,6 +453,10 @@ function deleteQuestion() {
 
 .w-16 {
   width: 16rem;
+}
+
+#buttons-interactivity > div {
+  margin: 0.5rem;
 }
 
 .my-button {

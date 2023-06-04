@@ -7,15 +7,14 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from slides_app.models import Presentation, Lead, Slide, Question, Answer, Privacy
-from slides_app.serializers import UserSerializer, PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
-    CreateUserSerializer, QuestionSerializer, AnswerSerializer, CreateUpdateAnswerSerializer, SlideSerializer, \
-    QuestionInStatisticsSerializer
+from slides_app.serializers import PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
+    CreateUserSerializer, QuestionSerializer, AnswerSerializer, CreateUpdateAnswerSerializer, SlideSerializer
 from slides_app.utils import IsPresentationOwner, PdfConverter, NoCsrfSessionAuthentication, \
     IsQuestionOwner, IsAnswerOwner
 
@@ -39,7 +38,7 @@ class UserViewSet(ModelViewSet):
         user = get_object_or_404(User.objects.all(), email=request.data["email"])
         if user.check_password(request.data["password"]):
             login(request, user)
-            serializer = UserSerializer(user)
+            serializer = CreateUserSerializer(user)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(
             data={"detail: Wrong password."},
@@ -59,7 +58,7 @@ class PresentationViewSet(ModelViewSet):
     queryset = Presentation.objects.all()
     authentication_classes = [NoCsrfSessionAuthentication]
     permission_classes = [IsPresentationOwner]
-    parser_classes = [MultiPartParser]
+    parser_classes = [MultiPartParser, JSONParser]
 
     def get_permissions(self):
         permission_classes = super().get_permissions()
@@ -92,7 +91,7 @@ class PresentationViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        keys = ["topic", "user_id"]
+        keys = ["topic", "user_id", "favorite__id"]
         errors = {}
         for key in keys:
             if self.request.query_params.get(key) is not None:
@@ -107,7 +106,10 @@ class PresentationViewSet(ModelViewSet):
         if errors:
             raise serializers.ValidationError(errors)
 
-        if self.request.query_params.get("user_id") is None:
+        if (
+                self.request.query_params.get("user_id") is None or
+                self.request.query_params.get("favorite__id") is not None
+        ):
             queryset = queryset.filter(privacy=Privacy.PUBLIC)
             queryset = queryset.order_by("-description__views__total_views", "-date_created")
 
@@ -115,7 +117,7 @@ class PresentationViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         description = {
-            "lead": False,
+            "lead": {},
             "favorite": {"total_favorite": 0, "users_by_date": {}},
             "views": {"total_views": 0}
         }
@@ -132,6 +134,12 @@ class PresentationViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         description = json.loads(self.request.data["description"])
+        for slide_id in description["lead"]:
+            try:
+                Question.objects.get(slide_id=slide_id)
+                raise serializers.ValidationError({"detail": "Slide already has question"})
+            except Question.DoesNotExist:
+                pass
         serializer.save(description=description)
 
     def perform_destroy(self, instance):
@@ -185,13 +193,13 @@ class PresentationViewSet(ModelViewSet):
             "favorite": favorite_by_date,
             "first_slide": SlideSerializer(slides[0]).data,
             "leads": [],
-            "questions": {}
+            "questions": []
         }
 
         for slide in slides:
             try:
-                question = QuestionInStatisticsSerializer(slide.question_id).data
-                data["questions"][slide.id] = question
+                question = QuestionSerializer(slide.question_id).data
+                data["questions"].append(question)
             except Question.DoesNotExist:
                 pass
             if presentation.description["lead"]:
@@ -311,10 +319,21 @@ class LeadViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         slide = get_object_or_404(Slide.objects.all(), id=self.kwargs["slide_id"])
-        if slide.presentation.privacy == Privacy.PRIVATE or not slide.presentation.description["lead"]:
-            return Response({"detail": "Presentation is not public or leads not enabled"}, status.HTTP_403_FORBIDDEN)
+        presentation = slide.presentation
+        if presentation.privacy == Privacy.PRIVATE or not presentation.description["lead"]:
+            raise serializers.ValidationError(
+                {"detail": "Presentation is not public or leads not enabled"}
+            )
         if self.request.user.is_authenticated:
             user = self.request.user
+            if Lead.objects.filter(slide__presentation_id=presentation.id, email=user.email):
+                raise serializers.ValidationError(
+                    {"detail": "You have already sent your contacts"}
+                )
             serializer.save(slide=slide, email=user.email, last_name=user.last_name, first_name=user.first_name)
         else:
+            if Lead.objects.filter(slide__presentation_id=presentation.id, email=self.request.data["email"]):
+                raise serializers.ValidationError(
+                    {"detail": "You have already sent your contacts"}
+                )
             serializer.save(slide=slide)

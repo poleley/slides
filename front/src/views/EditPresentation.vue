@@ -30,9 +30,6 @@ const {form} = useDefaultForm({
     value: '',
     validators: {required}
   },
-  lead: {
-    value: ''
-  }
 })
 
 const checked = ref([])
@@ -48,8 +45,6 @@ presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'tru
         form.title.value = presentations.presentation.value.title;
         form.privacy.value = presentations.presentation.value.privacy;
         form.topic.value = presentations.presentation.value.topic;
-        form.lead.value = String(presentations.presentation.value.description.lead);
-        description.value = presentations.presentation.value.description;
         checked.value = [1 === form.privacy.value, 2 === form.privacy.value];
       }
     })
@@ -60,10 +55,6 @@ watch(() => form.privacy.value, () => {
 
 watch(() => form.topic.value, () => {
   form.topic.value = Number(form.topic.value)
-})
-
-watch(() => form.lead.value, () => {
-  description.value.lead = form.lead.value === "true"
 })
 
 const topicOptions = ref([
@@ -88,7 +79,6 @@ function edit() {
     formData.append('title', form.title.value)
     formData.append('topic', form.topic.value)
     formData.append('privacy', form.privacy.value)
-    formData.append('description', JSON.stringify(description.value))
     presentations.editPresentation(presentations.presentation.value.id, formData).then(() => {
       router.replace({name: 'library'})
     })

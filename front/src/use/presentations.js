@@ -5,6 +5,7 @@ export function usePresentations() {
     const presentationsPublic = ref([])
     const userPresentations = ref([])
     const presentation = ref({})
+    const errCode = ref(0)
 
     const getPublicPresentations = async (params = {}) => {
         return await axios.get("/api/v1/presentation/", {params: params})
@@ -27,7 +28,7 @@ export function usePresentations() {
             .then((res) => {
                 presentation.value = res.data
             })
-            .catch((e) => console.log(e))
+            .catch((e) => errCode.value = e.response.status)
     }
 
     const createPresentation = async (data) => {
@@ -74,6 +75,7 @@ export function usePresentations() {
         presentationsPublic,
         userPresentations,
         presentation,
+        errCode,
         getPublicPresentations,
         getUserPresentations,
         getPresentation,

@@ -27,6 +27,14 @@
             <canvas id="graphic"></canvas>
           </div>
         </div>
+        <div class="row row-graphic-questions">
+          <div class="row-title">
+            Статистика по ответам пользователей на вопросы
+          </div>
+          <div v-for="(question, index) in presentations.presentation.value.questions">
+            <canvas class="graphic-question" :id="'graphic-question-' + index"></canvas>
+          </div>
+        </div>
 
         <div v-if="isLeads" class="row row-leads">
           <div class="row-title">Лиды</div>
@@ -105,8 +113,48 @@ presentations.getStatistics(router.currentRoute.value.params.id).then(
           {
             type: 'line',
             data: data,
-            options: {maintainAspectRatio: false}
+            options: {
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
           })
+      const questionGraphics = document.querySelectorAll('canvas.graphic-question')
+      for (let [index, questionGraphic] of questionGraphics.entries()) {
+        let answersChosen = []
+        let labels = []
+        for (let answer of presentations.presentation.value.questions[index].answer_set) {
+          labels.push(answer.answer_text)
+          answersChosen.push(answer.chosen_count)
+        }
+        const questionGraphicData = {
+          labels: labels,
+          datasets: [{
+            label: presentations.presentation.value.questions[index].question_text,
+            data: answersChosen,
+            backgroundColor: ['rgba(171,124,54,0.4)'],
+            borderWidth: 1
+          }]
+        };
+        new Chart(
+            questionGraphic,
+            {
+              type: 'bar',
+              data: questionGraphicData,
+              options: {
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            }
+        )
+      }
     }
 )
 
@@ -154,7 +202,7 @@ img {
   height: 20rem;
 }
 
-.row-graphic, .row-leads {
+.row-graphic, .row-leads, .row-graphic-questions {
   padding: 1rem;
   margin-top: 1rem;
   background-color: white;

@@ -5,6 +5,9 @@
           v-for="(slide, index) in slides.slice(0, slides.length - 1)"
           :slide="slide"
           :slides="slides"
+          :is-lead-on="slide.id in presentations.presentation.value.description.lead"
+          @lead-on="SlideLeadOn"
+          @lead-off="SlideLeadOff"
       />
     </div>
   </div>
@@ -31,6 +34,24 @@ presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'tru
         router.replace({name: 'all-presentations'})
       slides.value = presentations.presentation.value.slide_set
     })
+
+function SlideLeadOn(slideId) {
+  let description = ref(presentations.presentation.value.description)
+  description.value.lead[String(slideId)] = true
+  presentations.editPresentation(
+      presentations.presentation.value.id,
+      {"description": JSON.stringify(description.value)}
+  )
+}
+
+function SlideLeadOff(slideId) {
+  let description = ref(presentations.presentation.value.description)
+  delete description.value.lead[String(slideId)]
+  presentations.editPresentation(
+      presentations.presentation.value.id,
+      {"description": JSON.stringify(description.value)}
+  )
+}
 
 </script>
 

@@ -94,23 +94,19 @@ class AnswerSerializer(ModelSerializer):
 
 
 class QuestionSerializer(ModelSerializer):
-    answer_set = AnswerSerializer(read_only=True, many=True)
+    answer_set = serializers.SerializerMethodField()
     slide_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Question
         fields = ['id', 'slide_id', 'question_text', 'answer_set']
 
+    def get_answer_set(self, instance):
+        answers = instance.answer_set.all().order_by('id')
+        return AnswerSerializer(answers, many=True, read_only=True).data
+
 
 class CreateUpdateAnswerSerializer(ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id', 'answer_text', 'chosen_count']
-
-
-class QuestionInStatisticsSerializer(ModelSerializer):
-    answer_set = CreateUpdateAnswerSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Question
-        fields = ['id', 'question_text', 'answer_set']
