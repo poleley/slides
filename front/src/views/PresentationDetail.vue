@@ -41,7 +41,7 @@
       v-model="isShowModal"
   >
     <template v-slot:title>
-      Хотите узнать больше?
+      Запросить консультацию
     </template>
     <template v-slot:body>
       <div class="help-text">
@@ -140,92 +140,100 @@
 
   <div class="presentation-outer">
     <div class="presentation-inner">
-      <div class="title-date">
-        <div class="w-75">
-        <div class="title">
-          {{ presentations.presentation.value.title }}
+      <template v-if="presentations.errCode.value === 404">
+        <h2 class="err-title">Презентации не существует</h2>
+      </template>
+      <template v-else-if="presentations.errCode.value === 403">
+        <h2 class="err-title">Презентация не является публичной</h2>
+      </template>
+      <template v-else>
+        <div class="title-date">
+          <div class="w-75">
+            <div class="title">
+              {{ presentations.presentation.value.title }}
+            </div>
+          </div>
+          <div class="date">
+            {{ dateCreated }}
+          </div>
         </div>
-        </div>
-        <div class="date">
-          {{ dateCreated }}
-        </div>
-      </div>
-      <player
-          :img-src="imgSrc"
-          :slide-num="slideNum"
-          :is-last="isLast"
-          @next="nextSlide"
-          @prev="prevSlide"
-      />
-      <div class="presentation-progress">
-        <div
-            v-for="(slide, index) in slides"
-            class="progress-item"
-            :class="{
+        <player
+            :img-src="imgSrc"
+            :slide-num="slideNum"
+            :is-last="isLast"
+            @next="nextSlide"
+            @prev="prevSlide"
+        />
+        <div class="presentation-progress">
+          <div
+              v-for="(slide, index) in slides"
+              class="progress-item"
+              :class="{
               'current-progress-item': index === slideNum
             }"
-        >
-        </div>
-      </div>
-      <div class="info justify-content-between">
-        <div class="stats">
-          <div class="total-views">
-            <i class="bi bi-eye"></i>{{ totalViews }}
-          </div>
-          <div class="total-favorite">
-            <i class="bi bi-star"></i>{{ totalFavorite }}
+          >
           </div>
         </div>
-        <div v-if="isUserOwner" class="buttons">
-          <router-link
-              :to="{name: 'statistics', params: {id: router.currentRoute.value.params.id}}"
-              class="ui-link to-item"
-          >
-            <i class="bi bi-bar-chart-line-fill ui-tooltip">
-              <ui-tooltip>Статистика</ui-tooltip>
+        <div class="info justify-content-between">
+          <div class="stats">
+            <div class="total-views">
+              <i class="bi bi-eye"></i>{{ totalViews }}
+            </div>
+            <div class="total-favorite">
+              <i class="bi bi-star"></i>{{ totalFavorite }}
+            </div>
+          </div>
+          <div v-if="isUserOwner" class="buttons">
+            <router-link
+                :to="{name: 'statistics', params: {id: router.currentRoute.value.params.id}}"
+                class="ui-link to-item"
+            >
+              <i class="bi bi-bar-chart-line-fill ui-tooltip">
+                <ui-tooltip>Статистика</ui-tooltip>
+              </i>
+            </router-link>
+            <router-link
+                :to="{name: 'presentation-edit', params: {id: router.currentRoute.value.params.id}}"
+                class="ui-link to-item"
+            >
+              <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value.id)">
+                <ui-tooltip>Редактировать</ui-tooltip>
+              </i>
+            </router-link>
+            <i class="bi bi-trash3-fill ui-tooltip" @click="deletePresentation(presentations.presentation.value.id)">
+              <ui-tooltip>Удалить</ui-tooltip>
             </i>
-          </router-link>
-          <router-link
-              :to="{name: 'presentation-edit', params: {id: router.currentRoute.value.params.id}}"
-              class="ui-link to-item"
-          >
-            <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value.id)">
-              <ui-tooltip>Редактировать</ui-tooltip>
-            </i>
-          </router-link>
-          <i class="bi bi-trash3-fill ui-tooltip" @click="deletePresentation(presentations.presentation.value.id)">
-            <ui-tooltip>Удалить</ui-tooltip>
-          </i>
+          </div>
+          <div v-else-if="isLead">
+            <ui-button
+                class="button-submit"
+                @click="leadStart"
+            >
+              Оставить контакты
+            </ui-button>
+          </div>
         </div>
-        <div v-else-if="isLead">
-          <ui-button
-              class="button-submit"
-              @click="leadStart"
-          >
-            Оставить контакты
-          </ui-button>
-        </div>
-      </div>
-      <div class="info">
+        <div class="info">
         <span class="topic">
           {{ topics[presentations.presentation.value.topic] }}
         </span>
-        <i
-            class="bi bi-share-fill ui-tooltip title-icon"
-            @click="isShowShare = true"
-            v-if="presentations.presentation.value.privacy === 1"
-        >
-          <ui-tooltip>Поделиться</ui-tooltip>
-        </i>
-        <div class="star" @click="toggleFavorite">
-          <i class="bi bi-star ui-tooltip title-icon" v-if="!isFavorite">
-            <ui-tooltip>В избранное</ui-tooltip>
+          <i
+              class="bi bi-share-fill ui-tooltip title-icon"
+              @click="isShowShare = true"
+              v-if="presentations.presentation.value.privacy === 1"
+          >
+            <ui-tooltip>Поделиться</ui-tooltip>
           </i>
-          <i class="bi bi-star-fill ui-tooltip title-icon" v-else>
-            <ui-tooltip>Удалить из избранного</ui-tooltip>
-          </i>
+          <div class="star" @click="toggleFavorite">
+            <i class="bi bi-star ui-tooltip title-icon" v-if="!isFavorite">
+              <ui-tooltip>В избранное</ui-tooltip>
+            </i>
+            <i class="bi bi-star-fill ui-tooltip title-icon" v-else>
+              <ui-tooltip>Удалить из избранного</ui-tooltip>
+            </i>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -306,11 +314,21 @@ const leadForm = useDefaultForm({
 }).form
 
 watch(slideNum, () => {
+  isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value.description.lead
   if (presentations.presentation.value.slide_set[slideNum.value].question_id) {
     questions.getQuestion(presentations.presentation.value.slide_set[slideNum.value].question_id).then(() => {
       isShowQuestion.value = true
     })
   }
+})
+
+watch(isShowModal, () => {
+  leadForm.firstName.value = ''
+  leadForm.firstName.touched = false
+  leadForm.lastName.value = ''
+  leadForm.lastName.touched = false
+  leadForm.email.value = ''
+  leadForm.email.touched = false
 })
 
 watch(share, () => {
@@ -336,9 +354,10 @@ function deletePresentation(id) {
 
 presentations.getPresentation(router.currentRoute.value.params.id)
     .then(() => {
-      isLead.value = presentations.presentation.value.description.lead
+      isLead.value = Object.keys(presentations.presentation.value.description.lead).length !== 0
       slides.value = presentations.presentation.value.slide_set
       slideNum.value = 0
+      isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value.description.lead
       currentSlideId.value = slides.value[slideNum.value].id;
       imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
       isLast.value = slideNum.value === slides.value.length - 1;
@@ -644,6 +663,10 @@ textarea.input-share {
   color: white;
   border-radius: 16px;
   padding: 4px 8px;
+}
+
+.err-title {
+  color: #81673e;
 }
 
 </style>
