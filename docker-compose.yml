@@ -14,7 +14,7 @@ services:
       - slides:/backend/slides_app/slides
     command: bash -c "
       python manage.py migrate
-      && python manage.py runserver 0.0.0.0:8000
+      && gunicorn slides.wsgi:application --bind 0.0.0.0:8000
       "
     environment:
       POSTGRES_PASSWORD: postgres
