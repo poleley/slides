@@ -133,14 +133,16 @@ class PresentationViewSet(ModelViewSet):
             Slide.objects.create(presentation_id=presentation.id, name=img_name, ordering=index)
 
     def perform_update(self, serializer):
-        description = json.loads(self.request.data["description"])
-        for slide_id in description["lead"]:
-            try:
-                Question.objects.get(slide_id=slide_id)
-                raise serializers.ValidationError({"detail": "Slide already has question"})
-            except Question.DoesNotExist:
-                pass
-        serializer.save(description=description)
+        if "description" in self.request.data:
+            description = json.loads(self.request.data["description"])
+            for slide_id in description["lead"]:
+                try:
+                    Question.objects.get(slide_id=slide_id)
+                    raise serializers.ValidationError({"detail": "Slide already has question"})
+                except Question.DoesNotExist:
+                    pass
+            serializer.save(description=description)
+        serializer.save()
 
     def perform_destroy(self, instance):
         slides = Slide.objects.filter(presentation_id=instance.id)
