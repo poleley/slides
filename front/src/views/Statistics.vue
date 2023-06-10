@@ -27,7 +27,7 @@
             <canvas id="graphic"></canvas>
           </div>
         </div>
-        <div class="row row-graphic-questions">
+        <div v-if="isQuestions" class="row row-graphic-questions">
           <div class="row-title">
             Статистика по ответам пользователей на вопросы
           </div>
@@ -79,12 +79,14 @@ const viewsValues = ref([])
 const favoriteValues = ref([])
 const imgSrc = ref('')
 const isLeads = ref(false)
+const isQuestions = ref(true)
 
 presentations.getStatistics(router.currentRoute.value.params.id).then(
     () => {
       if (userStore.user.id !== presentations.presentation.value.user_id)
         router.replace({name: 'all-presentations'})
       isLeads.value = presentations.presentation.value.leads.length !== 0
+      isQuestions.value = presentations.presentation.value.questions.length !== 0
       imgSrc.value = `/media/${presentations.presentation.value.first_slide.name}`
       labels.value = Object.keys(presentations.presentation.value.views)
       viewsValues.value = Object.values(presentations.presentation.value.views)
