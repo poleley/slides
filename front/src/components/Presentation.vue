@@ -101,9 +101,6 @@ function toggleFavorite() {
                 <ui-tooltip>Статистика</ui-tooltip>
               </i>
               </router-link>
-              <i class="bi bi-share-fill ui-tooltip">
-                <ui-tooltip>Поделиться</ui-tooltip>
-              </i>
               <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentation.id)">
                 <ui-tooltip>Редактировать</ui-tooltip>
               </i>
