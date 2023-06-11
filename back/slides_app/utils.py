@@ -46,7 +46,8 @@ class PdfConverter(ABC):
         slides = []
         pdf = fitz.open(stream=file.read())
         for page in pdf.pages():
-            pix = page.get_pixmap()
+            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+            pix.set_dpi(300, 300)
             data = pix.pil_tobytes("PNG")
             hash = hashlib.sha256(data).hexdigest()
             image_name = f"{hash}.png"
