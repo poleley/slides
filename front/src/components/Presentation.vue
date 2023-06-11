@@ -59,8 +59,8 @@ function toggleFavorite() {
         <template v-if="currentRoute !== '/library'">
           <div class="row-1">
             <div class="title">
-              <template v-if="presentation.title.length > 21">
-                {{ presentation.title.slice(0, 22) }}...
+              <template v-if="presentation.title.length > 18">
+                {{ presentation.title.slice(0, 18) }}...
               </template>
               <template v-else>
                 {{ presentation.title }}
@@ -83,8 +83,8 @@ function toggleFavorite() {
         <template v-else>
           <div class="row-1">
             <div class="title">
-              <template v-if="presentation.title.length > 21">
-                {{ presentation.title.slice(0, 21) }}...
+              <template v-if="presentation.title.length > 18">
+                {{ presentation.title.slice(0, 18) }}...
               </template>
               <template v-else>
                 {{ presentation.title }}
