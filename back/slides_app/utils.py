@@ -5,6 +5,8 @@ from rest_framework.authentication import SessionAuthentication
 
 from rest_framework.permissions import BasePermission
 
+from slides_app.models import Privacy
+
 
 class IsPresentationOwner(BasePermission):
     def has_permission(self, request, view):
@@ -26,9 +28,12 @@ class IsQuestionOwner(BasePermission):
         )
 
 
-class IsAnswerOwner(BasePermission):
+class IsAnswerOwnerOrAnswerPublic(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.question.slide.presentation.user == request.user
+        return (
+                obj.question.slide.presentation.user == request.user or
+                obj.question.slide.presentation.privacy == Privacy.PUBLIC
+        )
 
 
 class NoCsrfSessionAuthentication(SessionAuthentication):

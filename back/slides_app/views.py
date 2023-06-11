@@ -16,7 +16,7 @@ from slides_app.models import Presentation, Lead, Slide, Question, Answer, Priva
 from slides_app.serializers import PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
     CreateUserSerializer, QuestionSerializer, AnswerSerializer, CreateUpdateAnswerSerializer, SlideSerializer
 from slides_app.utils import IsPresentationOwner, PdfConverter, NoCsrfSessionAuthentication, \
-    IsQuestionOwner, IsAnswerOwner
+    IsQuestionOwner, IsAnswerOwnerOrAnswerPublic
 
 
 class UserViewSet(ModelViewSet):
@@ -253,7 +253,7 @@ class QuestionViewSet(ModelViewSet):
 
 class AnswerViewSet(ModelViewSet):
     authentication_classes = [NoCsrfSessionAuthentication]
-    permission_classes = [IsAnswerOwner & IsAuthenticated]
+    permission_classes = [IsAnswerOwnerOrAnswerPublic & IsAuthenticated]
     serializer_class = AnswerSerializer
     queryset = Answer.objects.all()
     lookup_url_kwarg = "answer_id"
