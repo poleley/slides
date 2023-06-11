@@ -40,7 +40,7 @@ function SlideLeadOn(slideId) {
   description.value.lead[String(slideId)] = true
   presentations.editPresentation(
       presentations.presentation.value.id,
-      {"description": JSON.stringify(description.value)}
+      {"description": description.value}
   )
 }
 
@@ -49,7 +49,7 @@ function SlideLeadOff(slideId) {
   delete description.value.lead[String(slideId)]
   presentations.editPresentation(
       presentations.presentation.value.id,
-      {"description": JSON.stringify(description.value)}
+      {"description": description.value}
   )
 }
 

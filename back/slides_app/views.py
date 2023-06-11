@@ -134,7 +134,7 @@ class PresentationViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         if "description" in self.request.data:
-            description = json.loads(self.request.data["description"])
+            description = self.request.data["description"]
             for slide_id in description["lead"]:
                 try:
                     Question.objects.get(slide_id=slide_id)
@@ -142,7 +142,8 @@ class PresentationViewSet(ModelViewSet):
                 except Question.DoesNotExist:
                     pass
             serializer.save(description=description)
-        serializer.save()
+        else:
+            serializer.save()
 
     def perform_destroy(self, instance):
         slides = Slide.objects.filter(presentation_id=instance.id)
