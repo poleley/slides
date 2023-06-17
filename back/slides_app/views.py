@@ -29,6 +29,16 @@ class UserViewSet(ModelViewSet):
                 status=status.HTTP_200_OK,
                 data={"detail: User already authenticated."}
             )
+        if len(User.objects.filter(email=request.data["email"])) != 0:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"email": "User with this email already exists"}
+            )
+        if len(User.objects.filter(username=request.data["username"])) != 0:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"username": "User with this username already exists"}
+            )
         res = super().create(request)
         user = User.objects.get(email=request.data["email"])
         login(request, user)
