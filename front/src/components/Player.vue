@@ -9,7 +9,7 @@
     >
     </i>
     <div class="slide" @mouseover="isShowControls = true" @mouseleave="isShowControls = false">
-      <img :src="imgSrc" alt="Слайд">
+      <img :src="imgSrc" alt="Слайд" :class="{'img': !isFullScreen, 'h-100': isFullScreen}">
       <div class="controls text-end" :class="{'d-none': !isShowControls && !isFullScreen || isFullScreen}">
         <i class="bi bi-fullscreen" @click="fullScreen($event)"></i>
       </div>
@@ -107,7 +107,7 @@ function fullScreen(event) {
   position: relative;
 }
 
-img {
+.img {
   width: 100%;
   max-width: 100%;
 }
@@ -122,22 +122,9 @@ img {
   z-index: 1;
 }
 
-.slideBottom {
-  position: absolute;
-  height: 30%;
-  background-color: transparent;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-}
-
 .bi-fullscreen {
   color: #fff;
   cursor: pointer;
-}
-
-.z-index-2 {
-  z-index: 2;
 }
 
 .switch {

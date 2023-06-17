@@ -210,7 +210,7 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import UiButton from "@/components/UI/UiButton.vue";
 import UiModal from "@/components/UI/UiModal.vue";
 import SlidesInAnswer from "@/components/SlidesInAnswer.vue";
@@ -292,9 +292,20 @@ const isShowDialogQuestion = ref(false)
 const isShowDialogAnswer = ref(false)
 const isShowDialogAnswerEdit = ref(false)
 
-const showDialogQuestion = () => isShowDialogQuestion.value = true
-const showDialogAnswer = () => isShowDialogAnswer.value = true
+const showDialogQuestion = () => {
+  isShowDialogQuestion.value = true
+}
+const showDialogAnswer = () => {
+  isShowDialogAnswer.value = true
+  formAnswer.answerText.value = ""
+}
 
+watch(isShowDialogQuestion, () => {
+  if (!isShowDialogQuestion.value && !isSlideHasQuestion.value) {
+    formQuestion.questionText.value = ""
+    answers.value = []
+  }
+})
 
 function createAnswer() {
   if (formAnswer.answerText.valid && slidesIds.value.length !== 0) {
@@ -445,6 +456,8 @@ function deleteAnswer(answerToDelete) {
 function deleteQuestion() {
   question.deleteQuestion(question.question.value.id)
   isSlideHasQuestion.value = false
+  formQuestion.questionText.value = ""
+  answers.value = []
 }
 
 </script>
