@@ -25,7 +25,7 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'updateFavorite']);
 
 const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
-const currentRoute = Router.currentRoute.value.path
+const currentRoute = Router.currentRoute.value.name
 
 function presentationDetail(id) {
   router.replace({path: `/presentation/${id}`})
@@ -56,7 +56,7 @@ function toggleFavorite() {
         <img class="img-preview" alt="Превью" :src="imgSrc">
       </div>
       <div class="info">
-        <template v-if="currentRoute !== '/library'">
+        <template v-if="currentRoute !== 'library'">
           <div class="row-1">
             <div class="title">
               <template v-if="presentation.title.length > 18">

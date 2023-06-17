@@ -11,9 +11,7 @@ presentations.getUserPresentations(userStore.user.id);
 
 const updatePresentations = (deletedPresentation) => {
   presentations.deletePresentation(deletedPresentation.id).then(() => {
-    presentations.userPresentations.value = presentations.userPresentations.value.filter(
-        presentation => presentation.id !== deletedPresentation.id
-    )
+    presentations.getUserPresentations(userStore.user.id);
   })
 }
 
