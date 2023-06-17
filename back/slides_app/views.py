@@ -15,7 +15,7 @@ from rest_framework.viewsets import ModelViewSet
 from slides_app.models import Presentation, Lead, Slide, Question, Answer, Privacy
 from slides_app.serializers import PresentationSerializer, LeadSerializer, CreatePresentationSerializer, \
     CreateUserSerializer, QuestionSerializer, AnswerSerializer, CreateUpdateAnswerSerializer, SlideSerializer
-from slides_app.utils import IsPresentationOwner, PdfConverter, NoCsrfSessionAuthentication, \
+from slides_app.utils import IsPresentationOwnerOrPublic, PdfConverter, NoCsrfSessionAuthentication, \
     IsQuestionOwner, IsAnswerOwnerOrAnswerPublic
 
 
@@ -57,7 +57,7 @@ class PresentationViewSet(ModelViewSet):
     serializer_class = PresentationSerializer
     queryset = Presentation.objects.all()
     authentication_classes = [NoCsrfSessionAuthentication]
-    permission_classes = [IsPresentationOwner]
+    permission_classes = [IsPresentationOwnerOrPublic]
     parser_classes = [MultiPartParser, JSONParser]
 
     def get_permissions(self):
