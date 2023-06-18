@@ -16,7 +16,8 @@ class IsPresentationOwnerOrPublic(BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
-        return obj.privacy == Privacy.PUBLIC and view.action == "retrieve" or obj.user == request.user
+        actions_allowed_to_all = ["add_to_favorite", "remove_from_favorite", "retrieve"]
+        return obj.privacy == Privacy.PUBLIC and view.action in actions_allowed_to_all or obj.user == request.user
 
 
 class IsQuestionOwner(BasePermission):

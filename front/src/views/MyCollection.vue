@@ -22,6 +22,7 @@ const updatePresentations = (deletedPresentation) => {
     <div class="row">
       <presentation
           v-for="presentation in presentations.userPresentations.value"
+          :key="presentation.id"
           :presentation="presentation"
           @delete="updatePresentations"
       />
