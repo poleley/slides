@@ -315,7 +315,7 @@ const leadForm = useDefaultForm({
 
 watch(slideNum, () => {
   isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value.description.lead
-  if (presentations.presentation.value.slide_set[slideNum.value].question_id) {
+  if (slides.value[slideNum.value].question_id) {
     questions.getQuestion(presentations.presentation.value.slide_set[slideNum.value].question_id).then(() => {
       isShowQuestion.value = true
     })
