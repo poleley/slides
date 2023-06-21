@@ -57,6 +57,7 @@ const props = defineProps({
   border-radius: 8px;
   min-height: 50px;
   min-width: 26rem;
+  max-width: 28rem;
   padding: 1.5rem;
   border: 1px solid rgba(178, 154, 113, 0.56);
 }
