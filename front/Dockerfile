@@ -13,6 +13,5 @@ RUN  apt-get update \
   && apt-get install -y wget \
   && rm -rf /var/lib/apt/lists/*
 RUN rm -rf /usr/share/nginx/html/*
-COPY /etc/letsencrypt/live/i-present.ru/fullchain.pem /etc/letsencrypt/live/i-present.ru/privkey.pem /var/cert/
 COPY --from=build /app/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
