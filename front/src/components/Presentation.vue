@@ -52,7 +52,7 @@ function toggleFavorite() {
 <template>
   <div class="col-4">
     <div class="presentation">
-      <div class="preview" @dblclick="presentationDetail(presentation.id)">
+      <div class="preview" @click="presentationDetail(presentation.id)">
         <img class="img-preview" alt="Превью" :src="imgSrc">
       </div>
       <div class="info">
