@@ -16,7 +16,7 @@
 
 <script setup>
 
-import Player from "@/components/Player.vue";
+import Player from "@/components/PresentationPlayer.vue";
 import {useUserStore} from "@/stores";
 import {usePresentations} from "@/use/presentations";
 import {useRouter} from "vue-router";

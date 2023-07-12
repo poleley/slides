@@ -1,27 +1,22 @@
-<script>
-
-import {defineComponent} from "vue";
+<script setup>
 import {useUserStore} from "@/stores";
 import {useRouter} from "vue-router";
 
-export default defineComponent({
-  name: 'app',
-  setup() {
-    const userStore = useUserStore();
-    const router = useRouter()
-    return {userStore, router}
-  }
-})
+const userStore = useUserStore();
+const router = useRouter()
 
 </script>
 
 <template>
   <nav v-if="router.currentRoute.value.name !== 'embed'" class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+          class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+      <div id="navbarNav" class="collapse navbar-collapse justify-content-between">
         <ul class="navbar-nav">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/">Галерея презентаций</a>
@@ -39,14 +34,17 @@ export default defineComponent({
               </li>
             </template>
             <li v-else class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                 aria-expanded="false">
                 {{ userStore.user.lastName }} {{ userStore.user.firstName }}
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="/library">Моя коллекция</a></li>
                 <li><a class="dropdown-item" href="/favorite">Избранное</a></li>
                 <li><a class="dropdown-item" href="/upload">Загрузить презентацию</a></li>
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
                 <li><a class="dropdown-item" href="#" @click="userStore.logOut()">Выйти</a></li>
               </ul>
             </li>

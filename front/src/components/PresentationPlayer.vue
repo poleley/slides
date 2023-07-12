@@ -1,30 +1,3 @@
-<template>
-  <div class="slides" :class="{'width-70': !isEmbed}">
-    <i
-        class="switch bi bi-caret-left-fill"
-        @click="$emit('prev')"
-        :class="{
-          'disabled': slideNum === 0
-            }"
-    >
-    </i>
-    <div class="slide" @mouseover="isShowControls = true" @mouseleave="isShowControls = false">
-      <img :src="imgSrc" alt="Слайд" :class="{'img': !isFullScreen, 'h-100': isFullScreen}">
-      <div class="controls text-end" :class="{'d-none': !isShowControls && !isFullScreen || isFullScreen}">
-        <i class="bi bi-fullscreen" @click="fullScreen($event)"></i>
-      </div>
-    </div>
-    <i
-        class="switch bi bi-caret-right-fill"
-        @click="$emit('next')"
-        :class="{
-          'disabled': isLast
-            }"
-    >
-    </i>
-  </div>
-</template>
-
 <script setup>
 
 import {ref} from "vue";
@@ -90,7 +63,34 @@ function fullScreen(event) {
 
 </script>
 
-<style scoped>
+<template>
+  <div class="slides" :class="{'width-70': !isEmbed}">
+    <i
+        class="switch bi bi-caret-left-fill"
+        @click="$emit('prev')"
+        :class="{
+          'disabled': slideNum === 0
+            }"
+    >
+    </i>
+    <div class="slide" @mouseover="isShowControls = true" @mouseleave="isShowControls = false">
+      <img :src="imgSrc" alt="Слайд" :class="{'img': !isFullScreen, 'h-100': isFullScreen}">
+      <div class="controls text-end" :class="{'d-none': !isShowControls && !isFullScreen || isFullScreen}">
+        <i class="bi bi-fullscreen" @click="fullScreen($event)"></i>
+      </div>
+    </div>
+    <i
+        class="switch bi bi-caret-right-fill"
+        @click="$emit('next')"
+        :class="{
+          'disabled': isLast
+            }"
+    >
+    </i>
+  </div>
+</template>
+
+<style module>
 .slides {
   display: flex;
   align-items: center;

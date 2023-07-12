@@ -272,7 +272,7 @@ import {useLead} from "@/use/leads";
 import {useQuestion} from "@/use/question";
 import Question from "@/components/UI/Question.vue";
 import {useRouter} from "vue-router";
-import Player from "@/components/Player.vue";
+import Player from "@/components/PresentationPlayer.vue";
 import {useAnswer} from "@/use/answer";
 
 const presentations = usePresentations();
