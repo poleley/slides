@@ -4,9 +4,14 @@ import {defineProps, ref, watch} from 'vue'
 
 defineProps({
   modelValue: {
-    type: Object
+    type: Object,
+    default() {
+      return {}
+    }
   },
 })
+
+defineEmits(['update:modelValue'])
 
 var fileName = ref('')
 
@@ -52,8 +57,7 @@ watch(() => fileName.value, () => {
         class="input-file"
         accept=".pdf"
         @input="
-        modelValue.value = $event.target.files[0];
-        modelValue.touched = true;
+        $emit('update:modelValue', $event.target.files[0]);
         fileName = $event.target.files[0].name;
 
 "/>

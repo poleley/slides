@@ -1,13 +1,15 @@
 <script setup>
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: Boolean,
     default: false
   },
   isOthersModal: {
     type: Array,
-    default: [false]
+    default() {
+      return [false]
+    }
   },
   is70rem: {
     type: Boolean,
@@ -15,12 +17,16 @@ const props = defineProps({
   }
 })
 
+defineEmits(['update:modelValue'])
+
 </script>
 
 <template>
-  <div class="dialog" v-if="modelValue && !isOthersModal.includes(true)" @click="$emit('update:modelValue', false)">
-    <div @click.stop class="dialog-body"
-         :class="{'width-70-rem': is70rem}"
+  <div v-if="modelValue && !isOthersModal.includes(true)" class="dialog" @click="$emit('update:modelValue', false)">
+    <div
+        :class="{'width-70-rem': is70rem}"
+        class="dialog-body"
+        @click.stop
     >
       <div class="header d-flex justify-content-between align-items-center">
         <div class="my-modal-title">

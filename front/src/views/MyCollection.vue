@@ -1,5 +1,5 @@
 <script setup>
-import Presentation from "@/components/Presentation.vue";
+import Presentation from "@/components/PresentationPreview.vue";
 import {usePresentations} from "@/use/presentations";
 import {useUserStore} from "@/stores";
 

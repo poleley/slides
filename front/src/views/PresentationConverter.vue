@@ -1,6 +1,5 @@
 <script setup>
 
-import UiButton from "@/components/UI/UiButton.vue";
 import FileInput from "@/components/UI/FileInput.vue";
 import {useDefaultForm} from "@/use/defaultForm";
 import {ref, watch} from "vue";
@@ -82,40 +81,55 @@ async function submit() {
   }
 }
 
+function updateModelValue(value, modelValueKey) {
+  console.log(value)
+  if (modelValueKey === 'privacy')
+    form[modelValueKey].value = Number(value)
+  else
+    form[modelValueKey].value = value
+}
+
+function updateFormFile(file) {
+  form.file.value = file;
+  form.file.touched = true;
+}
+
 </script>
 
 <template>
-  <div class="file-upload-outer">
-    <div class="file-upload-inner">
+  <div :class="$style['file-upload-outer']">
+    <div :class="$style['file-upload-inner']">
       <h2 class="fw-bold mb-4">Загрузить презентацию</h2>
       <form @submit.prevent="submit">
         <div class="container p-0">
           <div class="row">
             <div class="col-12">
               <file-input
-                  v-model="form.file"
+                  :model-value="form.file"
+                  @update:model-value="updateFormFile"
               />
             </div>
           </div>
           <presentation-form
-          :model-value="form"
-          :topic-options="topicOptions"
-          :max-title-length="MAX_TITLE_LENGTH"
+              :model-value="form"
+              :topic-options="topicOptions"
+              :max-title-length="MAX_TITLE_LENGTH"
+              @update:model-value="updateModelValue"
           />
         </div>
-        <ui-button
+        <button
             type="submit"
             class="button-submit w-100 mt-3"
             :disabled="!form.valid"
         >
           Загрузить
-        </ui-button>
+        </button>
       </form>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style module>
 
 h2 {
   color: #564425;

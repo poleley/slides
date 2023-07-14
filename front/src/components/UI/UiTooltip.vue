@@ -1,10 +1,9 @@
+<script>
+</script>
+
 <template>
   <span class="tooltiptext"><slot></slot></span>
 </template>
-
-<script>
-
-</script>
 
 <style scoped>
 .tooltiptext {

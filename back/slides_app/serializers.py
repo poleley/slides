@@ -78,7 +78,7 @@ class LeadSerializer(ModelSerializer):
 
     class Meta:
         model = Lead
-        fields = ['slide', 'email', 'first_name', 'last_name']
+        fields = ['id', 'slide', 'email', 'first_name', 'last_name']
 
 
 class AnswerSerializer(ModelSerializer):

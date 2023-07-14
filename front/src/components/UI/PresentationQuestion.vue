@@ -1,17 +1,19 @@
 <script setup>
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: Boolean,
     default: false
   }
 })
 
+defineEmits(['update:modelValue'])
+
 </script>
 
 <template>
-  <div class="dialog" v-if="modelValue" @click="$emit('update:modelValue', false)">
-    <div @click.stop class="dialog-body">
+  <div v-if="modelValue" class="dialog" @click="$emit('update:modelValue', false)">
+    <div class="dialog-body" @click.stop>
       <div class="header d-flex justify-content-between align-items-center">
         <div class="my-modal-title">
           <slot name="question"></slot>

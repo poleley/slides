@@ -26,7 +26,7 @@ export function useQuestion() {
 
     const deleteQuestion = async (questionId) => {
         return await axios.delete(`/api/v1/question/${questionId}/`)
-            .then((res) => question.value = null)
+            .then(() => question.value = null)
     }
 
     return {

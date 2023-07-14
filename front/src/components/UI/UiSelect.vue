@@ -2,7 +2,10 @@
 
 defineProps({
   modelValue: {
-    type: Object
+    type: Object,
+    default() {
+      return []
+    }
   },
   options: {
     type: Array,
@@ -16,7 +19,6 @@ defineProps({
 <template>
   <select
       :value="modelValue.value"
-      @change="modelValue.value = $event.target.value"
       class="form-select"
   >
     <option disabled selected hidden value="">
@@ -32,6 +34,6 @@ defineProps({
   </select>
 </template>
 
-<style scoped>
+<style module>
 
 </style>

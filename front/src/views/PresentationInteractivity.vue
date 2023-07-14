@@ -1,25 +1,9 @@
-<template>
-  <div class="presentation-outer">
-    <div class="presentation-inner">
-      <slide-preview
-          v-for="(slide, index) in slides.slice(0, slides.length - 1)"
-          :slide="slide"
-          :slides="slides"
-          :is-lead-on="slide.id in presentations.presentation.value.description.lead"
-          @lead-on="SlideLeadOn"
-          @lead-off="SlideLeadOff"
-      />
-    </div>
-  </div>
-</template>
-
 <script setup>
 import SlidePreview from "@/components/SlidePreview.vue";
 import {usePresentations} from "@/use/presentations";
 import {useUserStore} from "@/stores";
 import {useRouter} from "vue-router";
 import {ref} from "vue";
-import UiButton from "@/components/UI/UiButton.vue";
 
 const router = useRouter()
 
@@ -54,6 +38,22 @@ function SlideLeadOff(slideId) {
 }
 
 </script>
+
+<template>
+  <div class="presentation-outer">
+    <div class="presentation-inner">
+      <slide-preview
+          v-for="slide in slides.slice(0, slides.length - 1)"
+          :key="slide.id"
+          :slide="slide"
+          :slides="slides"
+          :is-lead-on="slide.id in presentations.presentation.value.description.lead"
+          @lead-on="SlideLeadOn"
+          @lead-off="SlideLeadOff"
+      />
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .presentation-outer {

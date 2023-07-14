@@ -33,7 +33,6 @@ const {form} = useDefaultForm({
 })
 
 const checked = ref([])
-const description = ref({})
 
 const userStore = useUserStore();
 
@@ -84,6 +83,14 @@ function edit() {
     })
   }
 }
+
+function updateModelValue(value, modelValueKey) {
+  if (modelValueKey === 'privacy')
+    form[modelValueKey].value = Number(value)
+  else
+    form[modelValueKey].value = value
+}
+
 </script>
 
 <template>
@@ -100,6 +107,7 @@ function edit() {
               :checked2="checked[1]"
               :checked1="checked[0]"
               :is-edit="true"
+              @update:model-value="updateModelValue"
           >
             <div class="col-3">
               <router-link
@@ -110,47 +118,6 @@ function edit() {
               </router-link>
             </div>
           </presentation-form>
-<!--          <div class="row mt-2 align-items-center">-->
-<!--            <div class="col-6">-->
-<!--              Собирать лиды-->
-<!--              <div>-->
-<!--                <div class="form-check form-check-inline">-->
-<!--                  <label for="lead-yes">-->
-<!--                    Да-->
-<!--                  </label>-->
-<!--                  <input-->
-<!--                      id="lead-yes"-->
-<!--                      type="radio"-->
-<!--                      name="lead"-->
-<!--                      value="true"-->
-<!--                      class="form-check-input"-->
-<!--                      v-model="form.lead.value"-->
-<!--                  >-->
-<!--                </div>-->
-<!--                <div class="form-check form-check-inline">-->
-<!--                  <label for="lead-no">-->
-<!--                    Нет-->
-<!--                  </label>-->
-<!--                  <input-->
-<!--                      id="lead-no"-->
-<!--                      type="radio"-->
-<!--                      name="lead"-->
-<!--                      value="false"-->
-<!--                      class="form-check-input"-->
-<!--                      v-model="form.lead.value"-->
-<!--                  >-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div class="col-6">-->
-<!--              <router-link-->
-<!--                  :to="{name: 'interactivity', params: {id: router.currentRoute.value.params.id}}"-->
-<!--                  class="ui-link interactivity"-->
-<!--              >-->
-<!--                Настроить интерактивность-->
-<!--              </router-link>-->
-<!--            </div>-->
-<!--          </div>-->
         </div>
         <ui-button
             type="submit"

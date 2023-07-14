@@ -1,6 +1,29 @@
+<script setup>
+
+defineProps({
+  slides: {
+    type: Array,
+    required: true
+  },
+  selectedSlidesIds: {
+    type: Array,
+    default() {
+      return []
+    }
+  }
+})
+
+defineEmits(['changeSlidesIds'])
+
+</script>
+
 <template>
   <div class="row row-slides">
-      <div class="col col-4 slide-item" v-for="slide in slides">
+      <div
+          v-for="slide in slides"
+          :key="slide.id"
+          class="col col-4 slide-item"
+      >
         <div class="img-slide-preview">
           <input
               class="form-check-input input-check-slide"
@@ -14,23 +37,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-
-const props = defineProps({
-  slides: {
-    type: Array,
-    required: true
-  },
-  selectedSlidesIds: {
-    type: Array,
-    default: []
-  }
-})
-
-defineEmits(['changeSlidesIds'])
-
-</script>
 
 <style scoped>
 img {

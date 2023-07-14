@@ -1,3 +1,12 @@
+<script setup>
+const props = defineProps({
+  show: {
+    type: Boolean,
+    default: false
+  }
+})
+</script>
+
 <template>
   <Transition>
   <div v-if="props.show" class="ui-toast">
@@ -12,15 +21,6 @@
   </div>
   </Transition>
 </template>
-
-<script setup>
-const props = defineProps({
-  show: {
-    type: Boolean,
-    default: false
-  }
-})
-</script>
 
 <style scoped>
 .ui-toast-header {

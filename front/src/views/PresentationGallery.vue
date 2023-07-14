@@ -1,5 +1,5 @@
 <script setup>
-import Presentation from "@/components/Presentation.vue";
+import Presentation from "@/components/PresentationPreview.vue";
 import {usePresentations} from "@/use/presentations";
 import {onMounted} from "vue";
 import Router from "@/routers/router";
@@ -36,9 +36,10 @@ const toggleFavorite = (presentation) => {
     <div class="row">
       <presentation
           v-for="presentation in presentations.presentationsPublic.value"
+          :key="presentation.id"
           :presentation="presentation"
           :current-route="currentRoute"
-          @updateFavorite="toggleFavorite"
+          @update-favorite="toggleFavorite"
       />
     </div>
   </div>

@@ -83,8 +83,8 @@ async function submit() {
 
 <template>
   <ui-toast :show="isShowToast">
-    <template v-slot:header>Уведомление</template>
-    <template v-slot:body>{{ userStore.error }}</template>
+    <template #header>Уведомление</template>
+    <template #body>{{ userStore.error }}</template>
   </ui-toast>
   <div class="registration-outer">
     <div class="registration-inner">

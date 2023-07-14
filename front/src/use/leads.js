@@ -20,7 +20,7 @@ export function useLead() {
                 leadCreateMessage.value.body = "Вы уже оставили свои данные"
             }
             console.log(res)
-        }).catch((err) => {
+        }).catch(() => {
             leadCreateMessage.value.header = "Ошибка"
             leadCreateMessage.value.body = "Вы уже оставили свои данные"
         })

@@ -1,67 +1,3 @@
-<template>
-  <div class="statistics-outer">
-    <div class="statistics-inner">
-      <h2 class="fw-bold mb-4">Статистика</h2>
-
-      <div class="container">
-        <div class="row align-items-center">
-          <div class="col col-2">
-            <div class="presentation-preview">
-              <img :src="imgSrc" alt="Первый слайд">
-            </div>
-          </div>
-          <div class="col col-10">
-            <div class="row fw-bold presentation-title">
-              {{ presentations.presentation.value.title }}
-            </div>
-            <div class="row presentation-date">
-              {{ dateCreated }}
-            </div>
-          </div>
-        </div>
-        <div class="row row-graphic">
-          <div class="row-title">
-            График просмотров и добавлений в избранное по дням
-          </div>
-          <div class="graphic">
-            <canvas id="graphic"></canvas>
-          </div>
-        </div>
-        <div v-if="isQuestions" class="row row-graphic-questions">
-          <div class="row-title">
-            Статистика по ответам пользователей на вопросы
-          </div>
-          <div v-for="(question, index) in presentations.presentation.value.questions">
-            <canvas class="graphic-question" :id="'graphic-question-' + index"></canvas>
-          </div>
-        </div>
-
-        <div v-if="isLeads" class="row row-leads">
-          <div class="row-title">Лиды</div>
-          <table class="table">
-            <thead>
-            <tr>
-              <th>Номер слайда</th>
-              <th>Фамилия</th>
-              <th>Имя</th>
-              <th>Email</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="lead in presentations.presentation.value.leads">
-              <td>{{ lead.slide.ordering + 1 }}</td>
-              <td>{{ lead.last_name }}</td>
-              <td>{{ lead.first_name }}</td>
-              <td>{{ lead.email }}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 
 import {usePresentations} from "@/use/presentations";
@@ -166,6 +102,76 @@ const dateCreated = computed(() => {
 })
 
 </script>
+
+<template>
+  <div class="statistics-outer">
+    <div class="statistics-inner">
+      <h2 class="fw-bold mb-4">Статистика</h2>
+
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col col-2">
+            <div class="presentation-preview">
+              <img :src="imgSrc" alt="Первый слайд">
+            </div>
+          </div>
+          <div class="col col-10">
+            <div class="row fw-bold presentation-title">
+              {{ presentations.presentation.value.title }}
+            </div>
+            <div class="row presentation-date">
+              {{ dateCreated }}
+            </div>
+          </div>
+        </div>
+        <div class="row row-graphic">
+          <div class="row-title">
+            График просмотров и добавлений в избранное по дням
+          </div>
+          <div class="graphic">
+            <canvas id="graphic"></canvas>
+          </div>
+        </div>
+        <div v-if="isQuestions" class="row row-graphic-questions">
+          <div class="row-title">
+            Статистика по ответам пользователей на вопросы
+          </div>
+          <div
+              v-for="(question, index) in presentations.presentation.value.questions"
+              :key="question.id"
+          >
+            <canvas :id="'graphic-question-' + index" class="graphic-question"></canvas>
+          </div>
+        </div>
+
+        <div v-if="isLeads" class="row row-leads">
+          <div class="row-title">Лиды</div>
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Номер слайда</th>
+              <th>Фамилия</th>
+              <th>Имя</th>
+              <th>Email</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr
+                v-for="lead in presentations.presentation.value.leads"
+                :key="lead.id"
+            >
+              <td>{{ lead.slide.ordering + 1 }}</td>
+              <td>{{ lead.last_name }}</td>
+              <td>{{ lead.first_name }}</td>
+              <td>{{ lead.email }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .statistics-outer {

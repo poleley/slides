@@ -1,7 +1,7 @@
 <script setup>
 import UiSelect from "@/components/UI/UiSelect.vue";
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: Object,
     required: true
@@ -27,6 +27,8 @@ const props = defineProps({
     default: false
   }
 })
+
+defineEmits(['update:modelValue', 'updateSelect'])
 </script>
 
 <template>
@@ -38,11 +40,12 @@ const props = defineProps({
             Название*
           </label>
           <input
-              class="form-control title"
               id="title"
-              v-model="modelValue.title.value"
-              @blur="modelValue.title.blur"
+              :value="modelValue.title.value"
+              class="form-control title"
               :class="{'is-invalid': !modelValue.title.valid && modelValue.title.touched}"
+              @input="$emit('update:modelValue', $event.target.value, 'title')"
+              @blur="modelValue.title.blur"
           >
           <div class="help-text">*Обязательно</div>
           <div class="invalid-feedback">
@@ -64,10 +67,11 @@ const props = defineProps({
           </label>
           <ui-select
               id="topic"
-              @blur="modelValue.topic.blur"
-              v-model="modelValue.topic"
-              :options="topicOptions"
+              :value="modelValue.topic.value"
               :class="{'is-invalid': !modelValue.topic.valid && modelValue.topic.touched}"
+              :options="topicOptions"
+              @change="$emit('update:modelValue', $event.target.value, 'topic')"
+              @blur="modelValue.topic.blur"
           >
             Выберите тему...
           </ui-select>
@@ -88,7 +92,7 @@ const props = defineProps({
                 value="2"
                 class="form-check-input"
                 :checked="checked2"
-                v-model="modelValue.privacy.value"
+                @click="$emit('update:modelValue', $event.target.value, 'privacy')"
             >
           </label>
         </div>
@@ -99,15 +103,14 @@ const props = defineProps({
                 type="radio"
                 name="privacy"
                 value="1"
-                :checked="checked1"
                 class="form-check-input"
-                v-model="modelValue.privacy.value"
+                :checked="checked1"
+                @click="$emit('update:modelValue', $event.target.value, 'privacy')"
             >
           </label>
         </div>
       </div>
       <slot>
-
       </slot>
     </div>
   </div>

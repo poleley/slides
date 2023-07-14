@@ -19,7 +19,13 @@ const router = useRouter()
       <div id="navbarNav" class="collapse navbar-collapse justify-content-between">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Галерея презентаций</a>
+            <router-link
+                class="nav-link active"
+                aria-current="page"
+                :to="{name: 'all-presentations'}"
+            >
+              Галерея презентаций
+            </router-link>
           </li>
         </ul>
 
@@ -27,25 +33,67 @@ const router = useRouter()
           <ul class="navbar-nav">
             <template v-if="!userStore.user">
               <li class="nav-item">
-                <a class="nav-link" href="/signup">Регистрация</a>
+                <router-link
+                    class="nav-link"
+                    :to="{name: 'signup'}"
+                >
+                  Регистрация
+                </router-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/login">Войти</a>
+                <router-link
+                    class="nav-link"
+                    :to="{name: 'login'}"
+                >
+                  Войти
+                </router-link>
               </li>
             </template>
             <li v-else class="nav-item dropdown">
-              <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                 aria-expanded="false">
+              <span
+                  id="navbarDropdown"
+                  class="nav-link dropdown-toggle"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+              >
                 {{ userStore.user.lastName }} {{ userStore.user.firstName }}
-              </a>
+              </span>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="/library">Моя коллекция</a></li>
-                <li><a class="dropdown-item" href="/favorite">Избранное</a></li>
-                <li><a class="dropdown-item" href="/upload">Загрузить презентацию</a></li>
+                <li>
+                  <router-link
+                      class="dropdown-item"
+                      :to="{name: 'library'}"
+                  >
+                    Моя коллекция
+                  </router-link>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      :to="{name: 'favorite'}"
+                  >Избранное
+                  </a>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      :to="{name: 'converter'}"
+                  >Загрузить презентацию
+                  </a>
+                </li>
                 <li>
                   <hr class="dropdown-divider">
                 </li>
-                <li><a class="dropdown-item" href="#" @click="userStore.logOut()">Выйти</a></li>
+                <li>
+                  <router-link
+                      class="dropdown-item"
+                      :to="{name: 'all-presentations'}"
+                      @click="userStore.logOut()"
+                  >
+                    Выйти
+                  </router-link>
+                </li>
               </ul>
             </li>
           </ul>

@@ -5,12 +5,12 @@ import PresentationGallery from "@/views/PresentationGallery.vue";
 import MyCollection from "@/views/MyCollection.vue";
 import {useUserStore} from "@/stores";
 import PresentationDetail from "@/views/PresentationDetail.vue";
-import Converter from "@/views/Converter.vue";
+import Converter from "@/views/PresentationConverter.vue";
 import EditPresentation from "@/views/EditPresentation.vue";
-import Interactivity from "@/views/Interactivity.vue";
-import Statistics from "@/views/Statistics.vue";
-import Embed from "@/views/Embed.vue";
-import Favorite from "@/views/Favorite.vue";
+import Interactivity from "@/views/PresentationInteractivity.vue";
+import Statistics from "@/views/PresentationStatistics.vue";
+import Embed from "@/views/EmbeddedPresentation.vue";
+import Favorite from "@/views/FavoritePresentations.vue";
 
 const routes = [
     {

@@ -1,214 +1,3 @@
-<template>
-  <ui-modal
-      v-model="isShowDialogAnswerEdit"
-      :is70rem="true"
-
-  >
-    <template v-slot:title>Редактировать ответ</template>
-    <template v-slot:body>
-      <form class="add-question">
-        <div class="input-question-item">
-          <label for="answer-text">Текст ответа</label>
-          <input
-              class="form-control"
-              id="answer-text"
-              v-model="formAnswer.answerText.value"
-          >
-        </div>
-        <label>Выберите слайды, которые будут показаны, если выбран этот вариант ответа</label>
-        <slides-in-answer
-            :slides="slides.slice(slide.ordering + 1)"
-            :selected-slides-ids="slidesIds"
-            @change-slides-ids="updateSlidesIds"
-        />
-      </form>
-    </template>
-    <template class="dialog-footer" v-slot:footer>
-      <button
-          class="btn btn-secondary footer-button"
-          @click.prevent="isShowDialogAnswerEdit = false"
-      >
-        Отмена
-      </button>
-      <ui-button
-          type="submit"
-          class="button-submit footer-button"
-          :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
-          @click="editAnswer(editableAnswer)"
-      >
-        Сохранить
-      </ui-button>
-    </template>
-  </ui-modal>
-
-  <ui-modal
-      v-model="isShowDialogAnswer"
-      :is70rem="true"
-  >
-    <template v-slot:title>Добавить ответ</template>
-    <template v-slot:body>
-      <form class="add-question">
-        <div class="input-question-item">
-          <label for="answer-text">Текст ответа</label>
-          <input
-              class="form-control"
-              id="answer-text"
-              v-model="formAnswer.answerText.value"
-          >
-        </div>
-        <label>Выберите слайды, которые будут показаны, если выбран этот вариант ответа</label>
-        <slides-in-answer
-            :slides="slides.slice(slide.ordering + 1)"
-            @change-slides-ids="updateSlidesIds"
-        />
-      </form>
-    </template>
-    <template class="dialog-footer" v-slot:footer>
-      <button
-          class="btn btn-secondary footer-button"
-          @click.prevent="isShowDialogAnswer = false"
-      >
-        Отмена
-      </button>
-      <ui-button
-          type="submit"
-          class="button-submit footer-button"
-          :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
-          @click="createAnswer"
-      >
-        Сохранить
-      </ui-button>
-    </template>
-  </ui-modal>
-
-  <ui-modal v-model="isShowDialogQuestion" :is-others-modal="[isShowDialogAnswer, isShowDialogAnswerEdit]">
-    <template v-if="!isSlideHasQuestion" v-slot:title>Добавить вопрос к слайду №{{ slide.ordering + 1 }}</template>
-    <template v-else v-slot:title>Редактировать вопрос к слайду №{{ slide.ordering + 1 }}</template>
-    <template v-slot:body>
-      <form class="add-question">
-        <div class="input-question-item">
-          <label for="question-text">Текст вопроса</label>
-          <input
-              class="form-control"
-              id="question-text"
-              v-model="formQuestion.questionText.value"
-          >
-        </div>
-        <table class="table">
-          <thead>
-          <tr>
-            <th>Ответ</th>
-            <th>Слайды</th>
-            <th class="th-actions">Действия</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr
-              v-for="answer in answers"
-              class="answer"
-          >
-            <td>{{ answer.answerText }}</td>
-            <td>{{ answer.slidesNums }}</td>
-            <td class="actions">
-              <div class="icon-actions">
-                <i class="bi bi-pencil-fill ui-tooltip" @click="startEditAnswer(answer)">
-                  <ui-tooltip>Редактировать</ui-tooltip>
-                </i>
-                <i class="bi bi-trash3-fill ui-tooltip" @click="deleteAnswer(answer)">
-                  <ui-tooltip>Удалить</ui-tooltip>
-                </i>
-              </div>
-            </td>
-          </tr>
-          <tr @click.prevent="showDialogAnswer" class="button-add-answer">
-            <td colspan="3" class="text-center">
-              Добавить ответ
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </form>
-    </template>
-    <template class="dialog-footer" v-slot:footer>
-      <button
-          class="btn btn-secondary footer-button"
-          @click="isShowDialogQuestion = false"
-      >
-        Отмена
-      </button>
-      <ui-button
-          type="submit"
-          class="button-submit footer-button"
-          :disabled="!formQuestion.questionText.valid || answers.length === 0"
-          @click.prevent="createOrEditQuestion"
-      >
-        Сохранить
-      </ui-button>
-    </template>
-  </ui-modal>
-
-  <div class="row slide">
-    <div class="col col-6">
-      <div class="d-flex align-items-center justify-content-end">
-        <div class="slide-number fw-bold">{{ slide.ordering + 1 }}</div>
-        <div class="preview">
-          <img :src="`/media/${slide.name}`" alt="Слайд">
-        </div>
-      </div>
-    </div>
-    <div class="col col-6 d-flex justify-content-start align-items-center">
-      <div class="align-items-center" id="buttons-interactivity">
-        <div>
-          <template v-if="isSlideHasQuestion">
-            <button class="button-submit my-button w-16">
-              <button
-                  @click.prevent="showDialogQuestion"
-                  class="btn button-edit-question"
-              >
-                Редактировать вопрос
-              </button>
-              <button
-                  @click.prevent="deleteQuestion"
-                  class="btn button-delete-question"
-              >
-                <i class="bi bi-trash3-fill ui-tooltip">
-                  <ui-tooltip>Удалить вопрос</ui-tooltip>
-                </i>
-              </button>
-            </button>
-          </template>
-          <template v-else>
-            <ui-button
-                class="button-submit text-center w-16"
-                @click.prevent="showDialogQuestion"
-                :disabled="isLeadOn"
-            >
-              Добавить вопрос
-            </ui-button>
-          </template>
-        </div>
-        <div>
-          <ui-button
-              class="button-submit text-center w-16"
-              v-if="!isLeadOn"
-              @click="$emit('leadOn', props.slide.id)"
-              :disabled="isSlideHasQuestion"
-          >
-            Добавить сбор контактов
-          </ui-button>
-          <ui-button
-              class="button-submit text-center w-16"
-              v-else
-              @click="$emit('leadOff', props.slide.id)"
-          >
-            Отключить сбор контактов
-          </ui-button>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import {ref, watch} from "vue";
 import UiButton from "@/components/UI/UiButton.vue";
@@ -461,6 +250,218 @@ function deleteQuestion() {
 }
 
 </script>
+
+<template>
+  <ui-modal
+      v-model="isShowDialogAnswerEdit"
+      :is70rem="true"
+
+  >
+    <template #title>Редактировать ответ</template>
+    <template #body>
+      <form class="add-question">
+        <div class="input-question-item">
+          <label for="answer-text">Текст ответа</label>
+          <input
+              id="answer-text"
+              v-model="formAnswer.answerText.value"
+              class="form-control"
+          >
+        </div>
+        <label>Выберите слайды, которые будут показаны, если выбран этот вариант ответа</label>
+        <slides-in-answer
+            :slides="slides.slice(slide.ordering + 1)"
+            :selected-slides-ids="slidesIds"
+            @change-slides-ids="updateSlidesIds"
+        />
+      </form>
+    </template>
+    <template #footer>
+      <button
+          class="btn btn-secondary footer-button"
+          @click.prevent="isShowDialogAnswerEdit = false"
+      >
+        Отмена
+      </button>
+      <ui-button
+          type="submit"
+          class="button-submit footer-button"
+          :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
+          @click="editAnswer(editableAnswer)"
+      >
+        Сохранить
+      </ui-button>
+    </template>
+  </ui-modal>
+
+  <ui-modal
+      v-model="isShowDialogAnswer"
+      :is70rem="true"
+  >
+    <template #title>Добавить ответ</template>
+    <template #body>
+      <form class="add-question">
+        <div class="input-question-item">
+          <label for="answer-text">Текст ответа</label>
+          <input
+              id="answer-text"
+              v-model="formAnswer.answerText.value"
+              class="form-control"
+          >
+        </div>
+        <label>Выберите слайды, которые будут показаны, если выбран этот вариант ответа</label>
+        <slides-in-answer
+            :slides="slides.slice(slide.ordering + 1)"
+            @change-slides-ids="updateSlidesIds"
+        />
+      </form>
+    </template>
+    <template #footer>
+      <button
+          class="btn btn-secondary footer-button"
+          @click.prevent="isShowDialogAnswer = false"
+      >
+        Отмена
+      </button>
+      <ui-button
+          type="submit"
+          class="button-submit footer-button"
+          :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
+          @click="createAnswer"
+      >
+        Сохранить
+      </ui-button>
+    </template>
+  </ui-modal>
+
+  <ui-modal v-model="isShowDialogQuestion" :is-others-modal="[isShowDialogAnswer, isShowDialogAnswerEdit]">
+    <template v-if="!isSlideHasQuestion" #title>Добавить вопрос к слайду №{{ slide.ordering + 1 }}</template>
+    <template v-else #title>Редактировать вопрос к слайду №{{ slide.ordering + 1 }}</template>
+    <template #body>
+      <form class="add-question">
+        <div class="input-question-item">
+          <label for="question-text">Текст вопроса</label>
+          <input
+              id="question-text"
+              v-model="formQuestion.questionText.value"
+              class="form-control"
+          >
+        </div>
+        <table class="table">
+          <thead>
+          <tr>
+            <th>Ответ</th>
+            <th>Слайды</th>
+            <th class="th-actions">Действия</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr
+              v-for="answerElem in answers"
+              :key="answerElem.id"
+              class="answer"
+          >
+            <td>{{ answerElem.answerText }}</td>
+            <td>{{ answerElem.slidesNums }}</td>
+            <td class="actions">
+              <div class="icon-actions">
+                <i class="bi bi-pencil-fill ui-tooltip" @click="startEditAnswer(answerElem)">
+                  <ui-tooltip>Редактировать</ui-tooltip>
+                </i>
+                <i class="bi bi-trash3-fill ui-tooltip" @click="deleteAnswer(answerElem)">
+                  <ui-tooltip>Удалить</ui-tooltip>
+                </i>
+              </div>
+            </td>
+          </tr>
+          <tr class="button-add-answer" @click.prevent="showDialogAnswer">
+            <td colspan="3" class="text-center">
+              Добавить ответ
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </form>
+    </template>
+    <template #footer>
+      <button
+          class="btn btn-secondary footer-button"
+          @click="isShowDialogQuestion = false"
+      >
+        Отмена
+      </button>
+      <ui-button
+          type="submit"
+          class="button-submit footer-button"
+          :disabled="!formQuestion.questionText.valid || answers.length === 0"
+          @click.prevent="createOrEditQuestion"
+      >
+        Сохранить
+      </ui-button>
+    </template>
+  </ui-modal>
+
+  <div class="row slide">
+    <div class="col col-6">
+      <div class="d-flex align-items-center justify-content-end">
+        <div class="slide-number fw-bold">{{ slide.ordering + 1 }}</div>
+        <div class="preview">
+          <img :src="`/media/${slide.name}`" alt="Слайд">
+        </div>
+      </div>
+    </div>
+    <div class="col col-6 d-flex justify-content-start align-items-center">
+      <div id="buttons-interactivity" class="align-items-center">
+        <div>
+          <template v-if="isSlideHasQuestion">
+            <button class="button-submit my-button w-16">
+              <button
+                  class="btn button-edit-question"
+                  @click.prevent="showDialogQuestion"
+              >
+                Редактировать вопрос
+              </button>
+              <button
+                  class="btn button-delete-question"
+                  @click.prevent="deleteQuestion"
+              >
+                <i class="bi bi-trash3-fill ui-tooltip">
+                  <ui-tooltip>Удалить вопрос</ui-tooltip>
+                </i>
+              </button>
+            </button>
+          </template>
+          <template v-else>
+            <ui-button
+                class="button-submit text-center w-16"
+                :disabled="isLeadOn"
+                @click.prevent="showDialogQuestion"
+            >
+              Добавить вопрос
+            </ui-button>
+          </template>
+        </div>
+        <div>
+          <ui-button
+              v-if="!isLeadOn"
+              class="button-submit text-center w-16"
+              :disabled="isSlideHasQuestion"
+              @click="$emit('leadOn', props.slide.id)"
+          >
+            Добавить сбор контактов
+          </ui-button>
+          <ui-button
+              v-else
+              class="button-submit text-center w-16"
+              @click="$emit('leadOff', props.slide.id)"
+          >
+            Отключить сбор контактов
+          </ui-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 

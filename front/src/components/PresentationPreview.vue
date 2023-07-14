@@ -14,11 +14,6 @@ const props = defineProps({
     required: true,
     default: () => {
     },
-  },
-  currentRoute: {
-    type: String,
-    required: false,
-    default: () => ""
   }
 });
 
@@ -67,8 +62,8 @@ function toggleFavorite() {
               </template>
             </div>
             <div class="star" @click="toggleFavorite">
-              <i class="bi bi-star" v-if="!isFavorite"></i>
-              <i class="bi bi-star-fill" v-else></i>
+              <i v-if="!isFavorite" class="bi bi-star"></i>
+              <i v-else class="bi bi-star-fill"></i>
             </div>
           </div>
           <div class="row-2">

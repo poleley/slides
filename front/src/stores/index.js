@@ -82,7 +82,7 @@ export const useUserStore = defineStore('userStore', () => {
 
     const logOut = () => {
         axios.get("/api/v1/user/logout/")
-            .then((res) => {
+            .then(() => {
                     error.value = null;
                     user.value = null
                     saveUserToLocalStorage(user.value)
