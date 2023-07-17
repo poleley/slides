@@ -3,7 +3,7 @@ import SignUp from "@/views/SignUp.vue";
 import LogIn from "@/views/LogIn.vue";
 import PresentationGallery from "@/views/PresentationGallery.vue";
 import MyCollection from "@/views/MyCollection.vue";
-import {useUserStore} from "@/stores";
+import {useUserStore} from "../stores";
 import PresentationDetail from "@/views/PresentationDetail.vue";
 import Converter from "@/views/PresentationConverter.vue";
 import EditPresentation from "@/views/EditPresentation.vue";

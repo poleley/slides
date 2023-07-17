@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 
 import UiButton from "@/components/UI/UiButton.vue";
 
-import {useForm} from "@/use/form";
-import {useUserStore} from "@/stores";
-import router from "@/routers/router";
+import {useForm} from "../use/form";
+import {useUserStore} from "../stores";
+import router from "../routers/router";
 import {ref} from "vue";
 import UiToast from "@/components/UI/UiToast.vue";
 
@@ -15,7 +15,7 @@ const isEmail = v => EMAIL_REGEXP.test(v)
 
 const userStore = useUserStore();
 
-const {form} = useForm({
+const form = useForm({
   email: {
     value: '',
     validators: {required, isEmail}
@@ -33,7 +33,7 @@ function hideToast() {
 }
 
 async function submit() {
-  if (form.valid) {
+  if ("valid" in form && form.valid) {
     await userStore.logIn(
         form.email.value,
         form.password.value,

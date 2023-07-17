@@ -1,18 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import UiTooltip from '@/components/UI/UiTooltip.vue'
-import {usePresentations} from "@/use/presentations";
-import {useUserStore} from "@/stores";
+import {usePresentations} from "../use/presentations";
+import {useUserStore} from "../stores";
 import {computed, ref, watch} from "vue";
 import UiButton from "@/components/UI/UiButton.vue";
 import UiDialog from "@/components/UI/UiDialog.vue";
 import UiToast from "@/components/UI/UiToast.vue";
-import {useDefaultForm} from "@/use/defaultForm";
-import {useLead} from "@/use/leads";
-import {useQuestion} from "@/use/question";
+import {useDefaultForm} from "../use/defaultForm";
+import {useLead} from "../use/leads";
+import {useQuestion} from "../use/question";
 import Question from "@/components/UI/PresentationQuestion.vue";
 import {useRouter} from "vue-router";
 import Player from "@/components/PresentationPlayer.vue";
-import {useAnswer} from "@/use/answer";
+import {useAnswer} from "../use/answer";
 
 const presentations = usePresentations();
 const userStore = useUserStore();

@@ -1,11 +1,43 @@
 import axios from "axios";
 import {ref} from "vue";
 
+export interface Presentation {
+    id: number,
+    user: User,
+    favorite: number[],
+    title: string,
+    slide_set: Slide[],
+    topic: number,
+    description: Description,
+    privacy: number,
+    date_created: string
+}
+
+export interface User {
+    id: number,
+    username: string,
+    last_name: string,
+    first_name: string,
+}
+
+export interface Slide {
+    id: number,
+    name: string,
+    ordering: number,
+    question_id: null | number,
+}
+
+export interface Description {
+    lead: object,
+    views: object,
+    favorite: object
+}
+
 export function usePresentations() {
-    const presentationsPublic = ref([])
-    const userPresentations = ref([])
-    const presentation = ref({})
-    const errCode = ref(0)
+    const presentationsPublic = ref<Presentation[]>([])
+    const userPresentations = ref<Presentation[]>([])
+    const presentation = ref<Presentation>()
+    const errCode = ref<number>(0)
 
     const getPublicPresentations = async (params = {}) => {
         return await axios.get("/api/v1/presentation/", {params: params})
@@ -57,13 +89,13 @@ export function usePresentations() {
         ).then((res) => console.log(res))
     }
 
-    const removeFromFavorite = async (id) => {
+    const removeFromFavorite = async (id:number) => {
         return await axios.patch(
             `/api/v1/presentation/${id}/remove_from_favorite/`
         ).then((res) => console.log(res))
     }
 
-    const getStatistics = async (id) => {
+    const getStatistics = async (id:number) => {
         return await axios.get(`/api/v1/presentation/${id}/statistics`)
             .then((res) => {
                 presentation.value = res.data

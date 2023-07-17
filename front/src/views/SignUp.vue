@@ -1,80 +1,80 @@
-<script setup>
+<script setup lang="ts">
 
 import UiButton from "@/components/UI/UiButton.vue";
 
-import {useForm} from "@/use/form";
-import {useUserStore} from "@/stores";
+import { useForm } from "../use/form";
+import { useUserStore } from "../stores";
 import UiToast from "@/components/UI/UiToast.vue";
-import router from "@/routers/router";
-import {ref} from "vue";
+import router from "../routers/router";
+import { ref } from "vue";
 
 
-const passLength = 8
+const passLength = 8;
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
-const required = v => !!v
-const minLength = num => v => v.length >= num
+const required = v => !!v;
+const minLength = num => v => v.length >= num;
 
-const isEmail = v => EMAIL_REGEXP.test(v)
+const isEmail = v => EMAIL_REGEXP.test(v);
 
-const isEqual = (firstField, secondField, validatedField) => (form) => {
-  const isValid = form[secondField].value === form[firstField].value
-  form[validatedField].errors["isEqual"] = !isValid
-  form[validatedField].validate()
-  form[validatedField].valid &&= isValid
-}
+const isEqual = (firstField: string, secondField: string, validatedField: string) => (form: object) => {
+  const isValid = form[secondField].value === form[firstField].value;
+  form[validatedField].errors["isEqual"] = !isValid;
+  form[validatedField].validate();
+  form[validatedField].valid &&= isValid;
+};
 
 const userStore = useUserStore();
 
-const {form} = useForm({
+const form = useForm({
   firstName: {
-    value: '',
-    validators: {required}
+    value: "",
+    validators: { required }
   },
   lastName: {
-    value: '',
-    validators: {required}
+    value: "",
+    validators: { required }
   },
   email: {
-    value: '',
-    validators: {required, isEmail}
+    value: "",
+    validators: { required, isEmail }
   },
   username: {
-    value: '',
-    validators: {required}
+    value: "",
+    validators: { required }
   },
   password: {
-    value: '',
-    validators: {required, minLength: minLength(passLength)}
+    value: "",
+    validators: { required, minLength: minLength(passLength) }
   },
   passwordConfirm: {
-    value: '',
-    validators: {required, minLength: minLength(passLength)}
-  },
+    value: "",
+    validators: { required, minLength: minLength(passLength) }
+  }
 }, {
-  validators: [isEqual('password', 'passwordConfirm', 'passwordConfirm')]
-})
+  validators: [isEqual("password", "passwordConfirm", "passwordConfirm")]
+});
 
-const isShowToast = ref(false)
+const isShowToast = ref(false);
 
 function hideToast() {
-  isShowToast.value = false
+  isShowToast.value = false;
 }
 
 async function submit() {
-  if (form.valid) {
+  if ("valid" in form && form.valid) {
     await userStore.signUp(
-        form.email.value,
-        form.username.value,
-        form.password.value,
-        form.firstName.value,
-        form.lastName.value,
-    )
+      form.email.value,
+      form.username.value,
+      form.password.value,
+      form.firstName.value,
+      form.lastName.value
+    );
     if (userStore.error === null)
-      await router.replace({name: 'library'})
+      await router.replace({ name: "library" });
     else {
-      isShowToast.value = true
-      setTimeout(hideToast, 3000)
+      isShowToast.value = true;
+      setTimeout(hideToast, 3000);
     }
   }
 }
@@ -92,12 +92,12 @@ async function submit() {
       <form @submit.prevent="submit">
         <div class="input-item">
           <input
-              v-model="form.firstName.value"
-              type="text"
-              placeholder="Имя"
-              class="form-control"
-              :class="{'is-invalid': !form.firstName.valid && form.firstName.touched}"
-              @blur="form.firstName.blur"
+            v-model="form.firstName.value"
+            type="text"
+            placeholder="Имя"
+            class="form-control"
+            :class="{'is-invalid': !form.firstName.valid && form.firstName.touched}"
+            @blur="form.firstName.blur"
           />
           <div class="invalid-feedback">
             Заполните это поле
@@ -106,12 +106,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.lastName.value"
-              type="text"
-              placeholder="Фамилия"
-              class="form-control"
-              :class="{'is-invalid': !form.lastName.valid && form.lastName.touched}"
-              @blur="form.lastName.blur"
+            v-model="form.lastName.value"
+            type="text"
+            placeholder="Фамилия"
+            class="form-control"
+            :class="{'is-invalid': !form.lastName.valid && form.lastName.touched}"
+            @blur="form.lastName.blur"
           />
           <div class="invalid-feedback">
             Заполните это поле
@@ -120,12 +120,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.email.value"
-              type="email"
-              placeholder="Электронная почта"
-              class="form-control"
-              :class="{'is-invalid': !form.email.valid && form.email.touched}"
-              @blur="form.email.blur"
+            v-model="form.email.value"
+            type="email"
+            placeholder="Электронная почта"
+            class="form-control"
+            :class="{'is-invalid': !form.email.valid && form.email.touched}"
+            @blur="form.email.blur"
           />
           <template v-if="form.email.errors.isEmail">
             <div class="invalid-feedback">
@@ -141,12 +141,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.username.value"
-              type="text"
-              placeholder="Никнейм"
-              class="form-control"
-              :class="{'is-invalid': !form.username.valid && form.username.touched}"
-              @blur="form.username.blur"
+            v-model="form.username.value"
+            type="text"
+            placeholder="Никнейм"
+            class="form-control"
+            :class="{'is-invalid': !form.username.valid && form.username.touched}"
+            @blur="form.username.blur"
           />
           <div class="invalid-feedback">
             Заполните это поле
@@ -155,12 +155,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.password.value"
-              type="password"
-              placeholder="Пароль"
-              class="form-control"
-              :class="{'is-invalid': !form.password.valid && form.password.touched}"
-              @blur="form.password.blur"
+            v-model="form.password.value"
+            type="password"
+            placeholder="Пароль"
+            class="form-control"
+            :class="{'is-invalid': !form.password.valid && form.password.touched}"
+            @blur="form.password.blur"
           />
           <div class="invalid-feedback">
             <template v-if="form.password.errors.minLength">
@@ -178,12 +178,12 @@ async function submit() {
 
         <div class="input-item">
           <input
-              v-model="form.passwordConfirm.value"
-              type="password"
-              placeholder="Подтвердите пароль"
-              class="form-control"
-              :class="{'is-invalid': !form.passwordConfirm.valid && form.passwordConfirm.touched}"
-              @blur="form.passwordConfirm.blur"
+            v-model="form.passwordConfirm.value"
+            type="password"
+            placeholder="Подтвердите пароль"
+            class="form-control"
+            :class="{'is-invalid': !form.passwordConfirm.valid && form.passwordConfirm.touched}"
+            @blur="form.passwordConfirm.blur"
           />
           <div class="invalid-feedback">
             <template v-if="form.passwordConfirm.errors.isEqual">
@@ -204,9 +204,9 @@ async function submit() {
           </div>
         </div>
         <ui-button
-            type="submit"
-            class="button-submit w-100"
-            :disabled="!form.valid"
+          type="submit"
+          class="button-submit w-100"
+          :disabled="!form.valid"
         >
           Зарегистрироваться
         </ui-button>

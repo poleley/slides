@@ -18,7 +18,7 @@ export function useField(field) {
     }
 
     watch(value, reassign)
-    reassign(field.value)
+    reassign()
 
     return {value, valid, errors, validate: reassign, touched, blur: () => touched.value = true}
 }

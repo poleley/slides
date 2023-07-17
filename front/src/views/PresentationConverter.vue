@@ -1,11 +1,11 @@
-<script setup>
+<script setup lang="ts">
 
 import FileInput from "@/components/UI/FileInput.vue";
-import {useDefaultForm} from "@/use/defaultForm";
-import {ref, watch} from "vue";
-import {usePresentations} from "@/use/presentations";
+import {useDefaultForm} from "../use/defaultForm";
+import {ref} from "vue";
+import {usePresentations} from "../use/presentations";
 import PresentationForm from "@/components/PresentationForm.vue";
-import router from "@/routers/router";
+import router from "../routers/router";
 
 const MAX_TITLE_LENGTH = 255
 const MAX_FILE_SIZE = 5242880
@@ -24,7 +24,7 @@ const maxSize = v => {
   return v.size <= MAX_FILE_SIZE
 }
 
-const {form} = useDefaultForm({
+const form = useDefaultForm({
   file: {
     value: '',
     validators: {required, isPdf, maxSize}
@@ -41,14 +41,6 @@ const {form} = useDefaultForm({
     value: '',
     validators: {required}
   }
-})
-
-watch(() => form.privacy.value, () => {
-  form.privacy.value = Number(form.privacy.value)
-})
-
-watch(() => form.topic.value, () => {
-  form.topic.value = Number(form.topic.value)
 })
 
 const topicOptions = ref([
@@ -114,12 +106,15 @@ function updateFormFile(file) {
               :model-value="form"
               :topic-options="topicOptions"
               :max-title-length="MAX_TITLE_LENGTH"
+              :checked2="true"
+              :checked1="false"
+              :is-edit="false"
               @update:model-value="updateModelValue"
           />
         </div>
         <button
             type="submit"
-            class="button-submit w-100 mt-3"
+            class="btn button-submit w-100 mt-3"
             :disabled="!form.valid"
         >
           Загрузить

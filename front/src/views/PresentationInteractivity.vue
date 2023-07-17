@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import SlidePreview from "@/components/SlidePreview.vue";
-import {usePresentations} from "@/use/presentations";
-import {useUserStore} from "@/stores";
+import {usePresentations} from "../use/presentations";
+import {useUserStore} from "../stores";
 import {useRouter} from "vue-router";
 import {ref} from "vue";
 

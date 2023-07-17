@@ -2,8 +2,15 @@ import {defineStore} from 'pinia';
 import {ref} from "vue";
 import axios from "axios";
 
+export interface User {
+    id: number,
+    firstName: string,
+    lastName: string,
+    email: string
+}
+
 export const useUserStore = defineStore('userStore', () => {
-    const user = ref(null)
+    const user = ref<User>(<User>null)
     const error = ref(null)
 
     if (localStorage.getItem('user')) {

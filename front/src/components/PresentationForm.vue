@@ -1,32 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import UiSelect from "@/components/UI/UiSelect.vue";
+import { Form } from "../use/defaultForm";
 
-defineProps({
-  modelValue: {
-    type: Object,
-    required: true
-  },
-  topicOptions: {
-    type: Array,
-    required: true
-  },
-  maxTitleLength: {
-    type: Number,
-    required: true
-  },
-  checked2: {
-    type: Boolean,
-    default: true,
-  },
-  checked1: {
-    type: Boolean,
-    default: false
-  },
-  isEdit: {
-    type: Boolean,
-    default: false
-  }
-})
+export interface TopicOption {
+  val: number,
+  text: string
+}
+
+defineProps<{
+  modelValue: Form,
+  topicOptions: TopicOption[],
+  maxTitleLength: number,
+  checked2: boolean,
+  checked1: boolean,
+  isEdit: boolean
+}>()
 
 defineEmits(['update:modelValue', 'updateSelect'])
 </script>

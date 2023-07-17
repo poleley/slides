@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {defineProps, ref, watch} from 'vue'
 
 
@@ -13,7 +13,7 @@ defineProps({
 
 defineEmits(['update:modelValue'])
 
-var fileName = ref('')
+const fileName = ref('')
 
 watch(() => fileName.value, () => {
   if (fileName.value.length > 50)
