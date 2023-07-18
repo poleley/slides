@@ -1,8 +1,15 @@
 import axios from "axios";
 import {ref} from "vue";
+import { Answer } from "./answer";
+
+export interface Question {
+    id: number,
+    question_text: string,
+    answer_set: Answer[]
+}
 
 export function useQuestion() {
-    const question = ref(null)
+    const question = ref<Question | null>(null)
 
     const getQuestion = async (questionId) => {
         return await axios.get(`/api/v1/question/${questionId}/`)

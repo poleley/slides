@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import FileInput from "@/components/UI/FileInput.vue";
+import FileInput from "../components/UI/FileInput.vue";
 import {useDefaultForm} from "../use/defaultForm";
 import {ref} from "vue";
 import {usePresentations} from "../use/presentations";
-import PresentationForm from "@/components/PresentationForm.vue";
+import PresentationForm from "../components/PresentationForm.vue";
 import router from "../routers/router";
 
 const MAX_TITLE_LENGTH = 255
@@ -62,7 +62,7 @@ const topicOptions = ref([
 const presentations = usePresentations()
 
 async function submit() {
-  if (form.valid) {
+  if (form.valid && "file" in form && "title" in form && "topic" in form && "privacy" in form) {
     let formData = new FormData();
     formData.append('file', form.file.value)
     formData.append('title', form.title.value)
@@ -82,8 +82,10 @@ function updateModelValue(value, modelValueKey) {
 }
 
 function updateFormFile(file) {
-  form.file.value = file;
-  form.file.touched = true;
+  if ("file" in form) {
+    form.file.value = file;
+    form.file.touched = true;
+  }
 }
 
 </script>

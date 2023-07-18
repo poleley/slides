@@ -1,21 +1,17 @@
-<script setup>
+<script setup lang="ts">
 
-import router from "@/routers/router";
-import UiTooltip from '@/components/UI/UiTooltip.vue'
-import {useUserStore} from "@/stores";
+import router from "../routers/router";
+import UiTooltip from '../components/UI/UiTooltip.vue'
+import {useUserStore} from "../stores";
 import {ref} from "vue";
-import Router from "@/routers/router";
+import Router from "../routers/router";
+import { Presentation } from "../use/presentations";
 
 const userStore = useUserStore();
 
-const props = defineProps({
-  presentation: {
-    type: Object,
-    required: true,
-    default: () => {
-    },
-  }
-});
+const props = defineProps<{
+  presentation: Presentation
+}>()
 
 const emit = defineEmits(['delete', 'updateFavorite']);
 

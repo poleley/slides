@@ -14,6 +14,7 @@ export interface Form1 {
 export interface Form2 {
     email: Field,
     password: Field,
+    valid: boolean
 }
 
 export interface Field {

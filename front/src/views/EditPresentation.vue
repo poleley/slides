@@ -2,16 +2,15 @@
 import { useDefaultForm } from "../use/defaultForm";
 import { ref } from "vue";
 import { usePresentations } from "../use/presentations";
-import PresentationForm from "@/components/PresentationForm.vue";
-import UiButton from "@/components/UI/UiButton.vue";
+import PresentationForm from "../components/PresentationForm.vue";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
 import { TopicOption } from "../components/PresentationForm.vue";
 
 const router = useRouter();
 
-const MAX_TITLE_LENGTH = 255;
-const MAX_TAG_LENGTH = 100;
+const MAX_TITLE_LENGTH: number = 255;
+const MAX_TAG_LENGTH: number = 100;
 
 const required = v => !!v;
 const MaxTitleLength = v => v.length <= MAX_TITLE_LENGTH;
@@ -33,7 +32,7 @@ const form = useDefaultForm({
   }
 });
 
-const checked = ref([]);
+const checked = ref<boolean[]>([]);
 
 const userStore = useUserStore();
 
@@ -42,10 +41,16 @@ presentations.getPresentation(router.currentRoute.value.params.id, { "edit": "tr
     if (userStore.user.id !== presentations.presentation.value.user.id)
       router.replace({ name: "signup" });
     else {
-      form.title.value = presentations.presentation.value.title;
-      form.privacy.value = String(presentations.presentation.value.privacy);
-      form.topic.value = String(presentations.presentation.value.topic);
-      checked.value = ["1" === form.privacy.value, "2" === form.privacy.value];
+      if ("title" in form) {
+        form.title.value = presentations.presentation.value.title;
+      }
+      if ("privacy" in form) {
+        form.privacy.value = String(presentations.presentation.value.privacy);
+        checked.value = ["1" === form.privacy.value, "2" === form.privacy.value];
+      }
+      if ("topic" in form) {
+        form.topic.value = String(presentations.presentation.value.topic);
+      }
     }
   });
 
@@ -68,9 +73,11 @@ const topicOptions = ref<TopicOption[]>([
 function edit() {
   if (form.valid) {
     let formData = new FormData();
-    formData.append("title", form.title.value);
-    formData.append("topic", form.topic.value);
-    formData.append("privacy", form.privacy.value);
+    if ("title" in form && "topic" in form && "privacy" in form) {
+      formData.append("title", form.title.value);
+      formData.append("topic", form.topic.value);
+      formData.append("privacy", form.privacy.value);
+    }
     presentations.editPresentation(presentations.presentation.value.id, formData).then(() => {
       router.replace({ name: "library" });
     });
@@ -78,7 +85,7 @@ function edit() {
 }
 
 function updateModelValue(value, modelValueKey) {
-    form[modelValueKey].value = value;
+  form[modelValueKey].value = value;
 }
 
 </script>
@@ -109,13 +116,13 @@ function updateModelValue(value, modelValueKey) {
             </div>
           </presentation-form>
         </div>
-        <ui-button
+        <button
           type="submit"
-          class="button-submit w-100 mt-3"
+          class="btn button-submit w-100 mt-3"
           :disabled="!form.valid"
         >
           Сохранить
-        </ui-button>
+        </button>
       </form>
     </div>
   </div>

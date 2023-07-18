@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiSelect from "@/components/UI/UiSelect.vue";
+import UiSelect from "../components/UI/UiSelect.vue";
 import { Form } from "../use/defaultForm";
 
 export interface TopicOption {

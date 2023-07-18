@@ -1,17 +1,11 @@
-<script setup>
+<script setup lang="ts">
 
-defineProps({
-  slides: {
-    type: Array,
-    required: true
-  },
-  selectedSlidesIds: {
-    type: Array,
-    default() {
-      return []
-    }
-  }
-})
+import { Slide } from "./SlidePreview.vue";
+
+defineProps<{
+  slides: Slide[],
+  selectedSlidesIds: number[]
+}>()
 
 defineEmits(['changeSlidesIds'])
 

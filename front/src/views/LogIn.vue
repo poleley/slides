@@ -1,12 +1,11 @@
 <script setup lang="ts">
 
-import UiButton from "@/components/UI/UiButton.vue";
 
 import {useForm} from "../use/form";
 import {useUserStore} from "../stores";
 import router from "../routers/router";
 import {ref} from "vue";
-import UiToast from "@/components/UI/UiToast.vue";
+import UiToast from "../components/UI/UiToast.vue";
 
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
@@ -97,13 +96,13 @@ async function submit() {
           </div>
         </div>
 
-        <ui-button
+        <button
             type="submit"
-            class="button-submit"
+            class="btn button-submit"
             :disabled="!form.valid"
         >
           Войти
-        </ui-button>
+        </button>
       </form>
     </div>
   </div>

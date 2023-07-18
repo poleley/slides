@@ -1,19 +1,20 @@
-<script setup>
-import Presentation from "@/components/PresentationPreview.vue";
-import {usePresentations} from "@/use/presentations";
-import {useUserStore} from "@/stores";
-import Router from "@/routers/router";
-import router from "@/routers/router";
+<script setup lang="ts">
+import PresentationPreview from "../components/PresentationPreview.vue";
+import { Presentation, usePresentations } from "../use/presentations";
+import {useUserStore} from "../stores";
+import { useRouter } from "vue-router";
 
 const presentations = usePresentations();
 
 const userStore = useUserStore();
 
-const currentRoute = Router.currentRoute.value.path
+const router = useRouter();
+
+const currentRoute = router.currentRoute.value.path
 
 presentations.getPublicPresentations({"favorite__id": userStore.user.id});
 
-const toggleFavorite = (presentation) => {
+const toggleFavorite = (presentation: Presentation) => {
   if (!userStore.user) {
     router.replace({name: 'signup'})
   } else {
@@ -33,7 +34,7 @@ const toggleFavorite = (presentation) => {
 <template>
   <div class="container">
     <div class="row">
-      <presentation
+      <presentation-preview
           v-for="presentation in presentations.presentationsPublic.value"
           :key="presentation.id"
           :presentation="presentation"

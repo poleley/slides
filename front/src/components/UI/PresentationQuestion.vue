@@ -1,11 +1,8 @@
-<script setup>
+<script setup lang="ts">
 
-defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  }
-})
+defineProps<{
+  modelValue: boolean
+}>()
 
 defineEmits(['update:modelValue'])
 

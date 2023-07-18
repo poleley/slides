@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import SlidePreview from "@/components/SlidePreview.vue";
-import {usePresentations} from "../use/presentations";
+import SlidePreview from "../components/SlidePreview.vue";
+import { Slide, usePresentations } from "../use/presentations";
 import {useUserStore} from "../stores";
 import {useRouter} from "vue-router";
 import {ref} from "vue";
@@ -10,7 +10,7 @@ const router = useRouter()
 const presentations = usePresentations()
 const userStore = useUserStore();
 
-const slides = ref([]);
+const slides = ref<Slide[]>([]);
 
 presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'true'})
     .then(() => {
@@ -19,7 +19,7 @@ presentations.getPresentation(router.currentRoute.value.params.id, {'edit': 'tru
       slides.value = presentations.presentation.value.slide_set
     })
 
-function SlideLeadOn(slideId) {
+function SlideLeadOn(slideId: number) {
   let description = ref(presentations.presentation.value.description)
   description.value.lead[String(slideId)] = true
   presentations.editPresentation(
@@ -28,7 +28,7 @@ function SlideLeadOn(slideId) {
   )
 }
 
-function SlideLeadOff(slideId) {
+function SlideLeadOff(slideId: number) {
   let description = ref(presentations.presentation.value.description)
   delete description.value.lead[String(slideId)]
   presentations.editPresentation(

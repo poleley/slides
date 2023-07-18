@@ -1,21 +1,21 @@
-<script setup>
-import Presentation from "@/components/PresentationPreview.vue";
-import {usePresentations} from "@/use/presentations";
+<script setup lang="ts">
+import PresentationPreview from "../components/PresentationPreview.vue";
+import { Presentation, usePresentations } from "../use/presentations";
 import {onMounted} from "vue";
-import Router from "@/routers/router";
-import router from "@/routers/router";
-import {useUserStore} from "@/stores";
+import {useUserStore} from "../stores";
+import { useRouter } from "vue-router";
 
 const presentations = usePresentations();
 const userStore = useUserStore()
+const router = useRouter()
 
 onMounted(async () => {
   await presentations.getPublicPresentations();
 })
 
-const currentRoute = Router.currentRoute.value.path
+const currentRoute = router.currentRoute.value.path
 
-const toggleFavorite = (presentation) => {
+const toggleFavorite = (presentation: Presentation) => {
   if (!userStore.user) {
     router.replace({name: 'signup'})
   } else {
@@ -34,7 +34,7 @@ const toggleFavorite = (presentation) => {
 <template>
   <div class="container">
     <div class="row">
-      <presentation
+      <presentation-preview
           v-for="presentation in presentations.presentationsPublic.value"
           :key="presentation.id"
           :presentation="presentation"
@@ -44,7 +44,3 @@ const toggleFavorite = (presentation) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-
-</style>

@@ -1,11 +1,8 @@
-<script>
-</script>
-
 <template>
-  <span class="tooltiptext"><slot></slot></span>
+  <span :class="$style.tooltiptext"><slot></slot></span>
 </template>
 
-<style scoped>
+<style module>
 .tooltiptext {
   visibility: hidden;
   width: 130px;

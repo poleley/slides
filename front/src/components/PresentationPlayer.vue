@@ -1,32 +1,21 @@
-<script setup>
+<script setup lang="ts">
 
 import {ref} from "vue";
 import { useEventListener } from '@vueuse/core'
+import { Slide } from "../use/presentations";
 
-defineProps({
-  slideNum: {
-    type: Number,
-    required: true
-  },
-  imgSrc: {
-    type: String,
-    required: true
-  },
-  isLast: {
-    type: Boolean,
-    required: true
-  },
-  isEmbed: {
-    type: Boolean,
-    default: false
-  }
-})
+defineProps<{
+  slideNum: number,
+  imgSrc: string,
+  isLast: boolean,
+  isEmbed: boolean
+}>()
 
 const emit = defineEmits(['next', 'prev'])
 
-const isShowControls = ref(false)
-const isFullScreen = ref(false)
-const slide = ref(null)
+const isShowControls = ref<boolean>(false)
+const isFullScreen = ref<boolean>(false)
+const slide = ref<Slide>(null)
 
 useEventListener('keydown', (event) => {
   if (event.code === 'ArrowRight')
@@ -36,14 +25,14 @@ useEventListener('keydown', (event) => {
 })
 
 if (document.addEventListener) {
-  useEventListener('fullscreenchange', exitHandler, false);
-  useEventListener('mozfullscreenchange', exitHandler, false);
-  useEventListener('MSFullscreenChange', exitHandler, false);
-  useEventListener('webkitfullscreenchange', exitHandler, false);
+  useEventListener(document, 'fullscreenchange', exitHandler, false);
+  useEventListener(document, 'mozfullscreenchange', exitHandler, false);
+  useEventListener(document, 'MSFullscreenChange', exitHandler, false);
+  useEventListener(document, 'webkitfullscreenchange', exitHandler, false);
 }
 
 function exitHandler() {
-  if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+  if (!document['webkitIsFullScreen'] && !document['mozFullScreen'] && !document['msFullscreenElement']) {
     isFullScreen.value = false
   }
 }

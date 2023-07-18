@@ -1,4 +1,12 @@
 import axios from "axios";
+import { Slide } from "./presentations";
+
+export interface Answer {
+    id: number,
+    answer_text: string,
+    chosen_count: number,
+    slides: Slide[]
+}
 
 export function useAnswer() {
     const createAnswer = async (question_id, data) => {

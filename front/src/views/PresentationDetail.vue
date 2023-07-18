@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import UiTooltip from '@/components/UI/UiTooltip.vue'
-import {usePresentations} from "../use/presentations";
+import UiTooltip from '../components/UI/UiTooltip.vue'
+import { Slide, usePresentations } from "../use/presentations";
 import {useUserStore} from "../stores";
 import {computed, ref, watch} from "vue";
-import UiButton from "@/components/UI/UiButton.vue";
-import UiDialog from "@/components/UI/UiDialog.vue";
-import UiToast from "@/components/UI/UiToast.vue";
+import UiDialog from "../components/UI/UiDialog.vue";
+import UiToast from "../components/UI/UiToast.vue";
 import {useDefaultForm} from "../use/defaultForm";
 import {useLead} from "../use/leads";
 import {useQuestion} from "../use/question";
-import Question from "@/components/UI/PresentationQuestion.vue";
+import Question from "../components/UI/PresentationQuestion.vue";
 import {useRouter} from "vue-router";
-import Player from "@/components/PresentationPlayer.vue";
+import Player from "../components/PresentationPlayer.vue";
 import {useAnswer} from "../use/answer";
 
 const presentations = usePresentations();
@@ -20,23 +19,23 @@ const questions = useQuestion();
 const answers = useAnswer();
 const router = useRouter();
 
-const imgSrc = ref('');
-const slideNum = ref(null);
-const isLast = ref(false);
-const totalViews = ref(0);
-const totalFavorite = ref(0);
-const isUserOwner = ref(false);
-const isShowModal = ref(false);
-const currentSlideId = ref('');
-const isShowToast = ref(false);
-const isShowQuestion = ref(false);
-const isShowShare = ref(false);
-const share = ref('1');
-const shareLink = ref(location.href);
-const slides = ref([])
-const answerId = ref('')
-const isLead = ref(false)
-const isFavorite = ref(false)
+const imgSrc = ref<string>('');
+const slideNum = ref<number>(0);
+const isLast = ref<boolean>(false);
+const totalViews = ref<number>(0);
+const totalFavorite = ref<number>(0);
+const isUserOwner = ref<boolean>(false);
+const isShowModal = ref<boolean>(false);
+const currentSlideId = ref<number>();
+const isShowToast = ref<boolean>(false);
+const isShowQuestion = ref<boolean>(false);
+const isShowShare = ref<boolean>(false);
+const share = ref<string>('1');
+const shareLink = ref<string>(location.href);
+const slides = ref<Slide[]>([])
+const answerId = ref<string>('')
+const isLead = ref<boolean>(false)
+const isFavorite = ref<boolean>(false)
 const topics = {
   1: 'Искусство',
   2: 'Бизнес',
@@ -71,7 +70,7 @@ const leadForm = useDefaultForm({
     value: '',
     validators: {required, isEmail}
   },
-}).form
+})
 
 watch(slideNum, () => {
   isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value.description.lead
@@ -83,12 +82,18 @@ watch(slideNum, () => {
 })
 
 watch(isShowModal, () => {
-  leadForm.firstName.value = ''
-  leadForm.firstName.touched = false
-  leadForm.lastName.value = ''
-  leadForm.lastName.touched = false
-  leadForm.email.value = ''
-  leadForm.email.touched = false
+  if ("firstName" in leadForm) {
+    leadForm.firstName.value = "";
+    leadForm.firstName.touched = false
+  }
+  if ("lastName" in leadForm) {
+    leadForm.lastName.value = ''
+    leadForm.lastName.touched = false
+  }
+  if ("email" in leadForm) {
+    leadForm.email.value = ''
+    leadForm.email.touched = false
+  }
 })
 
 watch(share, () => {
@@ -166,8 +171,8 @@ function prevSlide() {
 }
 
 function copyShare() {
-  const inputShare = document.querySelector('.input-share')
-  inputShare.select()
+  const inputShare = document.querySelector('.input-share');
+  (inputShare as HTMLInputElement).select();
   document.execCommand("copy");
 }
 
@@ -194,19 +199,19 @@ function leadStart() {
 
 
 function sendLead() {
-  if (leadForm.valid) {
-    const formData = {
-      'first_name': leadForm.firstName.value,
-      'last_name': leadForm.lastName.value,
-      'email': leadForm.email.value
-    }
-    leads.createLead(currentSlideId.value, formData)
-    isShowModal.value = false
-    isShowToast.value = true
-    setTimeout(hideToast, 3000)
-    leadForm.firstName.value = '';
-    leadForm.lastName.value = '';
-    leadForm.email.value = '';
+  if (leadForm.valid && "firstName" in leadForm && "lastName" in leadForm && "email" in leadForm) {
+      const formData = {
+        'first_name': leadForm.firstName.value,
+        'last_name': leadForm.lastName.value,
+        'email': leadForm.email.value
+      }
+      leads.createLead(currentSlideId.value, formData)
+      isShowModal.value = false
+      isShowToast.value = true
+      setTimeout(hideToast, 3000)
+      leadForm.firstName.value = '';
+      leadForm.lastName.value = '';
+      leadForm.email.value = '';
   }
 }
 
@@ -264,14 +269,14 @@ function answerTheQuestion() {
       </div>
     </template>
     <template #footer>
-      <ui-button
+      <button
           type="submit"
-          class="button-submit"
+          class="btn button-submit"
           :disabled="answerId.value === ''"
           @click.prevent="answerTheQuestion"
       >
         Ответить
-      </ui-button>
+      </button>
     </template>
   </question>
 
@@ -335,13 +340,13 @@ function answerTheQuestion() {
           </template>
         </div>
 
-        <ui-button
+        <button
             type="submit"
             :disabled="!leadForm.valid"
-            class="button-submit"
+            class="btn button-submit"
         >
           Отправить
-        </ui-button>
+        </button>
       </form>
     </template>
   </ui-dialog>
@@ -364,8 +369,8 @@ function answerTheQuestion() {
         <template v-if="share === '1'">
           <div class="input-group share">
             <input class="form-control input-share" type="text" :value="shareLink" readonly>
-            <ui-button class="copy" @click="copyShare"><i class="bi bi-clipboard"></i></ui-button>
-            <ui-button class="copy">
+            <button class="btn copy" @click="copyShare"><i class="bi bi-clipboard"></i></button>
+            <button class="btn copy">
               <a :href="`https://vk.com/share.php?url=${shareLink}/`">
                 <svg
                     width="18"
@@ -389,7 +394,7 @@ function answerTheQuestion() {
                   </defs>
                 </svg>
               </a>
-            </ui-button>
+            </button>
           </div>
         </template>
         <template v-else>
@@ -400,7 +405,7 @@ function answerTheQuestion() {
               readonly="readonly"
               :value="`<iframe src=${shareLink} width='480' height='216'></iframe>`"
           ></textarea>
-            <ui-button class="copy" @click="copyShare"><i class="bi bi-clipboard"></i></ui-button>
+            <button class="btn copy" @click="copyShare"><i class="bi bi-clipboard"></i></button>
           </div>
         </template>
 
@@ -477,12 +482,12 @@ function answerTheQuestion() {
             </i>
           </div>
           <div v-else-if="isLead">
-            <ui-button
-                class="button-submit"
+            <button
+                class="btn button-submit"
                 @click="leadStart"
             >
               Оставить контакты
-            </ui-button>
+            </button>
           </div>
         </div>
         <div class="info">

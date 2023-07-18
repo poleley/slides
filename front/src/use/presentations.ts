@@ -1,5 +1,6 @@
 import axios from "axios";
 import {ref} from "vue";
+import { Question } from "./question";
 
 export interface Presentation {
     id: number,
@@ -33,10 +34,32 @@ export interface Description {
     favorite: object
 }
 
+export interface Statistics {
+    user_id: number,
+    title: string,
+    date_created: string,
+    total_views: number,
+    views: object,
+    total_favorite: number,
+    favorite: object,
+    first_slide: Slide,
+    leads: Lead[],
+    questions: Question[]
+}
+
+export interface Lead {
+    id: number,
+    slide: Slide,
+    email: string,
+    first_name: string,
+    last_name: string
+}
+
 export function usePresentations() {
     const presentationsPublic = ref<Presentation[]>([])
     const userPresentations = ref<Presentation[]>([])
     const presentation = ref<Presentation>()
+    const statistics = ref<Statistics>()
     const errCode = ref<number>(0)
 
     const getPublicPresentations = async (params = {}) => {
@@ -98,7 +121,7 @@ export function usePresentations() {
     const getStatistics = async (id:number) => {
         return await axios.get(`/api/v1/presentation/${id}/statistics`)
             .then((res) => {
-                presentation.value = res.data
+                statistics.value = res.data
             })
             .catch((e) => console.log(e))
     }
@@ -107,6 +130,7 @@ export function usePresentations() {
         presentationsPublic,
         userPresentations,
         presentation,
+        statistics,
         errCode,
         getPublicPresentations,
         getUserPresentations,

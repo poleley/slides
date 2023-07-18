@@ -10,7 +10,7 @@ export interface User {
 }
 
 export const useUserStore = defineStore('userStore', () => {
-    const user = ref<User>(<User>null)
+    const user = ref<User | null>(null)
     const error = ref(null)
 
     if (localStorage.getItem('user')) {

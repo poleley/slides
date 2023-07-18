@@ -1,15 +1,17 @@
-<script setup>
-const props = defineProps({
+<script setup lang="ts">
+
+defineProps({
   show: {
     type: Boolean,
     default: false
   }
 })
+
 </script>
 
 <template>
   <Transition>
-  <div v-if="props.show" class="ui-toast">
+  <div v-if="show" class="ui-toast">
     <div class="ui-toast-header">
       <strong class="me-auto">
         <slot name="header"></slot>

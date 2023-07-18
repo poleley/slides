@@ -1,17 +1,17 @@
-<script setup>
+<script setup lang="ts">
 
-import Player from "@/components/PresentationPlayer.vue";
-import {usePresentations} from "@/use/presentations";
+import Player from "../components/PresentationPlayer.vue";
+import { Slide, usePresentations } from "../use/presentations";
 import {useRouter} from "vue-router";
 import {ref, watch} from "vue";
 
 const presentations = usePresentations()
 const router = useRouter()
 
-const slideNum = ref(0)
-const isLast = ref(false)
-const imgSrc = ref('')
-const slides = ref([])
+const slideNum = ref<number>(0)
+const isLast = ref<boolean>(false)
+const imgSrc = ref<string>('')
+const slides = ref<Slide[]>([])
 
 
 presentations.getPresentation(router.currentRoute.value.params.id)
@@ -57,6 +57,3 @@ watch(slideNum, () => {
     <h2>Презентация не является публичной</h2>
   </div>
 </template>
-
-<style scoped>
-</style>

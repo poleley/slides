@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 
-import {usePresentations} from "@/use/presentations";
+import {usePresentations} from "../use/presentations";
 import {useRouter} from "vue-router";
-import {useUserStore} from "@/stores";
+import {useUserStore} from "../stores";
 import {computed, ref} from "vue";
-import {Chart} from "chart.js/auto";
+import { Chart, ChartConfiguration, ChartItem } from "chart.js/auto";
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -17,16 +17,16 @@ const imgSrc = ref('')
 const isLeads = ref(false)
 const isQuestions = ref(true)
 
-presentations.getStatistics(router.currentRoute.value.params.id).then(
+presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(
     () => {
-      if (userStore.user.id !== presentations.presentation.value.user_id)
+      if (userStore.user.id !== presentations.statistics.value.user_id)
         router.replace({name: 'all-presentations'})
-      isLeads.value = presentations.presentation.value.leads.length !== 0
-      isQuestions.value = presentations.presentation.value.questions.length !== 0
-      imgSrc.value = `/media/${presentations.presentation.value.first_slide.name}`
-      labels.value = Object.keys(presentations.presentation.value.views)
-      viewsValues.value = Object.values(presentations.presentation.value.views)
-      favoriteValues.value = Object.values(presentations.presentation.value.favorite)
+      isLeads.value = presentations.statistics.value.leads.length !== 0
+      isQuestions.value = presentations.statistics.value.questions.length !== 0
+      imgSrc.value = `/media/${presentations.statistics.value.first_slide.name}`
+      labels.value = Object.keys(presentations.statistics.value.views)
+      viewsValues.value = Object.values(presentations.statistics.value.views)
+      favoriteValues.value = Object.values(presentations.statistics.value.favorite)
       const data = {
         labels: labels.value,
         datasets: [
@@ -47,7 +47,7 @@ presentations.getStatistics(router.currentRoute.value.params.id).then(
         ]
       }
       new Chart(
-          document.getElementById('graphic'),
+        (document.getElementById('graphic') as ChartItem),
           {
             type: 'line',
             data: data,
@@ -59,26 +59,26 @@ presentations.getStatistics(router.currentRoute.value.params.id).then(
                 }
               }
             }
-          })
+          } as ChartConfiguration)
       const questionGraphics = document.querySelectorAll('canvas.graphic-question')
       for (let [index, questionGraphic] of questionGraphics.entries()) {
         let answersChosen = []
         let labels = []
-        for (let answer of presentations.presentation.value.questions[index].answer_set) {
+        for (let answer of presentations.statistics.value.questions[index].answer_set) {
           labels.push(answer.answer_text)
           answersChosen.push(answer.chosen_count)
         }
         const questionGraphicData = {
           labels: labels,
           datasets: [{
-            label: presentations.presentation.value.questions[index].question_text,
+            label: presentations.statistics.value.questions[index].question_text,
             data: answersChosen,
             backgroundColor: ['rgba(171,124,54,0.4)'],
             borderWidth: 1
           }]
         };
         new Chart(
-            questionGraphic,
+            questionGraphic as ChartItem,
             {
               type: 'bar',
               data: questionGraphicData,
@@ -90,14 +90,14 @@ presentations.getStatistics(router.currentRoute.value.params.id).then(
                   }
                 }
               }
-            }
+            } as ChartConfiguration
         )
       }
     }
 )
 
 const dateCreated = computed(() => {
-  return (new Date(presentations.presentation.value.date_created))
+  return (new Date(presentations.statistics.value.date_created))
       .toLocaleDateString('ru', {dateStyle: "long"})
 })
 
@@ -117,7 +117,7 @@ const dateCreated = computed(() => {
           </div>
           <div class="col col-10">
             <div class="row fw-bold presentation-title">
-              {{ presentations.presentation.value.title }}
+              {{ presentations.statistics.value.title }}
             </div>
             <div class="row presentation-date">
               {{ dateCreated }}
@@ -137,7 +137,7 @@ const dateCreated = computed(() => {
             Статистика по ответам пользователей на вопросы
           </div>
           <div
-              v-for="(question, index) in presentations.presentation.value.questions"
+              v-for="(question, index) in presentations.statistics.value.questions"
               :key="question.id"
           >
             <canvas :id="'graphic-question-' + index" class="graphic-question"></canvas>
@@ -157,7 +157,7 @@ const dateCreated = computed(() => {
             </thead>
             <tbody>
             <tr
-                v-for="lead in presentations.presentation.value.leads"
+                v-for="lead in presentations.statistics.value.leads"
                 :key="lead.id"
             >
               <td>{{ lead.slide.ordering + 1 }}</td>

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 
-import UiButton from "@/components/UI/UiButton.vue";
-
-import { useForm } from "../use/form";
+import { Form1, Form2, useForm } from "../use/form";
 import { useUserStore } from "../stores";
-import UiToast from "@/components/UI/UiToast.vue";
+import UiToast from "../components/UI/UiToast.vue";
 import router from "../routers/router";
 import { ref } from "vue";
 
@@ -26,7 +24,7 @@ const isEqual = (firstField: string, secondField: string, validatedField: string
 
 const userStore = useUserStore();
 
-const form = useForm({
+const form: Form1 | Form2 = useForm({
   firstName: {
     value: "",
     validators: { required }
@@ -63,13 +61,15 @@ function hideToast() {
 
 async function submit() {
   if ("valid" in form && form.valid) {
-    await userStore.signUp(
-      form.email.value,
-      form.username.value,
-      form.password.value,
-      form.firstName.value,
-      form.lastName.value
-    );
+    if ("username" in form && "firstName" in form && "lastName" in form) {
+      await userStore.signUp(
+        form.email.value,
+        form.username.value,
+        form.password.value,
+        form.firstName.value,
+        form.lastName.value
+      );
+    }
     if (userStore.error === null)
       await router.replace({ name: "library" });
     else {
@@ -203,13 +203,13 @@ async function submit() {
             </template>
           </div>
         </div>
-        <ui-button
+        <button
           type="submit"
-          class="button-submit w-100"
+          class="btn button-submit w-100"
           :disabled="!form.valid"
         >
           Зарегистрироваться
-        </ui-button>
+        </button>
       </form>
     </div>
   </div>
