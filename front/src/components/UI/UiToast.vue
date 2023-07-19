@@ -1,26 +1,24 @@
 <script setup lang="ts">
-
 defineProps({
   show: {
     type: Boolean,
-    default: false
-  }
-})
-
+    default: false,
+  },
+});
 </script>
 
 <template>
   <Transition>
-  <div v-if="show" class="ui-toast">
-    <div class="ui-toast-header">
-      <strong class="me-auto">
-        <slot name="header"></slot>
-      </strong>
+    <div v-if="show" class="ui-toast">
+      <div class="ui-toast-header">
+        <strong class="me-auto">
+          <slot name="header"></slot>
+        </strong>
+      </div>
+      <div class="ui-toast-body">
+        <slot name="body"></slot>
+      </div>
     </div>
-    <div class="ui-toast-body">
-      <slot name="body"></slot>
-    </div>
-  </div>
   </Transition>
 </template>
 
@@ -30,7 +28,7 @@ defineProps({
   align-items: center;
   padding: 0.5rem 0.75rem;
   color: #6c757d;
-  border-bottom: 1px solid rgba(0, 0, 0, .05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .ui-toast-body {
@@ -44,12 +42,12 @@ defineProps({
   top: 4rem;
   width: 350px;
   max-width: 100%;
-  font-size: .875rem;
+  font-size: 0.875rem;
   pointer-events: auto;
-  background-color: rgba(255, 255, 255, .85);
+  background-color: rgba(255, 255, 255, 0.85);
   background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, .1);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
   border-radius: 0.25rem;
 }
 
@@ -62,5 +60,4 @@ defineProps({
 .v-leave-to {
   opacity: 0;
 }
-
 </style>

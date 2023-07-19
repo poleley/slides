@@ -1,20 +1,18 @@
 <script setup lang="ts">
-
 defineProps<{
-  modelValue: boolean
-}>()
+  modelValue: boolean;
+}>();
 
-defineEmits(['update:modelValue'])
-
+defineEmits(["update:modelValue"]);
 </script>
 
 <template>
   <div v-if="modelValue" class="dialog" @click="$emit('update:modelValue', false)">
     <div class="dialog-body" @click.stop>
       <div class="header d-flex justify-content-between align-items-center">
-      <div class="my-modal-title">
-        <slot name="title"></slot>
-      </div>
+        <div class="my-modal-title">
+          <slot name="title"></slot>
+        </div>
         <button class="btn-close" @click="$emit('update:modelValue', false)"></button>
       </div>
       <slot name="body"></slot>

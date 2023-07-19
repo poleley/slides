@@ -26,31 +26,32 @@ const presentations = usePresentations();
 const form = usePresentationForm({
   title: {
     value: "",
-    validators: { required, MaxTitleLength: maxTitleLength }
+    validators: { required, MaxTitleLength: maxTitleLength },
   },
   privacy: {
     value: "",
-    validators: { required }
+    validators: { required },
   },
   topic: {
     value: "",
-    validators: { required }
-  }
+    validators: { required },
+  },
 });
 
 const checked = ref<boolean[]>([]);
 
 const userStore = useUserStore();
 
-presentations.getPresentation(Number(router.currentRoute.value.params.id), { "edit": "true" })
+presentations
+  .getPresentation(Number(router.currentRoute.value.params.id), { edit: "true" })
   .then(() => {
     if (userStore.user?.id !== presentations.presentation.value!.user.id)
       router.replace({ name: "signup" });
     else {
-        form.title.value = presentations.presentation.value!.title;
-        form.privacy.value = String(presentations.presentation.value!.privacy);
-        checked.value = ["1" === form.privacy.value, "2" === form.privacy.value];
-        form.topic.value = String(presentations.presentation.value!.topic);
+      form.title.value = presentations.presentation.value!.title;
+      form.privacy.value = String(presentations.presentation.value!.privacy);
+      checked.value = ["1" === form.privacy.value, "2" === form.privacy.value];
+      form.topic.value = String(presentations.presentation.value!.topic);
     }
   });
 
@@ -67,7 +68,7 @@ const topicOptions = ref<TopicOption[]>([
   { val: 10, text: "Самообразование" },
   { val: 11, text: "Спорт" },
   { val: 12, text: "Технологии" },
-  { val: 13, text: "Путешествия" }
+  { val: 13, text: "Путешествия" },
 ]);
 
 function edit() {
@@ -78,16 +79,17 @@ function edit() {
       formData.append("topic", form.topic.value);
       formData.append("privacy", form.privacy.value);
     }
-    presentations.editPresentation(presentations.presentation.value!.id, formData).then(() => {
-      router.replace({ name: "library" });
-    });
+    presentations
+      .editPresentation(presentations.presentation.value!.id, formData)
+      .then(() => {
+        router.replace({ name: "library" });
+      });
   }
 }
 
 function updateModelValue(value: string, modelValueKey: Field) {
   form[modelValueKey].value = value;
 }
-
 </script>
 
 <template>
@@ -108,7 +110,10 @@ function updateModelValue(value: string, modelValueKey: Field) {
           >
             <div class="col-3">
               <router-link
-                :to="{name: 'interactivity', params: {id: router.currentRoute.value.params.id}}"
+                :to="{
+                  name: 'interactivity',
+                  params: { id: router.currentRoute.value.params.id },
+                }"
                 class="ui-link interactivity"
               >
                 Настроить интерактивность
@@ -129,7 +134,6 @@ function updateModelValue(value: string, modelValueKey: Field) {
 </template>
 
 <style scoped>
-
 h2 {
   color: #564425;
 }
@@ -148,5 +152,4 @@ h2 {
 .interactivity {
   font-weight: bold;
 }
-
 </style>

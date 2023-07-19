@@ -1,13 +1,13 @@
 <script setup lang="ts">
-
 import { useForm } from "../use/logInform";
 import { type logInForm } from "../use/logInform.js";
-import {useUserStore} from "../stores";
+import { useUserStore } from "../stores";
 import router from "../routers/router";
-import {ref} from "vue";
+import { ref } from "vue";
 import UiToast from "../components/UI/UiToast.vue";
 
-const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
+const EMAIL_REGEXP =
+  /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
 function required(v: string) {
   return !!v;
@@ -21,36 +21,31 @@ const userStore = useUserStore();
 
 const form: logInForm = useForm({
   email: {
-    value: '',
-    validators: {required, isEmail}
+    value: "",
+    validators: { required, isEmail },
   },
   password: {
-    value: '',
-    validators: {required}
+    value: "",
+    validators: { required },
   },
-})
+});
 
-const isShowToast = ref(false)
+const isShowToast = ref(false);
 
 function hideToast() {
-  isShowToast.value = false
+  isShowToast.value = false;
 }
 
 async function submit() {
   if (form.valid) {
-    await userStore.logIn(
-        form.email.value,
-        form.password.value,
-    )
-    if (userStore.error === null)
-      await router.replace({name: 'library'})
+    await userStore.logIn(form.email.value, form.password.value);
+    if (userStore.error === null) await router.replace({ name: "library" });
     else {
-      isShowToast.value = true
-      setTimeout(hideToast, 3000)
+      isShowToast.value = true;
+      setTimeout(hideToast, 3000);
     }
   }
 }
-
 </script>
 
 <template>
@@ -64,48 +59,38 @@ async function submit() {
       <form @submit.prevent="submit">
         <div class="input-item">
           <input
-              v-model="form.email.value"
-              type="text"
-              placeholder="Электронная почта"
-              class="form-control"
-              :class="{'is-invalid': !form.email.valid && form.email.touched}"
-              @blur="form.email.blur"
+            v-model="form.email.value"
+            type="text"
+            placeholder="Электронная почта"
+            class="form-control"
+            :class="{ 'is-invalid': !form.email.valid && form.email.touched }"
+            @blur="form.email.blur"
           />
           <template v-if="form.email.errors.isEmail">
-            <div class="invalid-feedback">
-              Введите корректную электронную почту
-            </div>
+            <div class="invalid-feedback">Введите корректную электронную почту</div>
           </template>
           <template v-else-if="form.email.errors.required">
-            <div class="invalid-feedback">
-              Заполните это поле
-            </div>
+            <div class="invalid-feedback">Заполните это поле</div>
           </template>
         </div>
 
         <div class="input-item">
           <input
-              v-model="form.password.value"
-              type="password"
-              placeholder="Пароль"
-              class="form-control"
-              :class="{'is-invalid': !form.password.valid && form.password.touched}"
-              @blur="form.password.blur"
+            v-model="form.password.value"
+            type="password"
+            placeholder="Пароль"
+            class="form-control"
+            :class="{ 'is-invalid': !form.password.valid && form.password.touched }"
+            @blur="form.password.blur"
           />
           <div class="invalid-feedback">
             <template v-if="form.password.errors.required">
-              <div>
-                Заполните это поле
-              </div>
+              <div>Заполните это поле</div>
             </template>
           </div>
         </div>
 
-        <button
-            type="submit"
-            class="btn button-submit"
-            :disabled="!form.valid"
-        >
+        <button type="submit" class="btn button-submit" :disabled="!form.valid">
           Войти
         </button>
       </form>

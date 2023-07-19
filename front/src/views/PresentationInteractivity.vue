@@ -2,62 +2,57 @@
 import SlidePreview from "../components/SlidePreview.vue";
 import { type Description, type Slide } from "../use/presentations.js";
 import { usePresentations } from "../use/presentations";
-import {useUserStore} from "../stores";
-import {useRouter} from "vue-router";
-import {ref} from "vue";
+import { useUserStore } from "../stores";
+import { useRouter } from "vue-router";
+import { ref } from "vue";
 
-const router = useRouter()
+const router = useRouter();
 
-const presentations = usePresentations()
+const presentations = usePresentations();
 const userStore = useUserStore();
 
 const slides = ref<Slide[]>([]);
 
-presentations.getPresentation(Number(router.currentRoute.value.params.id), {'edit': 'true'})
-    .then(() => {
-      if (userStore.user!.id !== presentations.presentation.value!.user.id)
-        router.replace({name: 'all-presentations'})
-      slides.value = presentations.presentation.value!.slide_set
-    })
+presentations
+  .getPresentation(Number(router.currentRoute.value.params.id), { edit: "true" })
+  .then(() => {
+    if (userStore.user!.id !== presentations.presentation.value!.user.id)
+      router.replace({ name: "all-presentations" });
+    slides.value = presentations.presentation.value!.slide_set;
+  });
 
 function SlideLeadOn(slideId: number) {
   if (presentations.presentation.value !== undefined) {
-    let description = ref(presentations.presentation.value!.description)
-    description.value.lead[String(slideId)] = true
-    presentations.editPresentation(
-      presentations.presentation.value!.id,
-      { "description": description.value }
-    )
+    let description = ref(presentations.presentation.value!.description);
+    description.value.lead[String(slideId)] = true;
+    presentations.editPresentation(presentations.presentation.value!.id, {
+      description: description.value,
+    });
   }
 }
 
 function SlideLeadOff(slideId: number) {
   if (presentations.presentation.value !== undefined) {
-    let description = ref<Description>(presentations.presentation.value!.description)
-    delete description.value.lead[String(slideId)]
-    presentations.editPresentation(
-      presentations.presentation.value!.id,
-      { "description": description.value }
-    )
+    let description = ref<Description>(presentations.presentation.value!.description);
+    delete description.value.lead[String(slideId)];
+    presentations.editPresentation(presentations.presentation.value!.id, {
+      description: description.value,
+    });
   }
 }
-
 </script>
 
 <template>
-  <div
-    v-if="presentations.presentation.value !== undefined"
-    class="presentation-outer"
-  >
+  <div v-if="presentations.presentation.value !== undefined" class="presentation-outer">
     <div class="presentation-inner">
       <slide-preview
-          v-for="slide in slides.slice(0, slides.length - 1)"
-          :key="slide.id"
-          :slide="slide"
-          :slides="slides"
-          :is-lead-on="slide.id in presentations.presentation.value.description.lead"
-          @lead-on="SlideLeadOn"
-          @lead-off="SlideLeadOff"
+        v-for="slide in slides.slice(0, slides.length - 1)"
+        :key="slide.id"
+        :slide="slide"
+        :slides="slides"
+        :is-lead-on="slide.id in presentations.presentation.value.description.lead"
+        @lead-on="SlideLeadOn"
+        @lead-off="SlideLeadOff"
       />
     </div>
   </div>

@@ -1,19 +1,12 @@
 <script setup lang="ts">
-
 import { ref } from "vue";
 import { useEventListener } from "@vueuse/core";
 
-interface Document {
-  mozFullScreen: () => void;
-  webkitIsFullScreen: () => void;
-  msFullscreenElement: () => void;
-}
-
 defineProps<{
-  slideNum: number,
-  imgSrc: string,
-  isLast: boolean,
-  isEmbed: boolean
+  slideNum: number;
+  imgSrc: string;
+  isLast: boolean;
+  isEmbed: boolean;
 }>();
 
 const emit = defineEmits(["next", "prev"]);
@@ -23,17 +16,14 @@ const isFullScreen = ref<boolean>(false);
 const slide = ref<HTMLElement>();
 
 useEventListener("keydown", (event) => {
-  if (event.code === "ArrowRight")
-    emit("next");
-  if (event.code === "ArrowLeft")
-    emit("prev");
+  if (event.code === "ArrowRight") emit("next");
+  if (event.code === "ArrowLeft") emit("prev");
 });
 
 useEventListener(document, "fullscreenchange", exitHandler, false);
 useEventListener(document, "mozfullscreenchange", exitHandler, false);
 useEventListener(document, "MSFullscreenChange", exitHandler, false);
 useEventListener(document, "webkitfullscreenchange", exitHandler, false);
-
 
 function exitHandler() {
   isFullScreen.value = false;
@@ -44,22 +34,13 @@ function fullScreen(event: Event) {
   if ((event.target as HTMLElement)["requestFullscreen"])
     (slide.value as HTMLElement)["requestFullscreen"]();
 }
-
 </script>
 
 <template>
-  <div
-    :class="[
-  $style.slides,
-  {[$style['width-70']]: !isEmbed}
-  ]"
-  >
+  <div :class="[$style.slides, { [$style['width-70']]: !isEmbed }]">
     <i
       class="bi bi-caret-left-fill"
-      :class="[
-            $style.switch,
-            {[$style.disabled]: slideNum === 0}
-        ]"
+      :class="[$style.switch, { [$style.disabled]: slideNum === 0 }]"
       @click="$emit('prev')"
     >
     </i>
@@ -69,23 +50,28 @@ function fullScreen(event: Event) {
       @mouseover="isShowControls = true"
       @mouseleave="isShowControls = false"
     >
-      <img :src="imgSrc" alt="Слайд" :class="{[$style.img]: !isFullScreen, 'h-100': isFullScreen}">
+      <img
+        :src="imgSrc"
+        alt="Слайд"
+        :class="{ [$style.img]: !isFullScreen, 'h-100': isFullScreen }"
+      />
       <div
         class="text-end"
         :class="[
           $style.controls,
-          {'d-none': !isShowControls && !isFullScreen || isFullScreen}
-          ]"
+          { 'd-none': (!isShowControls && !isFullScreen) || isFullScreen },
+        ]"
       >
-        <i class="bi bi-fullscreen" :class="$style['bi-fullscreen']" @click="fullScreen($event)"></i>
+        <i
+          class="bi bi-fullscreen"
+          :class="$style['bi-fullscreen']"
+          @click="fullScreen($event)"
+        ></i>
       </div>
     </div>
     <i
       class="bi bi-caret-right-fill"
-      :class="[
-        $style.switch,
-        {[$style.disabled]: isLast}
-        ]"
+      :class="[$style.switch, { [$style.disabled]: isLast }]"
       @click="$emit('next')"
     >
     </i>

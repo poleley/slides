@@ -1,45 +1,43 @@
 <script setup lang="ts">
-import {defineProps, ref, watch} from 'vue'
-
+import { defineProps, ref, watch } from "vue";
 
 defineProps({
   modelValue: {
     type: Object,
     default() {
-      return {}
-    }
+      return {};
+    },
   },
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
-const fileName = ref<string>('')
+const emit = defineEmits(["update:modelValue"]);
+const fileName = ref<string>("");
 
 const updateValue = (e: Event) => {
-  emit('update:modelValue', (e.target as HTMLInputElement).files![0]);
+  emit("update:modelValue", (e.target as HTMLInputElement).files![0]);
   fileName.value = (e.target as HTMLInputElement).files![0].name;
 };
 
-watch(() => fileName.value, () => {
-  if (fileName.value.length > 50)
-    fileName.value = fileName.value.slice(0, 50) + '...'
-})
-
+watch(
+  () => fileName.value,
+  () => {
+    if (fileName.value.length > 50)
+      fileName.value = fileName.value.slice(0, 50) + "...";
+  },
+);
 </script>
 
 <template>
-  <div class="file-upload mb-2" :class="{'invalid': !modelValue.valid && modelValue.touched}">
+  <div
+    class="file-upload mb-2"
+    :class="{ invalid: !modelValue.valid && modelValue.touched }"
+  >
     <div class="container-fluid">
       <div class="row">
         <template v-if="!modelValue.touched">
-        <div class="col col-12">
-          Нажмите здесь, чтобы загрузить файл
-        </div>
-        <div class="col col-12">
-          или
-        </div>
-        <div class="col col-12">
-          Перетащите его
-        </div>
+          <div class="col col-12">Нажмите здесь, чтобы загрузить файл</div>
+          <div class="col col-12">или</div>
+          <div class="col col-12">Перетащите его</div>
         </template>
         <template v-else>
           <div class="col col-12">
@@ -50,22 +48,17 @@ watch(() => fileName.value, () => {
               Размер файла не должен превышать 5 МБайт
             </template>
             <template v-else>
-            {{ fileName }}
+              {{ fileName }}
             </template>
           </div>
         </template>
       </div>
     </div>
-    <input
-        type="file"
-        class="input-file"
-        accept=".pdf"
-        @input="updateValue"/>
+    <input type="file" class="input-file" accept=".pdf" @input="updateValue" />
   </div>
 </template>
 
 <style scoped>
-
 .input-file {
   position: absolute;
   left: 0;
@@ -94,5 +87,4 @@ watch(() => fileName.value, () => {
   border: 1px dashed red;
   color: red;
 }
-
 </style>

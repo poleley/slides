@@ -1,50 +1,48 @@
 <script setup lang="ts">
-
 import router from "../routers/router";
-import UiTooltip from '../components/UI/UiTooltip.vue'
-import {useUserStore} from "../stores";
-import {ref} from "vue";
+import UiTooltip from "../components/UI/UiTooltip.vue";
+import { useUserStore } from "../stores";
+import { ref } from "vue";
 import Router from "../routers/router";
 import { type Presentation } from "../use/presentations.js";
 
 const userStore = useUserStore();
 
 const props = defineProps<{
-  presentation: Presentation
-}>()
+  presentation: Presentation;
+}>();
 
-const emit = defineEmits(['delete', 'updateFavorite']);
+const emit = defineEmits(["delete", "updateFavorite"]);
 
 const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
-const currentRoute = Router.currentRoute.value.name
+const currentRoute = Router.currentRoute.value.name;
 
 function presentationDetail(id: number) {
-  router.replace({path: `/presentation/${id}`})
+  router.replace({ path: `/presentation/${id}` });
 }
 
 function editPresentation(id: number) {
-  router.replace({name: 'presentation-edit', params: {id: id}})
+  router.replace({ name: "presentation-edit", params: { id: id } });
 }
 
-const isFavorite = ref<boolean>(false)
+const isFavorite = ref<boolean>(false);
 
 if (userStore.user)
-    isFavorite.value = props.presentation.favorite.includes(userStore.user.id)
+  isFavorite.value = props.presentation.favorite.includes(userStore.user.id);
 
 function toggleFavorite() {
   if (userStore.user) {
-    isFavorite.value = !isFavorite.value
+    isFavorite.value = !isFavorite.value;
   }
-  emit('updateFavorite', props.presentation)
+  emit("updateFavorite", props.presentation);
 }
-
 </script>
 
 <template>
   <div class="col-4">
     <div class="presentation">
       <div class="preview" @click="presentationDetail(presentation.id)">
-        <img class="img-preview" alt="Превью" :src="imgSrc">
+        <img class="img-preview" alt="Превью" :src="imgSrc" />
       </div>
       <div class="info">
         <template v-if="currentRoute !== 'library'">
@@ -67,7 +65,8 @@ function toggleFavorite() {
               {{ presentation.user.username }}
             </div>
             <div class="views">
-              {{ presentation.description.views.total_views || 0 }} <i class="bi bi-eye"></i>
+              {{ presentation.description.views.total_views || 0 }}
+              <i class="bi bi-eye"></i>
             </div>
           </div>
         </template>
@@ -85,25 +84,29 @@ function toggleFavorite() {
           <div class="d-flex justify-content-between">
             <div class="buttons">
               <router-link
-                  :to="{name: 'statistics', params: {id: presentation.id}}"
-                  class="ui-link to-item"
+                :to="{ name: 'statistics', params: { id: presentation.id } }"
+                class="ui-link to-item"
               >
-              <i class="bi bi-bar-chart-line-fill ui-tooltip">
-                <ui-tooltip>Статистика</ui-tooltip>
-              </i>
+                <i class="bi bi-bar-chart-line-fill ui-tooltip">
+                  <ui-tooltip>Статистика</ui-tooltip>
+                </i>
               </router-link>
-              <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentation.id)">
+              <i
+                class="bi bi-pencil-fill ui-tooltip"
+                @click="editPresentation(presentation.id)"
+              >
                 <ui-tooltip>Редактировать</ui-tooltip>
               </i>
               <i
-                  class="bi bi-trash3-fill ui-tooltip"
-                  @click="emit('delete', presentation)"
+                class="bi bi-trash3-fill ui-tooltip"
+                @click="emit('delete', presentation)"
               >
                 <ui-tooltip>Удалить</ui-tooltip>
               </i>
             </div>
             <div class="views">
-              {{ presentation.description.views.total_views || 0 }} <i class="bi bi-eye"></i>
+              {{ presentation.description.views.total_views || 0 }}
+              <i class="bi bi-eye"></i>
             </div>
           </div>
         </template>
@@ -120,7 +123,8 @@ function toggleFavorite() {
   border: 1px solid #e1d6c6;
 }
 
-.row-1, .row-2 {
+.row-1,
+.row-2 {
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -136,10 +140,10 @@ function toggleFavorite() {
   /*width: 100%;*/
   height: 11rem;
   position: absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  object-fit:cover;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
   /*margin: 0 auto;*/
 }
 
@@ -171,7 +175,9 @@ function toggleFavorite() {
   color: #81673e;
 }
 
-.bi-share-fill, .bi-pencil-fill, .bi-trash3-fill {
+.bi-share-fill,
+.bi-pencil-fill,
+.bi-trash3-fill {
   margin-left: 8px;
 }
 
@@ -188,5 +194,4 @@ function toggleFavorite() {
 .ui-tooltip:hover .tooltiptext {
   visibility: visible;
 }
-
 </style>

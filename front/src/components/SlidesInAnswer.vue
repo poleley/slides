@@ -1,33 +1,27 @@
 <script setup lang="ts">
-
 import { type Slide } from "../use/presentations.js";
 
 defineProps<{
-  slides: Slide[],
-  selectedSlidesIds: number[]
-}>()
+  slides: Slide[];
+  selectedSlidesIds: number[];
+}>();
 
-defineEmits(['changeSlidesIds'])
-
+defineEmits(["changeSlidesIds"]);
 </script>
 
 <template>
   <div class="row row-slides">
-      <div
-          v-for="slide in slides"
-          :key="slide.id"
-          class="col col-4 slide-item"
-      >
-        <div class="img-slide-preview">
-          <input
-              class="form-check-input input-check-slide"
-              type="checkbox"
-              :value="slide.id"
-              :checked="selectedSlidesIds.includes(slide.id)"
-              @change="$emit('changeSlidesIds', slide, $event)"
-          >
-          <img class="img-slide" :src="`/media/${slide.name}`" alt="Слайд">
-        </div>
+    <div v-for="slide in slides" :key="slide.id" class="col col-4 slide-item">
+      <div class="img-slide-preview">
+        <input
+          class="form-check-input input-check-slide"
+          type="checkbox"
+          :value="slide.id"
+          :checked="selectedSlidesIds.includes(slide.id)"
+          @change="$emit('changeSlidesIds', slide, $event)"
+        />
+        <img class="img-slide" :src="`/media/${slide.name}`" alt="Слайд" />
+      </div>
     </div>
   </div>
 </template>
@@ -67,5 +61,4 @@ img {
   overflow-y: auto;
   max-height: 27rem;
 }
-
 </style>
