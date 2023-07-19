@@ -1,6 +1,6 @@
 import {reactive} from "vue";
 import {useField} from "./field";
-import { Field } from "./form";
+import { type Field } from "./signUpForm.js";
 
 export interface Form {
     valid: boolean
@@ -14,12 +14,26 @@ interface formQuestion extends Form{
     questionText: Field
 }
 
-export function useOneFieldForm(init = {}) {
-    const form = reactive<formQuestion | formAnswer>(null)
+export function useAnswerForm(init = {}): formAnswer {
+    const form = reactive<formAnswer>(<formAnswer>{})
 
     for (const [key, val] of Object.entries(init)) {
-        form[key] = useField(val)
+        if (form) {
+            form[key] = useField(val);
+        }
     }
 
-    return {form}
+    return form
+}
+
+export function useQuestionForm(init = {}): formQuestion {
+    const form = reactive<formQuestion>(<formQuestion>{})
+
+    for (const [key, val] of Object.entries(init)) {
+        if (form) {
+            form[key] = useField(val);
+        }
+    }
+
+    return form
 }

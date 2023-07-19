@@ -6,7 +6,7 @@ export function useLead() {
 
     const leadCreateMessage = ref({header: "", body: ""})
 
-    const createLead = async (id, data) => {
+    const createLead = async (id: number, data: object) => {
         console.log(data)
         return await axios.post(
             `/api/v1/slide/${id}/lead/`,

@@ -1,30 +1,37 @@
 <script setup lang="ts">
 
-import { Form1, Form2, useForm } from "../use/form";
+import { type signUpForm} from "../use/signUpForm.js";
+import { useForm } from "../use/signUpForm";
 import { useUserStore } from "../stores";
 import UiToast from "../components/UI/UiToast.vue";
 import router from "../routers/router";
 import { ref } from "vue";
 
 
-const passLength = 8;
+const passLength: number = 8;
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
-const required = v => !!v;
-const minLength = num => v => v.length >= num;
+function required(v: string) {
+  return !!v;
+}
 
-const isEmail = v => EMAIL_REGEXP.test(v);
+function minLength(num: number) {
+  return (v: string) => v.length >= num;
+}
 
-const isEqual = (firstField: string, secondField: string, validatedField: string) => (form: object) => {
-  const isValid = form[secondField].value === form[firstField].value;
-  form[validatedField].errors["isEqual"] = !isValid;
-  form[validatedField].validate();
-  form[validatedField].valid &&= isValid;
+function isEmail(v: string) {
+  return EMAIL_REGEXP.test(v);
+}
+
+const isEqual = () => (form: signUpForm) => {
+  const isValid = form.password.value === form.passwordConfirm.value;
+  form.passwordConfirm.errors["isEqual"] = !isValid;
+  form.passwordConfirm.valid &&= isValid;
 };
 
 const userStore = useUserStore();
 
-const form: Form1 | Form2 = useForm({
+const form: signUpForm = useForm({
   firstName: {
     value: "",
     validators: { required }
@@ -50,32 +57,30 @@ const form: Form1 | Form2 = useForm({
     validators: { required, minLength: minLength(passLength) }
   }
 }, {
-  validators: [isEqual("password", "passwordConfirm", "passwordConfirm")]
+  validators: [isEqual()]
 });
 
-const isShowToast = ref(false);
+const isShowToast = ref<boolean>(false);
 
 function hideToast() {
   isShowToast.value = false;
 }
 
 async function submit() {
-  if ("valid" in form && form.valid) {
-    if ("username" in form && "firstName" in form && "lastName" in form) {
-      await userStore.signUp(
-        form.email.value,
-        form.username.value,
-        form.password.value,
-        form.firstName.value,
-        form.lastName.value
-      );
-    }
-    if (userStore.error === null)
-      await router.replace({ name: "library" });
-    else {
-      isShowToast.value = true;
-      setTimeout(hideToast, 3000);
-    }
+  if (form.valid) {
+    await userStore.signUp(
+      form.email.value,
+      form.username.value,
+      form.password.value,
+      form.firstName.value,
+      form.lastName.value
+    );
+  }
+  if (userStore.error === null)
+    await router.replace({ name: "library" });
+  else {
+    isShowToast.value = true;
+    setTimeout(hideToast, 3000);
   }
 }
 

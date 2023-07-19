@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import PresentationPreview from "../components/PresentationPreview.vue";
-import { Presentation, usePresentations } from "../use/presentations";
+import { usePresentations } from "../use/presentations";
+import { type Presentation } from "../use/presentations.js";
 import {useUserStore} from "../stores";
 import { useRouter } from "vue-router";
 
@@ -12,7 +13,7 @@ const router = useRouter();
 
 const currentRoute = router.currentRoute.value.path
 
-presentations.getPublicPresentations({"favorite__id": userStore.user.id});
+presentations.getPublicPresentations({"favorite__id": userStore.user!.id});
 
 const toggleFavorite = (presentation: Presentation) => {
   if (!userStore.user) {
@@ -22,7 +23,7 @@ const toggleFavorite = (presentation: Presentation) => {
       presentations.presentationsPublic.value = presentations.presentationsPublic.value
           .filter(publicPresentation => publicPresentation.id !== presentation.id)
       presentations.removeFromFavorite(presentation.id)
-      presentation.favorite = presentation.favorite.filter(id => id !== userStore.user.id)
+      presentation.favorite = presentation.favorite.filter(id => id !== userStore.user!.id)
     } else {
       presentations.addToFavorite(presentation.id)
       presentation.favorite.push(userStore.user.id)

@@ -1,26 +1,32 @@
 <script setup lang="ts">
-import { useDefaultForm } from "../use/defaultForm";
+import { usePresentationForm } from "../use/defaultForm";
 import { ref } from "vue";
 import { usePresentations } from "../use/presentations";
 import PresentationForm from "../components/PresentationForm.vue";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
-import { TopicOption } from "../components/PresentationForm.vue";
+import { type TopicOption } from "../components/PresentationForm.vue";
+import { type Field } from "../use/signUpForm.js";
 
 const router = useRouter();
 
 const MAX_TITLE_LENGTH: number = 255;
 const MAX_TAG_LENGTH: number = 100;
 
-const required = v => !!v;
-const MaxTitleLength = v => v.length <= MAX_TITLE_LENGTH;
+function required(v: string) {
+  return !!v;
+}
+
+function maxTitleLength(v: string) {
+  return v.length <= MAX_TITLE_LENGTH;
+}
 
 const presentations = usePresentations();
 
-const form = useDefaultForm({
+const form = usePresentationForm({
   title: {
     value: "",
-    validators: { required, MaxTitleLength }
+    validators: { required, MaxTitleLength: maxTitleLength }
   },
   privacy: {
     value: "",
@@ -36,21 +42,15 @@ const checked = ref<boolean[]>([]);
 
 const userStore = useUserStore();
 
-presentations.getPresentation(router.currentRoute.value.params.id, { "edit": "true" })
+presentations.getPresentation(Number(router.currentRoute.value.params.id), { "edit": "true" })
   .then(() => {
-    if (userStore.user.id !== presentations.presentation.value.user.id)
+    if (userStore.user?.id !== presentations.presentation.value!.user.id)
       router.replace({ name: "signup" });
     else {
-      if ("title" in form) {
-        form.title.value = presentations.presentation.value.title;
-      }
-      if ("privacy" in form) {
-        form.privacy.value = String(presentations.presentation.value.privacy);
+        form.title.value = presentations.presentation.value!.title;
+        form.privacy.value = String(presentations.presentation.value!.privacy);
         checked.value = ["1" === form.privacy.value, "2" === form.privacy.value];
-      }
-      if ("topic" in form) {
-        form.topic.value = String(presentations.presentation.value.topic);
-      }
+        form.topic.value = String(presentations.presentation.value!.topic);
     }
   });
 
@@ -78,13 +78,13 @@ function edit() {
       formData.append("topic", form.topic.value);
       formData.append("privacy", form.privacy.value);
     }
-    presentations.editPresentation(presentations.presentation.value.id, formData).then(() => {
+    presentations.editPresentation(presentations.presentation.value!.id, formData).then(() => {
       router.replace({ name: "library" });
     });
   }
 }
 
-function updateModelValue(value, modelValueKey) {
+function updateModelValue(value: string, modelValueKey: Field) {
   form[modelValueKey].value = value;
 }
 

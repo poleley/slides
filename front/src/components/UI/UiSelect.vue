@@ -1,24 +1,18 @@
 <script setup lang="ts">
 
-defineProps({
-  modelValue: {
-    type: Object,
-    default() {
-      return []
-    }
-  },
-  options: {
-    type: Array,
-    default:
-        () => []
-  }
-})
+import { type TopicOption } from "../PresentationForm.vue";
+import { type Field } from "../../use/signUpForm.js";
+
+defineProps<{
+  value: Field,
+  options: TopicOption[]
+}>()
 
 </script>
 
 <template>
   <select
-      :value="modelValue.value"
+      :value="value.value"
       class="form-select"
   >
     <option disabled selected hidden value="">

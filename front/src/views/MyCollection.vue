@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import PresentationPreview from "../components/PresentationPreview.vue";
-import { Presentation, usePresentations } from "../use/presentations";
+import { usePresentations } from "../use/presentations";
+import { type Presentation } from "../use/presentations.js";
 import {useUserStore} from "../stores";
 
 const presentations = usePresentations();
 
 const userStore = useUserStore();
 
-presentations.getUserPresentations(userStore.user.id);
+presentations.getUserPresentations(Number(userStore.user!.id));
 
 const updatePresentations = (deletedPresentation: Presentation) => {
   presentations.deletePresentation(deletedPresentation.id).then(() => {
-    presentations.getUserPresentations(userStore.user.id);
+    presentations.getUserPresentations(Number(userStore.user!.id));
   })
 }
 

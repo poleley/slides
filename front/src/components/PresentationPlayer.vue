@@ -1,81 +1,78 @@
 <script setup lang="ts">
 
-import {ref} from "vue";
-import { useEventListener } from '@vueuse/core'
-import { Slide } from "../use/presentations";
+import { ref } from "vue";
+import { useEventListener } from "@vueuse/core";
+
+interface Document {
+  mozFullScreen: () => void;
+  webkitIsFullScreen: () => void;
+  msFullscreenElement: () => void;
+}
 
 defineProps<{
   slideNum: number,
   imgSrc: string,
   isLast: boolean,
   isEmbed: boolean
-}>()
+}>();
 
-const emit = defineEmits(['next', 'prev'])
+const emit = defineEmits(["next", "prev"]);
 
-const isShowControls = ref<boolean>(false)
-const isFullScreen = ref<boolean>(false)
-const slide = ref<Slide>(null)
+const isShowControls = ref<boolean>(false);
+const isFullScreen = ref<boolean>(false);
+const slide = ref<HTMLElement>();
 
-useEventListener('keydown', (event) => {
-  if (event.code === 'ArrowRight')
-    emit('next')
-  if (event.code === 'ArrowLeft')
-    emit('prev')
-})
+useEventListener("keydown", (event) => {
+  if (event.code === "ArrowRight")
+    emit("next");
+  if (event.code === "ArrowLeft")
+    emit("prev");
+});
 
-if (document.addEventListener) {
-  useEventListener(document, 'fullscreenchange', exitHandler, false);
-  useEventListener(document, 'mozfullscreenchange', exitHandler, false);
-  useEventListener(document, 'MSFullscreenChange', exitHandler, false);
-  useEventListener(document, 'webkitfullscreenchange', exitHandler, false);
-}
+useEventListener(document, "fullscreenchange", exitHandler, false);
+useEventListener(document, "mozfullscreenchange", exitHandler, false);
+useEventListener(document, "MSFullscreenChange", exitHandler, false);
+useEventListener(document, "webkitfullscreenchange", exitHandler, false);
+
 
 function exitHandler() {
-  if (!document['webkitIsFullScreen'] && !document['mozFullScreen'] && !document['msFullscreenElement']) {
-    isFullScreen.value = false
-  }
+  isFullScreen.value = false;
 }
 
-function fullScreen(event) {
-  isFullScreen.value = true
-  if (event.target.requestFullscreen) {
-    slide.value.requestFullscreen();
-  } else if (event.target.webkitrequestFullscreen) {
-    slide.value.webkitRequestFullscreen();
-  } else if (event.target.mozRequestFullscreen) {
-    slide.value.mozRequestFullScreen();
-  }
+function fullScreen(event: Event) {
+  isFullScreen.value = true;
+  if ((event.target as HTMLElement)["requestFullscreen"])
+    (slide.value as HTMLElement)["requestFullscreen"]();
 }
 
 </script>
 
 <template>
   <div
-:class="[
+    :class="[
   $style.slides,
   {[$style['width-70']]: !isEmbed}
   ]"
   >
     <i
-        class="bi bi-caret-left-fill"
-        :class="[
+      class="bi bi-caret-left-fill"
+      :class="[
             $style.switch,
             {[$style.disabled]: slideNum === 0}
         ]"
-        @click="$emit('prev')"
+      @click="$emit('prev')"
     >
     </i>
     <div
-        ref="slide"
-        :class="$style.slide"
-        @mouseover="isShowControls = true"
-        @mouseleave="isShowControls = false"
+      ref="slide"
+      :class="$style.slide"
+      @mouseover="isShowControls = true"
+      @mouseleave="isShowControls = false"
     >
       <img :src="imgSrc" alt="Слайд" :class="{[$style.img]: !isFullScreen, 'h-100': isFullScreen}">
       <div
-          class="text-end"
-          :class="[
+        class="text-end"
+        :class="[
           $style.controls,
           {'d-none': !isShowControls && !isFullScreen || isFullScreen}
           ]"
@@ -84,12 +81,12 @@ function fullScreen(event) {
       </div>
     </div>
     <i
-        class="bi bi-caret-right-fill"
-        :class="[
+      class="bi bi-caret-right-fill"
+      :class="[
         $style.switch,
         {[$style.disabled]: isLast}
         ]"
-        @click="$emit('next')"
+      @click="$emit('next')"
     >
     </i>
   </div>

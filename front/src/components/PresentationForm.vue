@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiSelect from "../components/UI/UiSelect.vue";
-import { Form } from "../use/defaultForm";
+import { type PresentationForm } from "../use/defaultForm";
 
 export interface TopicOption {
   val: number,
@@ -8,7 +8,7 @@ export interface TopicOption {
 }
 
 defineProps<{
-  modelValue: Form,
+  modelValue: PresentationForm,
   topicOptions: TopicOption[],
   maxTitleLength: number,
   checked2: boolean,
@@ -16,7 +16,11 @@ defineProps<{
   isEdit: boolean
 }>()
 
-defineEmits(['update:modelValue', 'updateSelect'])
+const emit = defineEmits(['update:modelValue'])
+
+const updateValue = (e: Event, field: string) => {
+  emit('update:modelValue', (e.target as HTMLInputElement).value, field)
+};
 </script>
 
 <template>
@@ -32,7 +36,7 @@ defineEmits(['update:modelValue', 'updateSelect'])
               :value="modelValue.title.value"
               class="form-control title"
               :class="{'is-invalid': !modelValue.title.valid && modelValue.title.touched}"
-              @input="$emit('update:modelValue', $event.target.value, 'title')"
+              @input="updateValue($event, 'title')"
               @blur="modelValue.title.blur"
           >
           <div class="help-text">*Обязательно</div>
@@ -58,7 +62,7 @@ defineEmits(['update:modelValue', 'updateSelect'])
               :value="modelValue.topic.value"
               :class="{'is-invalid': !modelValue.topic.valid && modelValue.topic.touched}"
               :options="topicOptions"
-              @change="$emit('update:modelValue', $event.target.value, 'topic')"
+              @change="updateValue($event, 'topic')"
               @blur="modelValue.topic.blur"
           >
             Выберите тему...
@@ -80,7 +84,7 @@ defineEmits(['update:modelValue', 'updateSelect'])
                 value="2"
                 class="form-check-input"
                 :checked="checked2"
-                @click="$emit('update:modelValue', $event.target.value, 'privacy')"
+                @click="updateValue($event, 'privacy')"
             >
           </label>
         </div>
@@ -93,7 +97,7 @@ defineEmits(['update:modelValue', 'updateSelect'])
                 value="1"
                 class="form-check-input"
                 :checked="checked1"
-                @click="$emit('update:modelValue', $event.target.value, 'privacy')"
+                @click="updateValue($event, 'privacy')"
             >
           </label>
         </div>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
 import Player from "../components/PresentationPlayer.vue";
-import { Slide, usePresentations } from "../use/presentations";
+import { usePresentations } from "../use/presentations";
+import { type Slide } from "../use/presentations.js";
 import {useRouter} from "vue-router";
 import {ref, watch} from "vue";
 
@@ -14,9 +15,9 @@ const imgSrc = ref<string>('')
 const slides = ref<Slide[]>([])
 
 
-presentations.getPresentation(router.currentRoute.value.params.id)
+presentations.getPresentation(Number(router.currentRoute.value.params.id))
     .then(() => {
-      slides.value = presentations.presentation.value.slide_set
+      slides.value = presentations.presentation.value!.slide_set
       slideNum.value = 0
       imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
       isLast.value = slideNum.value === slides.value.length - 1;
@@ -43,7 +44,7 @@ watch(slideNum, () => {
 </script>
 
 <template>
-  <div v-if="presentations.presentation.value.privacy === 1" class="embed">
+  <div v-if="presentations.presentation.value?.privacy === 1" class="embed">
     <player
         :is-last="isLast"
         :img-src="imgSrc"

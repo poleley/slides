@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { Slide } from "./SlidePreview.vue";
+import { type Slide } from "../use/presentations.js";
 
 defineProps<{
   slides: Slide[],

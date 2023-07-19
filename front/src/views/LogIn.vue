@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-
-import {useForm} from "../use/form";
+import { useForm } from "../use/logInform";
+import { type logInForm } from "../use/logInform.js";
 import {useUserStore} from "../stores";
 import router from "../routers/router";
 import {ref} from "vue";
@@ -9,12 +9,17 @@ import UiToast from "../components/UI/UiToast.vue";
 
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
-const required = v => !!v
-const isEmail = v => EMAIL_REGEXP.test(v)
+function required(v: string) {
+  return !!v;
+}
+
+function isEmail(v: string) {
+  return EMAIL_REGEXP.test(v);
+}
 
 const userStore = useUserStore();
 
-const form = useForm({
+const form: logInForm = useForm({
   email: {
     value: '',
     validators: {required, isEmail}
@@ -23,7 +28,7 @@ const form = useForm({
     value: '',
     validators: {required}
   },
-}, {}, true)
+})
 
 const isShowToast = ref(false)
 
@@ -32,7 +37,7 @@ function hideToast() {
 }
 
 async function submit() {
-  if ("valid" in form && form.valid) {
+  if (form.valid) {
     await userStore.logIn(
         form.email.value,
         form.password.value,

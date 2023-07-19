@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import UiTooltip from '../components/UI/UiTooltip.vue'
-import { Slide, usePresentations } from "../use/presentations";
+import { type Slide } from "../use/presentations.js";
+import { usePresentations } from "../use/presentations";
 import {useUserStore} from "../stores";
 import {computed, ref, watch} from "vue";
 import UiDialog from "../components/UI/UiDialog.vue";
 import UiToast from "../components/UI/UiToast.vue";
-import {useDefaultForm} from "../use/defaultForm";
+import {useLeadForm} from "../use/defaultForm";
 import {useLead} from "../use/leads";
 import {useQuestion} from "../use/question";
 import Question from "../components/UI/PresentationQuestion.vue";
@@ -54,10 +55,15 @@ const topics = {
 
 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
 
-const required = v => !!v
-const isEmail = v => EMAIL_REGEXP.test(v)
+function required(v: string) {
+  return !!v;
+}
 
-const leadForm = useDefaultForm({
+function isEmail(v: string) {
+  return EMAIL_REGEXP.test(v);
+}
+
+const leadForm = useLeadForm({
   firstName: {
     value: '',
     validators: {required}
@@ -73,9 +79,9 @@ const leadForm = useDefaultForm({
 })
 
 watch(slideNum, () => {
-  isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value.description.lead
-  if (slides.value[slideNum.value].question_id) {
-    questions.getQuestion(presentations.presentation.value.slide_set[slideNum.value].question_id).then(() => {
+  isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value!.description.lead
+  if (slides.value[slideNum.value].question_id !== null) {
+    questions.getQuestion(Number(presentations.presentation.value!.slide_set[slideNum.value].question_id)).then(() => {
       isShowQuestion.value = true
     })
   }
@@ -100,37 +106,37 @@ watch(share, () => {
   if (share.value === '1')
     shareLink.value = location.href
   else
-    shareLink.value = location.protocol + '//' + location.host + `/embed/${presentations.presentation.value.id}/`
+    shareLink.value = location.protocol + '//' + location.host + `/embed/${presentations.presentation.value!.id}/`
 })
 
-const dateCreated = computed(() => {
-  return (new Date(presentations.presentation.value.date_created))
+const dateCreated = computed<string>(() => {
+  return (new Date(presentations.presentation.value!.date_created))
       .toLocaleDateString('ru', {dateStyle: "long"})
 })
 
-function editPresentation(id) {
+function editPresentation(id: number) {
   router.replace({name: 'presentation-edit', params: {id: id}})
 }
 
-function deletePresentation(id) {
+function deletePresentation(id: number) {
   presentations.deletePresentation(id)
       .then(() => router.replace({name: 'library'}))
 }
 
-presentations.getPresentation(router.currentRoute.value.params.id)
+presentations.getPresentation(Number(router.currentRoute.value.params.id))
     .then(() => {
-      isLead.value = Object.keys(presentations.presentation.value.description.lead).length !== 0
-      slides.value = presentations.presentation.value.slide_set
+      isLead.value = Object.keys(presentations.presentation.value!.description.lead).length !== 0
+      slides.value = presentations.presentation.value!.slide_set
       slideNum.value = 0
-      isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value.description.lead
+      isShowModal.value = slides.value[slideNum.value].id in presentations.presentation.value!.description.lead
       currentSlideId.value = slides.value[slideNum.value].id;
       imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
       isLast.value = slideNum.value === slides.value.length - 1;
-      totalViews.value = presentations.presentation.value.description.views.total_views || 0;
-      totalFavorite.value = presentations.presentation.value.favorite.length || 0;
+      totalViews.value = presentations.presentation.value!.description.views.total_views || 0;
+      totalFavorite.value = presentations.presentation.value!.favorite.length || 0;
       if (userStore.user) {
-        isFavorite.value = presentations.presentation.value.favorite.includes(userStore.user.id)
-        if (presentations.presentation.value.user.id === userStore.user.id)
+        isFavorite.value = presentations.presentation.value!.favorite.includes(userStore.user.id)
+        if (presentations.presentation.value!.user.id === userStore.user.id)
           isUserOwner.value = true
       }
     })
@@ -140,15 +146,16 @@ function toggleFavorite() {
     router.replace({name: 'signup'})
   } else {
     isFavorite.value = !isFavorite.value
-    if (presentations.presentation.value.favorite.includes(userStore.user.id)) {
-      presentations.removeFromFavorite(presentations.presentation.value.id)
-      presentations.presentation.value.favorite = presentations.presentation.value.favorite.filter(id => id !== userStore.user.id)
-      totalFavorite.value -= 1
-    } else {
-      presentations.addToFavorite(presentations.presentation.value.id)
-      presentations.presentation.value.favorite.push(userStore.user.id)
-      totalFavorite.value += 1
-    }
+    if (presentations.presentation.value !== undefined)
+      if (presentations.presentation.value!.favorite.includes(userStore.user.id)) {
+        presentations.removeFromFavorite(presentations.presentation.value!.id)
+        presentations.presentation.value!.favorite = presentations.presentation.value!.favorite.filter(id => id !== userStore.user!.id)
+        totalFavorite.value -= 1
+      } else {
+        presentations.addToFavorite(presentations.presentation.value!.id)
+        presentations.presentation.value!.favorite.push(userStore.user.id)
+        totalFavorite.value += 1
+      }
   }
 }
 
@@ -189,7 +196,8 @@ function leadStart() {
       'last_name': userStore.user.lastName,
       'email': userStore.user.email
     }
-    leads.createLead(currentSlideId.value, formData)
+    if (currentSlideId.value !== undefined)
+      leads.createLead(Number(currentSlideId.value), formData)
     isShowToast.value = true
     setTimeout(hideToast, 3000)
   } else {
@@ -205,7 +213,8 @@ function sendLead() {
         'last_name': leadForm.lastName.value,
         'email': leadForm.email.value
       }
-      leads.createLead(currentSlideId.value, formData)
+      if (currentSlideId.value !== undefined)
+        leads.createLead(Number(currentSlideId.value), formData)
       isShowModal.value = false
       isShowToast.value = true
       setTimeout(hideToast, 3000)
@@ -221,16 +230,16 @@ watch(slideNum, () => {
 
 function answerTheQuestion() {
   if (answerId.value !== '') {
-    let answer = questions.question.value.answer_set.find(({id}) => id === Number(answerId.value))
-    slides.value = [...slides.value.slice(0, slideNum.value + 1), ...answer.slides]
-    slideNum.value = slides.value.indexOf(answer.slides[0])
+    let answer = questions.question.value!.answer_set.find(({id}) => id === Number(answerId.value))
+    slides.value = [...slides.value.slice(0, slideNum.value + 1), ...answer!.slides]
+    slideNum.value = slides.value.indexOf(answer!.slides[0])
     currentSlideId.value = slides.value[slideNum.value].id;
     imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
     isLast.value = slideNum.value === slides.value.length - 1;
     isShowQuestion.value = false
     answers.chooseAnswer(
-        questions.question.value.id,
-        answerId.value
+        questions.question.value!.id,
+        Number(answerId.value)
     )
     answerId.value = ''
   }
@@ -246,23 +255,23 @@ function answerTheQuestion() {
 
   <question v-model="isShowQuestion">
     <template #question>
-      {{ questions.question.value.question_text }}
+      {{ questions.question.value?.question_text }}
     </template>
     <template #answers>
       <div
-          v-for="answer in questions.question.value.answer_set"
+          v-for="answer in questions.question.value?.answer_set"
           :key="answer.id"
       >
         <div class="form-check">
           <input
-              :id="answer.id"
+              :id="String(answer.id)"
               v-model="answerId"
               class="form-check-input"
               type="radio"
               name="flexRadioDefault"
               :value="answer.id"
           >
-          <label class="form-check-label" :for="answer.id">
+          <label class="form-check-label" :for="String(answer.id)">
             {{ answer.answer_text }}
           </label>
         </div>
@@ -272,7 +281,7 @@ function answerTheQuestion() {
       <button
           type="submit"
           class="btn button-submit"
-          :disabled="answerId.value === ''"
+          :disabled="answerId === ''"
           @click.prevent="answerTheQuestion"
       >
         Ответить
@@ -402,7 +411,7 @@ function answerTheQuestion() {
           <textarea
               class="form-control input-share"
               rows="2"
-              readonly="readonly"
+              readonly
               :value="`<iframe src=${shareLink} width='480' height='216'></iframe>`"
           ></textarea>
             <button class="btn copy" @click="copyShare"><i class="bi bi-clipboard"></i></button>
@@ -421,11 +430,11 @@ function answerTheQuestion() {
       <template v-else-if="presentations.errCode.value === 403">
         <h2 class="err-title">Презентация не является публичной</h2>
       </template>
-      <template v-else>
+      <template v-else-if="presentations.presentation.value !== undefined">
         <div class="title-date">
           <div class="w-75">
             <div class="title">
-              {{ presentations.presentation.value.title }}
+              {{ presentations.presentation.value?.title }}
             </div>
           </div>
           <div class="date">
@@ -470,14 +479,14 @@ function answerTheQuestion() {
               </i>
             </router-link>
             <router-link
-                :to="{name: 'presentation-edit', params: {id: router.currentRoute.value.params.id}}"
+                :to="{name: 'presentation-edit', params: {id: router.currentRoute.value?.params.id}}"
                 class="ui-link to-item"
             >
-              <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value.id)">
+              <i class="bi bi-pencil-fill ui-tooltip" @click="editPresentation(presentations.presentation.value?.id)">
                 <ui-tooltip>Редактировать</ui-tooltip>
               </i>
             </router-link>
-            <i class="bi bi-trash3-fill ui-tooltip" @click="deletePresentation(presentations.presentation.value.id)">
+            <i class="bi bi-trash3-fill ui-tooltip" @click="deletePresentation(presentations.presentation.value?.id)">
               <ui-tooltip>Удалить</ui-tooltip>
             </i>
           </div>
@@ -491,11 +500,14 @@ function answerTheQuestion() {
           </div>
         </div>
         <div class="info">
-        <span class="topic">
-          {{ topics[presentations.presentation.value.topic] }}
+        <span
+          v-if="presentations.presentation.value.topic !== undefined"
+          class="topic"
+        >
+          {{ topics[Number(presentations.presentation.value.topic)] }}
         </span>
           <i
-              v-if="presentations.presentation.value.privacy === 1"
+              v-if="presentations.presentation.value?.privacy === 1"
               class="bi bi-share-fill ui-tooltip title-icon"
               @click="isShowShare = true"
           >

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import FileInput from "../components/UI/FileInput.vue";
-import {useDefaultForm} from "../use/defaultForm";
+import { usePresentationForm } from "../use/defaultForm";
 import {ref} from "vue";
 import {usePresentations} from "../use/presentations";
 import PresentationForm from "../components/PresentationForm.vue";
@@ -10,28 +10,33 @@ import router from "../routers/router";
 const MAX_TITLE_LENGTH = 255
 const MAX_FILE_SIZE = 5242880
 
-const required = v => !!v
-const MaxTitleLength = v => v.length <= MAX_TITLE_LENGTH
-const isPdf = v => {
-  if (v === '')
+function required(v: string) {
+  return !!v;
+}
+
+function maxTitleLength(v: string) {
+  return v.length <= MAX_TITLE_LENGTH;
+}
+function isPdf(v: object | string) {
+  if (typeof v === "string")
     return false
   const nameSplit = v.name.split('.');
   return nameSplit[nameSplit.length - 1] === 'pdf'
 }
-const maxSize = v => {
-  if (v === '')
+function maxSize(v: object | string) {
+  if (typeof v === "string")
     return false
   return v.size <= MAX_FILE_SIZE
 }
 
-const form = useDefaultForm({
+const form = usePresentationForm({
   file: {
     value: '',
     validators: {required, isPdf, maxSize}
   },
   title: {
     value: '',
-    validators: {required, MaxTitleLength}
+    validators: {required, maxTitleLength}
   },
   privacy: {
     value: "2",
@@ -64,7 +69,7 @@ const presentations = usePresentations()
 async function submit() {
   if (form.valid && "file" in form && "title" in form && "topic" in form && "privacy" in form) {
     let formData = new FormData();
-    formData.append('file', form.file.value)
+    formData.append('file', form.file!.value)
     formData.append('title', form.title.value)
     formData.append('topic', form.topic.value)
     formData.append('privacy', form.privacy.value)
@@ -73,18 +78,15 @@ async function submit() {
   }
 }
 
-function updateModelValue(value, modelValueKey) {
+function updateModelValue(value: string, modelValueKey: string) {
   console.log(value)
-  if (modelValueKey === 'privacy')
-    form[modelValueKey].value = Number(value)
-  else
-    form[modelValueKey].value = value
+  form[modelValueKey].value = value
 }
 
-function updateFormFile(file) {
+function updateFormFile(file : FileList) {
   if ("file" in form) {
-    form.file.value = file;
-    form.file.touched = true;
+    form.file!.value = file;
+    form.file!.touched = true;
   }
 }
 

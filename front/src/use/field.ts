@@ -1,10 +1,15 @@
 import {reactive, ref, watch} from "vue";
+import { type RefValue } from "vue/macros";
 
-export function useField(field) {
-    const valid = ref(true)
-    const value = ref(field.value)
-    const touched = ref(false)
-    const errors = reactive({})
+interface Field {
+    [key: string] : any
+}
+
+export function useField(field: Field) {
+    const valid = ref<boolean>(true)
+    const value = ref<RefValue<string>>(field.value)
+    const touched = ref<boolean>(false)
+    const errors = reactive<Field>({})
 
     const reassign = () => {
         valid.value = true
@@ -13,7 +18,6 @@ export function useField(field) {
             errors[name] = !isValid
             if (!isValid)
                 valid.value = false
-
         })
     }
 

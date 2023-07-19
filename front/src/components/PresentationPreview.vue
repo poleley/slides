@@ -5,7 +5,7 @@ import UiTooltip from '../components/UI/UiTooltip.vue'
 import {useUserStore} from "../stores";
 import {ref} from "vue";
 import Router from "../routers/router";
-import { Presentation } from "../use/presentations";
+import { type Presentation } from "../use/presentations.js";
 
 const userStore = useUserStore();
 
@@ -18,15 +18,15 @@ const emit = defineEmits(['delete', 'updateFavorite']);
 const imgSrc = `/media/${props.presentation.slide_set[0].name}`;
 const currentRoute = Router.currentRoute.value.name
 
-function presentationDetail(id) {
+function presentationDetail(id: number) {
   router.replace({path: `/presentation/${id}`})
 }
 
-function editPresentation(id) {
+function editPresentation(id: number) {
   router.replace({name: 'presentation-edit', params: {id: id}})
 }
 
-const isFavorite = ref(false)
+const isFavorite = ref<boolean>(false)
 
 if (userStore.user)
     isFavorite.value = props.presentation.favorite.includes(userStore.user.id)

@@ -11,9 +11,13 @@ defineProps({
   },
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
+const fileName = ref<string>('')
 
-const fileName = ref('')
+const updateValue = (e: Event) => {
+  emit('update:modelValue', (e.target as HTMLInputElement).files![0]);
+  fileName.value = (e.target as HTMLInputElement).files![0].name;
+};
 
 watch(() => fileName.value, () => {
   if (fileName.value.length > 50)
@@ -56,11 +60,7 @@ watch(() => fileName.value, () => {
         type="file"
         class="input-file"
         accept=".pdf"
-        @input="
-        $emit('update:modelValue', $event.target.files[0]);
-        fileName = $event.target.files[0].name;
-
-"/>
+        @input="updateValue"/>
   </div>
 </template>
 

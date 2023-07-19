@@ -10,24 +10,30 @@ export interface User {
 }
 
 export const useUserStore = defineStore('userStore', () => {
-    const user = ref<User | null>(null)
-    const error = ref(null)
+    const user = ref<User>()
+    const error = ref<string | null>()
 
     if (localStorage.getItem('user')) {
         try {
-            user.value = JSON.parse(localStorage.getItem('user') || null);
+            user.value = JSON.parse(localStorage.getItem('user'));
         } catch (e) {
             console.log(e)
             localStorage.removeItem('user');
         }
     }
 
-    const saveUserToLocalStorage = (user) => {
+    const saveUserToLocalStorage = (user: User) => {
         const parsed = JSON.stringify(user);
         localStorage.setItem('user', parsed);
     }
 
-    const signUp = async (email, username, password, firstName, lastName) => {
+    const signUp = async (
+      email: string,
+      username: string,
+      password: string,
+      firstName: string,
+      lastName: string
+    ) => {
         const formData = {
             first_name: firstName,
             last_name: lastName,
@@ -45,7 +51,7 @@ export const useUserStore = defineStore('userStore', () => {
                             lastName: res.data.last_name,
                             email: res.data.email,
                         }
-                        saveUserToLocalStorage(user.value)
+                        saveUserToLocalStorage(user.value!)
                     }
                 }
             ).catch((err) => {
@@ -60,7 +66,7 @@ export const useUserStore = defineStore('userStore', () => {
             })
     }
 
-    const logIn = async (email, password) => {
+    const logIn = async (email: string, password: string) => {
         const formData = {
             email: email,
             password: password
@@ -75,7 +81,7 @@ export const useUserStore = defineStore('userStore', () => {
                             lastName: res.data.last_name,
                             email: res.data.email,
                         }
-                        saveUserToLocalStorage(user.value)
+                        saveUserToLocalStorage(user.value!)
                     }
                 }
             ).catch((err) => {
@@ -91,8 +97,7 @@ export const useUserStore = defineStore('userStore', () => {
         axios.get("/api/v1/user/logout/")
             .then(() => {
                     error.value = null;
-                    user.value = null
-                    saveUserToLocalStorage(user.value)
+                    localStorage.removeItem('user');
                 }
             ).catch((err) => {
             console.log(err)

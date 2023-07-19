@@ -5,8 +5,8 @@ import SlidesInAnswer from "../components/SlidesInAnswer.vue";
 import { useQuestion } from "../use/question";
 import UiTooltip from "../components/UI/UiTooltip.vue";
 import { useAnswer } from "../use/answer";
-import { useOneFieldForm } from "../use/oneFieldForm";
-import { Slide } from "../use/presentations";
+import { useAnswerForm, useQuestionForm } from "../use/oneFieldForm";
+import { type Slide } from "../use/presentations.js";
 
 const props = defineProps<{
   slide: Slide,
@@ -16,37 +16,54 @@ const props = defineProps<{
 
 defineEmits(["leadOn", "leadOff"]);
 
-const maxLength = 255;
-const required = v => !!v;
-const isMaxLength = v => v.length <= maxLength;
+const maxLength: number = 255;
+
+function required(v: string) {
+  return !!v;
+}
+
+function isMaxLength(v: string) {
+  return (v: string) => v.length <= maxLength;
+}
+
+export interface AnswerPreview {
+  id: number,
+  answerText: string,
+  isNewAnswer: boolean,
+  isEdited: boolean,
+  slidesNums: string,
+  slidesIds: number[]
+}
+
 
 const question = useQuestion();
 const answer = useAnswer();
-const answers = ref([]);
+const answers = ref<AnswerPreview[]>([]);
 
-const formQuestion = useOneFieldForm({
+const formQuestion = useQuestionForm({
   questionText: {
     value: "",
     validators: { required, isMaxLength }
   }
-}).form;
+});
 
-const formAnswer = useOneFieldForm({
+const formAnswer = useAnswerForm({
   answerText: {
     value: "",
     validators: { required, isMaxLength }
   }
-}).form;
+});
 
-const slidesIds = ref([]);
-const isSlidesIdsModified = ref(false);
-const isSlideHasQuestion = ref(false);
+const slidesIds = ref<number[]>([]);
+const isSlidesIdsModified = ref<boolean>(false);
+const isSlideHasQuestion = ref<boolean>(false);
 
 if (props.slide.question_id) {
   isSlideHasQuestion.value = true;
   question.getQuestion(props.slide.question_id).then(() => {
-    formQuestion["questionText"].value = question.question.value.question_text;
-    for (let answer of question.question.value.answer_set) {
+    if (question.question.value !== undefined)
+    formQuestion.questionText.value = question.question.value!.question_text;
+    for (let answer of question.question.value!.answer_set) {
       let slideOrdering = "";
       let slidesIDs = [];
       for (let slide of answer.slides) {
@@ -137,7 +154,7 @@ function createQuestion() {
             );
           }
         answer.createAnswer(
-          question.question.value.id,
+          question.question.value!.id,
           newAnswers
         );
         isShowDialogQuestion.value = false;
@@ -149,7 +166,7 @@ function createQuestion() {
 function editQuestion() {
   if ("questionText" in formQuestion)
     question.editQuestion(
-      question.question.value.id,
+      question.question.value!.id,
       {
         "question_text": formQuestion.questionText.value
       }
@@ -166,7 +183,7 @@ function editQuestion() {
             );
           } else if (answerOfAnswers.isEdited) {
             answer.editAnswer(
-              question.question.value.id,
+              question.question.value!.id,
               answerOfAnswers.id,
               {
                 "answer_text": answerOfAnswers.answerText,
@@ -176,7 +193,7 @@ function editQuestion() {
           }
         }
         answer.createAnswer(
-          question.question.value.id,
+          question.question.value!.id,
           newAnswers
         );
         isShowDialogQuestion.value = false;
@@ -195,9 +212,9 @@ function createOrEditQuestion() {
     }
 }
 
-const editableAnswer = ref(null);
+const editableAnswer = ref<number>();
 
-function startEditAnswer(answer) {
+function startEditAnswer(answer: AnswerPreview) {
   isShowDialogAnswerEdit.value = true;
   if ("answerText" in formAnswer)
     formAnswer.answerText.value = answer.answerText;
@@ -207,7 +224,7 @@ function startEditAnswer(answer) {
 
 function editAnswer() {
   if ("answerText" in formAnswer)
-    if (formAnswer.answerText.valid && slidesIds.value.length !== 0) {
+    if (formAnswer.answerText.valid && slidesIds.value.length !== 0 && editableAnswer.value !== undefined) {
       answers.value[editableAnswer.value].isEdited = true;
       answers.value[editableAnswer.value].answerText = formAnswer.answerText.value;
       answers.value[editableAnswer.value].slidesIds = slidesIds.value;
@@ -227,22 +244,22 @@ function editAnswer() {
     }
 }
 
-function updateSlidesIds(slide, event) {
+function updateSlidesIds(slide: Slide, event: Event) {
   isSlidesIdsModified.value = true;
-  if (event.target.checked)
+  if ((event.target as HTMLInputElement).checked)
     slidesIds.value.push(slide.id);
   else
     slidesIds.value = slidesIds.value.filter((slideId) => slideId !== slide.id);
 }
 
-function deleteAnswer(answerToDelete) {
+function deleteAnswer(answerToDelete: AnswerPreview) {
   if (!answerToDelete.isNewAnswer)
-    answer.deleteAnswer(question.question.value.id, answerToDelete.id);
+    answer.deleteAnswer(question.question.value!.id, answerToDelete.id);
   answers.value = answers.value.filter((answer) => answer.id !== answerToDelete.id);
 }
 
 function deleteQuestion() {
-  question.deleteQuestion(question.question.value.id);
+  question.deleteQuestion(question.question.value!.id);
   isSlideHasQuestion.value = false;
   if ("questionText" in formQuestion)
     formQuestion.questionText.value = "";
@@ -287,7 +304,7 @@ function deleteQuestion() {
         type="submit"
         class="btn button-submit footer-button"
         :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
-        @click="editAnswer(editableAnswer)"
+        @click="editAnswer"
       >
         Сохранить
       </button>
