@@ -108,7 +108,6 @@ const dateCreated = computed(() => {
 </script>
 
 <template>
-  <pre>{{ presentations.statistics.value }}</pre>
   <div class="statistics-outer">
     <div class="statistics-inner">
       <template v-if="presentations.statistics.value !== undefined">

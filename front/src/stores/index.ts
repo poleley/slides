@@ -13,9 +13,11 @@ export const useUserStore = defineStore("userStore", () => {
   const user = ref<User>();
   const error = ref<string | null>();
 
-  if (localStorage.getItem("user")) {
+  let userLocalStorage: string | null = localStorage.getItem("user")
+
+  if (userLocalStorage) {
     try {
-      user.value = JSON.parse(localStorage.getItem("user"));
+      user.value = JSON.parse(userLocalStorage);
     } catch (e) {
       console.log(e);
       localStorage.removeItem("user");
