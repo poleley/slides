@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import type { UnwrapRef } from "vue";
 import UiSelect from "../components/UI/UiSelect.vue";
-import { type PresentationForm } from "../use/defaultForm";
+import type { useField } from "../use/field.js";
 
 export interface TopicOption {
   val: number;
   text: string;
 }
 
-defineProps<{
-  modelValue: PresentationForm;
+type Keys = "title" | "privacy" | "topic";
+
+const props = defineProps<{
+  modelValue: Record<Keys, UnwrapRef<ReturnType<typeof useField>>>;
   topicOptions: TopicOption[];
   maxTitleLength: number;
   checked2: boolean;
@@ -16,11 +19,13 @@ defineProps<{
   isEdit: boolean;
 }>();
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits<{
+  (e: "update:modelValueField", field: Keys, value: string): void;
+}>();
 
-const updateValue = (e: Event, field: string) => {
-  emit("update:modelValue", (e.target as HTMLInputElement).value, field);
-};
+function updateValue(e: Event, field: keyof typeof props.modelValue) {
+  emit("update:modelValueField", field, (e.target as HTMLInputElement).value);
+}
 </script>
 
 <template>

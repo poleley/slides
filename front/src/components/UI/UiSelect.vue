@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { type TopicOption } from "../PresentationForm.vue";
-import { type Field } from "../../use/signUpForm.js";
 
 defineProps<{
-  value: Field;
+  value: string;
   options: TopicOption[];
 }>();
 </script>
 
 <template>
-  <select :value="value.value" class="form-select">
+  <select :value="value" class="form-select">
     <option disabled selected hidden value="">
       <slot></slot>
     </option>

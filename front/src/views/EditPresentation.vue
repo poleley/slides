@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { usePresentationForm } from "../use/defaultForm";
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import PresentationForm from "../components/PresentationForm.vue";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
 import { type TopicOption } from "../components/PresentationForm.vue";
-import { type Field } from "../use/signUpForm.js";
 import { presentationApi } from "../use/apiCalls";
+import { useForm } from "../use/form.js";
 
 const router = useRouter();
 
@@ -23,20 +22,13 @@ function maxTitleLength(v: string) {
 
 const presentations = presentationApi;
 
-const form = usePresentationForm({
-  title: {
-    value: "",
-    validators: { required, MaxTitleLength: maxTitleLength }
-  },
-  privacy: {
-    value: "",
-    validators: { required }
-  },
-  topic: {
-    value: "",
-    validators: { required }
-  }
-});
+const form = reactive(
+  useForm({
+    title: { validators: { required, maxTitleLength } },
+    privacy: { validators: { required } },
+    topic: { validators: { required } },
+  }),
+);
 
 const checked = ref<boolean[]>([]);
 
@@ -87,8 +79,8 @@ function edit() {
   }
 }
 
-function updateModelValue(value: string, modelValueKey: Field) {
-  form[modelValueKey].value = value;
+function updateModelValue(key: Exclude<keyof typeof form, "valid">, value: string) {
+  form[key].value = value;
 }
 </script>
 
@@ -107,7 +99,7 @@ function updateModelValue(value: string, modelValueKey: Field) {
               :checked2="checked[1]"
               :checked1="checked[0]"
               :is-edit="true"
-              @update:model-value="updateModelValue"
+              @update:model-value-field="updateModelValue"
             >
               <div class="col-3">
                 <router-link

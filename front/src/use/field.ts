@@ -1,33 +1,31 @@
-import { reactive, ref, watch } from "vue";
-import { type RefValue } from "vue/macros";
+import { ref, watch } from "vue";
 
-interface Field {
-  [key: string]: any;
-}
+export function useField(fieldInit: {
+  value?: string;
+  validators: Record<string, (value: string) => boolean>;
+}) {
+  const valid = ref(true);
+  const value = ref(fieldInit.value ?? "");
+  const touched = ref(false);
+  const errors = ref<Record<string, boolean>>({});
 
-export function useField(field: Field) {
-  const valid = ref<boolean>(true);
-  const value = ref<RefValue<string>>(field.value);
-  const touched = ref<boolean>(false);
-  const errors = reactive<Field>({});
-
-  const reassign = () => {
+  const validate = () => {
     valid.value = true;
-    Object.keys(field.validators ?? {}).map((name) => {
-      const isValid = field.validators[name](value.value);
-      errors[name] = !isValid;
+
+    for (const [name, validator] of Object.entries(fieldInit.validators)) {
+      const isValid = validator(value.value);
+      errors.value[name] = !isValid;
       if (!isValid) valid.value = false;
-    });
+    }
   };
 
-  watch(value, reassign);
-  reassign();
+  watch(value, validate, { immediate: true });
 
   return {
     value,
     valid,
     errors,
-    validate: reassign,
+    validate,
     touched,
     blur: () => (touched.value = true),
   };
