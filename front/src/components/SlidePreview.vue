@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import UiModal from "../components/UI/UiModal.vue";
 import SlidesInAnswer from "../components/SlidesInAnswer.vue";
 import UiTooltip from "../components/UI/UiTooltip.vue";
 import { answerApi, questionApi } from "../use/apiCalls";
-import { useAnswerForm, useQuestionForm } from "../use/oneFieldForm";
-import { type Slide } from "../use/interfaces.js";
+import type { Question, Slide } from "../use/interfaces.js";
+import { useForm } from "../use/form";
 
 const props = defineProps<{
   slide: Slide;
@@ -22,7 +22,7 @@ function required(v: string) {
 }
 
 function isMaxLength(v: string) {
-  return (v: string) => v.length <= maxLength;
+  return v.length <= maxLength;
 }
 
 export interface AnswerPreview {
@@ -34,23 +34,23 @@ export interface AnswerPreview {
   slidesIds: number[];
 }
 
-const question = questionApi;
-const answer = answerApi;
+const question = ref<Question>();
+// const answer = ref<Ans;
 const answers = ref<AnswerPreview[]>([]);
 
-const formQuestion = useQuestionForm({
-  questionText: {
-    value: "",
-    validators: { required, isMaxLength },
-  },
-});
+const formQuestion = reactive(useForm({
+    questionText: {
+      validators: { required, isMaxLength }
+    }
+  })
+);
 
-const formAnswer = useAnswerForm({
-  answerText: {
-    value: "",
-    validators: { required, isMaxLength },
-  },
-});
+const formAnswer = reactive(useForm({
+    answerText: {
+      validators: { required, isMaxLength }
+    }
+  })
+);
 
 const slidesIds = ref<number[]>([]);
 const isSlidesIdsModified = ref<boolean>(false);
@@ -58,26 +58,30 @@ const isSlideHasQuestion = ref<boolean>(false);
 
 if (props.slide.question_id) {
   isSlideHasQuestion.value = true;
-  question.getQuestion(props.slide.question_id).then(() => {
-    if (question.question.value !== undefined)
-      formQuestion.questionText.value = question.question.value!.question_text;
-    for (let answer of question.question.value!.answer_set) {
-      let slideOrdering = "";
-      let slidesIDs = [];
-      for (let slide of answer.slides) {
-        slidesIDs.push(slide.id);
-        slideOrdering += Number(slide["ordering"] + 1) + ", ";
+  questionApi.getQuestion(props.slide.question_id)
+    .then((data) => {
+      question.value = data;
+    })
+    .then(() => {
+      if (question.value !== undefined)
+        formQuestion.questionText.value = question.value!.question_text;
+      for (let answer of question.value!.answer_set) {
+        let slideOrdering = "";
+        let slidesIDs = [];
+        for (let slide of answer.slides) {
+          slidesIDs.push(slide.id);
+          slideOrdering += Number(slide["ordering"] + 1) + ", ";
+        }
+        answers.value.push({
+          id: answer.id,
+          isNewAnswer: false,
+          isEdited: false,
+          answerText: answer.answer_text,
+          slidesNums: slideOrdering.slice(0, -2),
+          slidesIds: slidesIDs
+        });
       }
-      answers.value.push({
-        id: answer.id,
-        isNewAnswer: false,
-        isEdited: false,
-        answerText: answer.answer_text,
-        slidesNums: slideOrdering.slice(0, -2),
-        slidesIds: slidesIDs,
-      });
-    }
-  });
+    });
 }
 
 const isShowDialogQuestion = ref(false);
@@ -105,7 +109,8 @@ function createAnswer() {
       let slideOrdering = [];
       for (let slideId of slidesIds.value) {
         for (let slide of props.slides)
-          if (slideId === slide.id) slideOrdering.push(Number(slide["ordering"] + 1));
+          if (slideId === slide.id)
+            slideOrdering.push(Number(slide["ordering"] + 1));
       }
       answers.value.push({
         id: Date.now(),
@@ -114,10 +119,10 @@ function createAnswer() {
         answerText: formAnswer.answerText.value,
         slidesIds: slidesIds.value,
         slidesNums: slideOrdering
-          .sort(function (a, b) {
+          .sort(function(a, b) {
             return a - b;
           })
-          .join(", "),
+          .join(", ")
       });
       slidesIds.value = [];
       formAnswer.answerText.value = "";
@@ -128,10 +133,13 @@ function createAnswer() {
 
 function createQuestion() {
   if ("questionText" in formQuestion)
-    question
+    questionApi
       .createQuestion({
         slide_id: props.slide.id,
-        question_text: formQuestion.questionText.value,
+        question_text: formQuestion.questionText.value
+      })
+      .then((data) => {
+        question.value = data;
       })
       .then(() => {
         let newAnswers = [];
@@ -139,10 +147,10 @@ function createQuestion() {
           if (answerToAdd.isNewAnswer) {
             newAnswers.push({
               answer_text: answerToAdd.answerText,
-              slides_ids: answerToAdd.slidesIds,
+              slides_ids: answerToAdd.slidesIds
             });
           }
-        answer.createAnswer(question.question.value!.id, newAnswers);
+        answerApi.createAnswer(question.value!.id, newAnswers);
         isShowDialogQuestion.value = false;
         isSlideHasQuestion.value = true;
       });
@@ -150,9 +158,9 @@ function createQuestion() {
 
 function editQuestion() {
   if ("questionText" in formQuestion)
-    question
-      .editQuestion(question.question.value!.id, {
-        question_text: formQuestion.questionText.value,
+    questionApi
+      .editQuestion(question.value!.id, {
+        question_text: formQuestion.questionText.value
       })
       .then(() => {
         let newAnswers = [];
@@ -160,16 +168,16 @@ function editQuestion() {
           if (answerOfAnswers.isNewAnswer) {
             newAnswers.push({
               answer_text: answerOfAnswers.answerText,
-              slides_ids: answerOfAnswers.slidesIds,
+              slides_ids: answerOfAnswers.slidesIds
             });
           } else if (answerOfAnswers.isEdited) {
-            answer.editAnswer(question.question.value!.id, answerOfAnswers.id, {
+            answerApi.editAnswer(question.value!.id, answerOfAnswers.id, {
               answer_text: answerOfAnswers.answerText,
-              slides_ids: answerOfAnswers.slidesIds,
+              slides_ids: answerOfAnswers.slidesIds
             });
           }
         }
-        answer.createAnswer(question.question.value!.id, newAnswers);
+        answerApi.createAnswer(question.value!.id, newAnswers);
         isShowDialogQuestion.value = false;
       });
 }
@@ -177,7 +185,7 @@ function editQuestion() {
 function createOrEditQuestion() {
   if ("questionText" in formQuestion)
     if (formQuestion.questionText.valid && answers.value.length !== 0) {
-      if (question.question.value) {
+      if (question.value) {
         editQuestion();
       } else {
         createQuestion();
@@ -210,7 +218,7 @@ function editAnswer() {
           if (slideId === slide.id) slideOrdering.push(Number(slide["ordering"] + 1));
       }
       answers.value[editableAnswer.value].slidesNums = slideOrdering
-        .sort(function (a, b) {
+        .sort(function(a, b) {
           return a - b;
         })
         .join(", ");
@@ -229,12 +237,12 @@ function updateSlidesIds(slide: Slide, event: Event) {
 
 function deleteAnswer(answerToDelete: AnswerPreview) {
   if (!answerToDelete.isNewAnswer)
-    answer.deleteAnswer(question.question.value!.id, answerToDelete.id);
+    answerApi.deleteAnswer(question.value!.id, answerToDelete.id);
   answers.value = answers.value.filter((answer) => answer.id !== answerToDelete.id);
 }
 
 function deleteQuestion() {
-  question.deleteQuestion(question.question.value!.id);
+  questionApi.deleteQuestion(question.value!.id);
   isSlideHasQuestion.value = false;
   if ("questionText" in formQuestion) formQuestion.questionText.value = "";
   answers.value = [];
@@ -254,10 +262,10 @@ function deleteQuestion() {
             class="form-control"
           />
         </div>
-        <label
-          >Выберите слайды, которые будут показаны, если выбран этот вариант
-          ответа</label
-        >
+        <label>
+          Выберите слайды, которые будут показаны, если выбран этот вариант
+          ответа
+        </label>
         <slides-in-answer
           :slides="slides.slice(slide.ordering + 1)"
           :selected-slides-ids="slidesIds"
@@ -296,7 +304,7 @@ function deleteQuestion() {
           />
         </div>
         <label
-          >Выберите слайды, которые будут показаны, если выбран этот вариант
+        >Выберите слайды, которые будут показаны, если выбран этот вариант
           ответа</label
         >
         <slides-in-answer
@@ -329,10 +337,12 @@ function deleteQuestion() {
     :is-others-modal="[isShowDialogAnswer, isShowDialogAnswerEdit]"
   >
     <template v-if="!isSlideHasQuestion" #title
-      >Добавить вопрос к слайду №{{ slide.ordering + 1 }}</template
+    >Добавить вопрос к слайду №{{ slide.ordering + 1 }}
+    </template
     >
     <template v-else #title
-      >Редактировать вопрос к слайду №{{ slide.ordering + 1 }}</template
+    >Редактировать вопрос к слайду №{{ slide.ordering + 1 }}
+    </template
     >
     <template #body>
       <form class="add-question">
@@ -346,36 +356,36 @@ function deleteQuestion() {
         </div>
         <table class="table">
           <thead>
-            <tr>
-              <th>Ответ</th>
-              <th>Слайды</th>
-              <th class="th-actions">Действия</th>
-            </tr>
+          <tr>
+            <th>Ответ</th>
+            <th>Слайды</th>
+            <th class="th-actions">Действия</th>
+          </tr>
           </thead>
           <tbody>
-            <tr v-for="answerElem in answers" :key="answerElem.id" class="answer">
-              <td>{{ answerElem.answerText }}</td>
-              <td>{{ answerElem.slidesNums }}</td>
-              <td class="actions">
-                <div class="icon-actions">
-                  <i
-                    class="bi bi-pencil-fill ui-tooltip"
-                    @click="startEditAnswer(answerElem)"
-                  >
-                    <ui-tooltip>Редактировать</ui-tooltip>
-                  </i>
-                  <i
-                    class="bi bi-trash3-fill ui-tooltip"
-                    @click="deleteAnswer(answerElem)"
-                  >
-                    <ui-tooltip>Удалить</ui-tooltip>
-                  </i>
-                </div>
-              </td>
-            </tr>
-            <tr class="button-add-answer" @click.prevent="showDialogAnswer">
-              <td colspan="3" class="text-center">Добавить ответ</td>
-            </tr>
+          <tr v-for="answerElem in answers" :key="answerElem.id" class="answer">
+            <td>{{ answerElem.answerText }}</td>
+            <td>{{ answerElem.slidesNums }}</td>
+            <td class="actions">
+              <div class="icon-actions">
+                <i
+                  class="bi bi-pencil-fill ui-tooltip"
+                  @click="startEditAnswer(answerElem)"
+                >
+                  <ui-tooltip>Редактировать</ui-tooltip>
+                </i>
+                <i
+                  class="bi bi-trash3-fill ui-tooltip"
+                  @click="deleteAnswer(answerElem)"
+                >
+                  <ui-tooltip>Удалить</ui-tooltip>
+                </i>
+              </div>
+            </td>
+          </tr>
+          <tr class="button-add-answer" @click.prevent="showDialogAnswer">
+            <td colspan="3" class="text-center">Добавить ответ</td>
+          </tr>
           </tbody>
         </table>
       </form>

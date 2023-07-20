@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { type signUpForm } from "../use/signUpForm.js";
-import { useForm } from "../use/signUpForm";
+import { useForm } from "../use/form";
 import { useUserStore } from "../stores";
 import UiToast from "../components/UI/UiToast.vue";
 import router from "../routers/router";
-import { ref } from "vue";
+import { reactive, ref, watch } from "vue";
 
 const passLength: number = 8;
 const EMAIL_REGEXP =
@@ -22,45 +21,40 @@ function isEmail(v: string) {
   return EMAIL_REGEXP.test(v);
 }
 
-const isEqual = () => (form: signUpForm) => {
+const userStore = useUserStore();
+
+const form = reactive(useForm(
+  {
+    firstName: {
+      validators: { required },
+    },
+    lastName: {
+      validators: { required },
+    },
+    email: {
+      validators: { required, isEmail },
+    },
+    username: {
+      validators: { required },
+    },
+    password: {
+      validators: { required, minLength: minLength(passLength) },
+    },
+    passwordConfirm: {
+      validators: { required, minLength: minLength(passLength) },
+    },
+  }
+));
+
+const isEqual = () => {
   const isValid = form.password.value === form.passwordConfirm.value;
   form.passwordConfirm.errors["isEqual"] = !isValid;
   form.passwordConfirm.valid &&= isValid;
 };
 
-const userStore = useUserStore();
-
-const form: signUpForm = useForm(
-  {
-    firstName: {
-      value: "",
-      validators: { required },
-    },
-    lastName: {
-      value: "",
-      validators: { required },
-    },
-    email: {
-      value: "",
-      validators: { required, isEmail },
-    },
-    username: {
-      value: "",
-      validators: { required },
-    },
-    password: {
-      value: "",
-      validators: { required, minLength: minLength(passLength) },
-    },
-    passwordConfirm: {
-      value: "",
-      validators: { required, minLength: minLength(passLength) },
-    },
-  },
-  {
-    validators: [isEqual()],
-  },
-);
+watch([() => form["password"].value, () => form["passwordConfirm"].value], () => {
+  isEqual()
+});
 
 const isShowToast = ref<boolean>(false);
 

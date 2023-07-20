@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { useForm } from "../use/logInform";
-import { type logInForm } from "../use/logInform.js";
 import { useUserStore } from "../stores";
 import router from "../routers/router";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import UiToast from "../components/UI/UiToast.vue";
+import { useForm } from "../use/form";
 
 const EMAIL_REGEXP =
   /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
@@ -19,16 +18,14 @@ function isEmail(v: string) {
 
 const userStore = useUserStore();
 
-const form: logInForm = useForm({
+const form = reactive(useForm({
   email: {
-    value: "",
-    validators: { required, isEmail },
+    validators: { required, isEmail }
   },
   password: {
-    value: "",
-    validators: { required },
-  },
-});
+    validators: { required }
+  }
+}));
 
 const isShowToast = ref(false);
 

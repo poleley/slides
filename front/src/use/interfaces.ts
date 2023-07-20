@@ -66,10 +66,19 @@ export interface BoolDictionary {
   [key: string]: boolean;
 }
 
+export interface NumberKeyDictionary {
+  [key: number]: string;
+}
+
 export interface Lead {
   id: number;
   slide: Slide;
   email: string;
   first_name: string;
   last_name: string;
+}
+
+export interface leadCreateMessage {
+  header: string,
+  body: string
 }

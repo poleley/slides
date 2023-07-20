@@ -3,16 +3,21 @@ import PresentationPreview from "../components/PresentationPreview.vue";
 import { presentationApi } from "../use/apiCalls";
 import { type Presentation } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
+import { ref } from "vue";
 
-const presentations = presentationApi;
+const presentations = ref<Presentation[]>([]);
 
 const userStore = useUserStore();
 
-presentations.getUserPresentations(Number(userStore.user!.id));
+presentationApi.getUserPresentations(Number(userStore.user!.id)).then(
+  (data) => {presentations.value = data}
+);
 
 const updatePresentations = (deletedPresentation: Presentation) => {
-  presentations.deletePresentation(deletedPresentation.id).then(() => {
-    presentations.getUserPresentations(Number(userStore.user!.id));
+  presentationApi.deletePresentation(deletedPresentation.id).then(() => {
+    presentationApi.getUserPresentations(Number(userStore.user!.id)).then(
+      (data) => {presentations.value = data}
+    );
   });
 };
 </script>
@@ -21,7 +26,7 @@ const updatePresentations = (deletedPresentation: Presentation) => {
   <div class="container">
     <div class="row">
       <presentation-preview
-        v-for="presentation in presentations.userPresentations.value"
+        v-for="presentation in presentations"
         :key="presentation.id"
         :presentation="presentation"
         @delete="updatePresentations"

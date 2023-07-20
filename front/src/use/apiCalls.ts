@@ -1,37 +1,27 @@
 import axios from "axios";
-import { ref } from "vue";
-import type { Presentation, Question, Statistics } from "./interfaces.js";
+import type { leadCreateMessage } from "./interfaces.js";
 
 
 export namespace questionApi {
-  export const question = ref<Question>();
 
-  export const getQuestion = async (questionId: number) => {
-    return await axios
-      .get(`/api/v1/question/${questionId}/`)
-      .then((res) => {
-        question.value = res.data;
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
+  export async function getQuestion(questionId: number) {
+    const response = await axios.get(`/api/v1/question/${questionId}/`);
+    return response.data;
+  }
 
-  export const createQuestion = async (data: object) => {
-    return await axios
-      .post(`/api/v1/question/`, data)
-      .then((res) => (question.value = res.data));
-  };
+  export async function createQuestion(data: unknown) {
+    const response = await axios.post(`/api/v1/question/`, data);
+    return response.data;
+  }
 
-  export const editQuestion = async (questionId: number, data: object) => {
-    return await axios
-      .patch(`/api/v1/question/${questionId}/`, data)
-      .then((res) => (question.value = res.data));
-  };
+  export async function editQuestion(questionId: number, data: unknown) {
+    const response = await axios.patch(`/api/v1/question/${questionId}/`, data);
+    return response.data;
+  }
 
-  export const deleteQuestion = async (questionId: number) => {
-    return await axios.delete(`/api/v1/question/${questionId}/`).then(() => {});
-  };
+  export async function deleteQuestion(questionId: number) {
+    await axios.delete(`/api/v1/question/${questionId}/`);
+  }
 }
 
 export namespace answerApi {
@@ -41,11 +31,10 @@ export namespace answerApi {
    * @param question_id id вопроса
    * @param data Тело запроса
    */
-  export const createAnswer = async (question_id: number, data: unknown) => {
-    return await axios
-      .post(`/api/v1/question/${question_id}/answer/`, data)
-      .then((res) => console.log(res));
-  };
+  export async function createAnswer(question_id: number, data: unknown) {
+    const response = await axios.post(`/api/v1/question/${question_id}/answer/`, data);
+    return response.data;
+  }
 
   /**
    * Отредактировать вариант ответа
@@ -54,11 +43,10 @@ export namespace answerApi {
    * @param answer_id id варианта ответа
    * @param data Тело запроса
    */
-  export const editAnswer = async (question_id: number, answer_id: number, data: unknown) => {
-    return await axios
-      .patch(`/api/v1/question/${question_id}/answer/${answer_id}/`, data)
-      .then((res) => console.log(res));
-  };
+  export async function editAnswer(question_id: number, answer_id: number, data: unknown) {
+    const response = await axios.patch(`/api/v1/question/${question_id}/answer/${answer_id}/`, data);
+    return response.data;
+  }
 
   /**
    * Удалить вариант ответа
@@ -66,11 +54,9 @@ export namespace answerApi {
    * @param question_id id вопроса
    * @param answer_id id варианта ответа
    */
-  export const deleteAnswer = async (question_id: number, answer_id: number) => {
-    return await axios
-      .delete(`/api/v1/question/${question_id}/answer/${answer_id}/`)
-      .then((res) => console.log(res));
-  };
+  export async function deleteAnswer(question_id: number, answer_id: number) {
+    await axios.delete(`/api/v1/question/${question_id}/answer/${answer_id}/`);
+  }
 
   /**
    * Сохранить факт выбора варианта ответа
@@ -78,111 +64,77 @@ export namespace answerApi {
    * @param question_id id вопроса
    * @param answer_id id варианта ответа
    */
-  export const chooseAnswer = async (question_id: number, answer_id: number) => {
-    return await axios
-      .patch(`/api/v1/question/${question_id}/answer/${answer_id}/choose/`)
-      .then((res) => console.log(res));
-  };
+  export async function chooseAnswer(question_id: number, answer_id: number) {
+    await axios.patch(`/api/v1/question/${question_id}/answer/${answer_id}/choose/`);
+  }
 
 }
 
 export namespace presentationApi {
-  export const presentationsPublic = ref<Presentation[]>([]);
-  export const userPresentations = ref<Presentation[]>([]);
-  export const presentation = ref<Presentation>();
-  export const statistics = ref<Statistics>();
-  export const errCode = ref<number>(0);
+  export async function getPublicPresentations(params = {}) {
+    const response = await axios
+      .get("/api/v1/presentation/", { params: params });
+    return response.data;
+  }
 
-  export const getPublicPresentations = async (params = {}) => {
-    return await axios
-      .get("/api/v1/presentation/", { params: params })
-      .then((res) => {
-        presentationsPublic.value = res.data;
-      })
-      .catch((e) => console.log(e));
-  };
+  export async function getUserPresentations(user_id: number) {
+    const response = await axios
+      .get("/api/v1/presentation/", { params: { user_id: user_id } });
+    return response.data;
+  }
 
-  export const getUserPresentations = async (user_id: number) => {
-    return await axios
-      .get("/api/v1/presentation/", { params: { user_id: user_id } })
-      .then((res) => {
-        userPresentations.value = res.data;
-      })
-      .catch((e) => console.log(e));
-  };
+  export async function getPresentation(id: number, params: unknown = {}) {
+    const response = await axios
+      .get(`/api/v1/presentation/${id}/`, { params: params });
+    return response.data;
+  }
 
-  export const getPresentation = async (id: number, params: unknown = {}) => {
-    return await axios
-      .get(`/api/v1/presentation/${id}/`, { params: params })
-      .then((res) => {
-        presentation.value = res.data;
-      })
-      .catch((e) => (errCode.value = e.response.status));
-  };
+  export async function createPresentation(data: unknown) {
+    await axios.post("/api/v1/presentation/", data);
+  }
 
-  export const createPresentation = async (data: unknown) => {
-    return await axios
-      .post("/api/v1/presentation/", data)
-      .then((res) => console.log(res));
-  };
+  export async function editPresentation(id: number, data: unknown) {
+    await axios.patch(`/api/v1/presentation/${id}/`, data);
+  }
 
-  export const editPresentation = async (id: number, data: unknown) => {
-    return await axios
-      .patch(`/api/v1/presentation/${id}/`, data)
-      .then((res) => console.log(res));
-  };
+  export async function deletePresentation(id: number) {
+    await axios.delete(`/api/v1/presentation/${id}/`);
+  }
 
-  export const deletePresentation = async (id: number) => {
-    return await axios
-      .delete(`/api/v1/presentation/${id}/`)
-      .then((res) => console.log(res));
-  };
+  export async function addToFavorite(id: number) {
+    await axios.patch(`/api/v1/presentation/${id}/add_to_favorite/`);
+  }
 
-  export const addToFavorite = async (id: number) => {
-    return await axios
-      .patch(`/api/v1/presentation/${id}/add_to_favorite/`)
-      .then((res) => console.log(res));
-  };
+  export async function removeFromFavorite(id: number) {
+    await axios.patch(`/api/v1/presentation/${id}/remove_from_favorite/`);
+  }
 
-  export const removeFromFavorite = async (id: number) => {
-    return await axios
-      .patch(`/api/v1/presentation/${id}/remove_from_favorite/`)
-      .then((res) => console.log(res));
-  };
-
-  export const getStatistics = async (id: number) => {
-    return await axios
-      .get(`/api/v1/presentation/${id}/statistics`)
-      .then((res) => {
-        statistics.value = res.data;
-      })
-      .catch((e) => console.log(e));
-  };
+  export async function getStatistics(id: number) {
+    const response = await axios.get(`/api/v1/presentation/${id}/statistics`);
+    return response.data;
+  }
 
 }
 
 export namespace leadApi {
-  export const leads = ref([]);
-
-  export const leadCreateMessage = ref({ header: "", body: "" });
-
-  export const createLead = async (id: number, data: object) => {
-    console.log(data);
-    return await axios
-      .post(`/api/v1/slide/${id}/lead/`, data)
-      .then((res) => {
-        if (res.status < 400) {
-          leadCreateMessage.value.header = "Успешно";
-          leadCreateMessage.value.body = "Контактные данные оставлены";
-        } else {
-          leadCreateMessage.value.header = "Ошибка";
-          leadCreateMessage.value.body = "Вы уже оставили свои данные";
-        }
-        console.log(res);
-      })
-      .catch(() => {
-        leadCreateMessage.value.header = "Ошибка";
-        leadCreateMessage.value.body = "Вы уже оставили свои данные";
-      });
-  };
+  export async function createLead(
+    id: number,
+    data: unknown
+  ) {
+    let leadCreateMessage: leadCreateMessage = { header: "", body: "" };
+    try {
+      const response = await axios.post(`/api/v1/slide/${id}/lead/`, data);
+      if (response.status < 400) {
+        leadCreateMessage.header = "Успешно";
+        leadCreateMessage.body = "Контактные данные оставлены";
+      } else {
+        leadCreateMessage.header = "Ошибка";
+        leadCreateMessage.body = "Вы уже оставили свои данные";
+      }
+    } catch (e: unknown) {
+      leadCreateMessage.header = "Ошибка";
+      leadCreateMessage.body = "Вы уже оставили свои данные";
+    }
+    return leadCreateMessage;
+  }
 }

@@ -5,10 +5,10 @@ import { computed, ref } from "vue";
 import { type ChartConfiguration, type ChartItem } from "chart.js/auto";
 import { Chart } from "chart.js/auto";
 import { presentationApi } from "../use/apiCalls";
+import { type Statistics } from "../use/interfaces";
 
 const router = useRouter();
 const userStore = useUserStore();
-const presentations = presentationApi;
 
 const labels = ref<string[]>([]);
 const viewsValues = ref<string[]>([]);
@@ -16,17 +16,20 @@ const favoriteValues = ref<string[]>([]);
 const imgSrc = ref<string>("");
 const isLeads = ref<boolean>(false);
 const isQuestions = ref<boolean>(true);
+const statistics = ref<Statistics>();
 
-presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(() => {
-  if (presentations.statistics.value !== undefined) {
-    if (userStore.user?.id !== presentations.statistics.value?.user_id)
+presentationApi.getStatistics(Number(router.currentRoute.value.params.id))
+  .then((data) => {statistics.value = data})
+  .then(() => {
+  if (statistics.value !== undefined) {
+    if (userStore.user?.id !== statistics.value?.user_id)
       router.replace({ name: "all-presentations" });
-    isLeads.value = presentations.statistics.value?.leads.length !== 0;
-    isQuestions.value = presentations.statistics.value?.questions.length !== 0;
-    imgSrc.value = `/media/${presentations.statistics.value?.first_slide.name}`;
-    labels.value = Object.keys(presentations.statistics.value?.views);
-    viewsValues.value = Object.values(presentations.statistics.value?.views);
-    favoriteValues.value = Object.values(presentations.statistics.value?.favorite);
+    isLeads.value = statistics.value?.leads.length !== 0;
+    isQuestions.value = statistics.value?.questions.length !== 0;
+    imgSrc.value = `/media/${statistics.value?.first_slide.name}`;
+    labels.value = Object.keys(statistics.value?.views);
+    viewsValues.value = Object.values(statistics.value?.views);
+    favoriteValues.value = Object.values(statistics.value?.favorite);
     const data = {
       labels: labels.value,
       datasets: [
@@ -59,13 +62,13 @@ presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(()
             },
           },
         },
-      } as ChartConfiguration,
+      } as unknown as ChartConfiguration,
     );
     const questionGraphics = document.querySelectorAll("canvas.graphic-question");
     for (let [index, questionGraphic] of questionGraphics.entries()) {
       let answersChosen = [];
       let labels = [];
-      for (let answer of presentations.statistics.value!.questions[index].answer_set) {
+      for (let answer of statistics.value!.questions[index].answer_set) {
         labels.push(answer.answer_text);
         answersChosen.push(answer.chosen_count);
       }
@@ -73,7 +76,7 @@ presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(()
         labels: labels,
         datasets: [
           {
-            label: presentations.statistics.value!.questions[index].question_text,
+            label: statistics.value!.questions[index].question_text,
             data: answersChosen,
             backgroundColor: ["rgba(171,124,54,0.4)"],
             borderWidth: 1,
@@ -93,14 +96,14 @@ presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(()
               },
             },
           },
-        } as ChartConfiguration,
+        } as unknown as ChartConfiguration,
       );
     }
   }
 });
 
 const dateCreated = computed(() => {
-  return new Date(presentations.statistics.value!.date_created).toLocaleDateString(
+  return new Date(statistics.value!.date_created).toLocaleDateString(
     "ru",
     { dateStyle: "long" },
   );
@@ -110,7 +113,7 @@ const dateCreated = computed(() => {
 <template>
   <div class="statistics-outer">
     <div class="statistics-inner">
-      <template v-if="presentations.statistics.value !== undefined">
+      <template v-if="statistics !== undefined">
         <h2 class="fw-bold mb-4">Статистика</h2>
         <div class="container">
           <div class="row align-items-center">
@@ -121,7 +124,7 @@ const dateCreated = computed(() => {
             </div>
             <div class="col col-10">
               <div class="row fw-bold presentation-title">
-                {{ presentations.statistics.value.title }}
+                {{ statistics?.title }}
               </div>
               <div class="row presentation-date">
                 {{ dateCreated }}
@@ -139,7 +142,7 @@ const dateCreated = computed(() => {
           <div v-if="isQuestions" class="row row-graphic-questions">
             <div class="row-title">Статистика по ответам пользователей на вопросы</div>
             <div
-              v-for="(question, index) in presentations.statistics.value.questions"
+              v-for="(question, index) in statistics?.questions"
               :key="question.id"
             >
               <canvas
@@ -161,7 +164,7 @@ const dateCreated = computed(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="lead in presentations.statistics.value.leads" :key="lead.id">
+                <tr v-for="lead in statistics?.leads" :key="lead.id">
                   <td>{{ lead.slide.ordering + 1 }}</td>
                   <td>{{ lead.last_name }}</td>
                   <td>{{ lead.first_name }}</td>

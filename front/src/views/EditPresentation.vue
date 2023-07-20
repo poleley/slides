@@ -6,6 +6,7 @@ import { useRouter } from "vue-router";
 import { type TopicOption } from "../components/PresentationForm.vue";
 import { presentationApi } from "../use/apiCalls";
 import { useForm } from "../use/form.js";
+import type { Presentation } from "../use/interfaces.js";
 
 const router = useRouter();
 
@@ -20,8 +21,6 @@ function maxTitleLength(v: string) {
   return v.length <= MAX_TITLE_LENGTH;
 }
 
-const presentations = presentationApi;
-
 const form = reactive(
   useForm({
     title: { validators: { required, maxTitleLength } },
@@ -34,16 +33,19 @@ const checked = ref<boolean[]>([]);
 
 const userStore = useUserStore();
 
-presentations
+const presentation = ref<Presentation>();
+
+presentationApi
   .getPresentation(Number(router.currentRoute.value.params.id), { edit: "true" })
-  .then(() => {
-    if (userStore.user?.id !== presentations.presentation.value!.user.id)
+  .then((data) => {
+    presentation.value = data;
+    if (userStore.user?.id !== presentation.value!.user.id)
       router.replace({ name: "signup" });
     else {
-      form.title.value = presentations.presentation.value!.title;
-      form.privacy.value = String(presentations.presentation.value!.privacy);
+      form.title.value = presentation.value!.title;
+      form.privacy.value = String(presentation.value!.privacy);
       checked.value = ["1" === form.privacy.value, "2" === form.privacy.value];
-      form.topic.value = String(presentations.presentation.value!.topic);
+      form.topic.value = String(presentation.value!.topic);
     }
   });
 
@@ -71,8 +73,8 @@ function edit() {
       formData.append("topic", form.topic.value);
       formData.append("privacy", form.privacy.value);
     }
-    presentations
-      .editPresentation(presentations.presentation.value!.id, formData)
+    presentationApi
+      .editPresentation(presentation.value!.id, formData)
       .then(() => {
         router.replace({ name: "library" });
       });
@@ -87,7 +89,7 @@ function updateModelValue(key: Exclude<keyof typeof form, "valid">, value: strin
 <template>
   <div class="edit-outer">
     <div class="edit-inner">
-      <template v-if="presentationApi.presentation.value !== undefined">
+      <template v-if="presentation !== undefined">
         <h2 class="fw-bold mb-4">Редактировать презентацию</h2>
         <form @submit.prevent="edit">
           <div class="container p-0">

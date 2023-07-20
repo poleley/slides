@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SlidePreview from "../components/SlidePreview.vue";
-import type { Description, Slide } from "../use/interfaces.js";
+import type { Description, Presentation, Slide } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
@@ -8,34 +8,36 @@ import { presentationApi } from "../use/apiCalls";
 
 const router = useRouter();
 
-const presentations = presentationApi;
+const presentation = ref<Presentation>();
 const userStore = useUserStore();
 
 const slides = ref<Slide[]>([]);
 
-presentations
+presentationApi
   .getPresentation(Number(router.currentRoute.value.params.id), { edit: "true" })
-  .then(() => {
-    if (userStore.user!.id !== presentations.presentation.value!.user.id)
+  .then((data) => {
+    presentation.value = data
+  }).then(() => {
+    if (userStore.user!.id !== presentation.value!.user.id)
       router.replace({ name: "all-presentations" });
-    slides.value = presentations.presentation.value!.slide_set;
+    slides.value = presentation.value!.slide_set;
   });
 
 function SlideLeadOn(slideId: number) {
-  if (presentations.presentation.value !== undefined) {
-    let description = ref(presentations.presentation.value!.description);
+  if (presentation.value !== undefined) {
+    let description = ref(presentation.value!.description);
     description.value.lead[String(slideId)] = true;
-    presentations.editPresentation(presentations.presentation.value!.id, {
+    presentationApi.editPresentation(presentation.value!.id, {
       description: description.value,
     });
   }
 }
 
 function SlideLeadOff(slideId: number) {
-  if (presentations.presentation.value !== undefined) {
-    let description = ref<Description>(presentations.presentation.value!.description);
+  if (presentation.value !== undefined) {
+    let description = ref<Description>(presentation.value!.description);
     delete description.value.lead[String(slideId)];
-    presentations.editPresentation(presentations.presentation.value!.id, {
+    presentationApi.editPresentation(presentation.value!.id, {
       description: description.value,
     });
   }
@@ -43,14 +45,14 @@ function SlideLeadOff(slideId: number) {
 </script>
 
 <template>
-  <div v-if="presentations.presentation.value !== undefined" class="presentation-outer">
+  <div v-if="presentation !== undefined" class="presentation-outer">
     <div class="presentation-inner">
       <slide-preview
         v-for="slide in slides.slice(0, slides.length - 1)"
         :key="slide.id"
         :slide="slide"
         :slides="slides"
-        :is-lead-on="slide.id in presentations.presentation.value.description.lead"
+        :is-lead-on="slide.id in presentation?.description.lead"
         @lead-on="SlideLeadOn"
         @lead-off="SlideLeadOff"
       />

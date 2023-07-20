@@ -4,8 +4,9 @@ import { type Presentation } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
 import { presentationApi } from "../use/apiCalls";
+import { ref } from "vue";
 
-const presentations = presentationApi;
+const presentations = ref<Presentation[]>([]);
 
 const userStore = useUserStore();
 
@@ -13,23 +14,25 @@ const router = useRouter();
 
 const currentRoute = router.currentRoute.value.path;
 
-presentations.getPublicPresentations({ favorite__id: userStore.user!.id });
+presentationApi.getPublicPresentations({ favorite__id: userStore.user!.id }).then(
+  (data) => presentations.value = data
+);
 
 const toggleFavorite = (presentation: Presentation) => {
   if (!userStore.user) {
     router.replace({ name: "signup" });
   } else {
     if (presentation.favorite.includes(userStore.user.id)) {
-      presentations.presentationsPublic.value =
-        presentations.presentationsPublic.value.filter(
+      presentations.value =
+        presentations.value.filter(
           (publicPresentation) => publicPresentation.id !== presentation.id,
         );
-      presentations.removeFromFavorite(presentation.id);
+      presentationApi.removeFromFavorite(presentation.id);
       presentation.favorite = presentation.favorite.filter(
         (id) => id !== userStore.user!.id,
       );
     } else {
-      presentations.addToFavorite(presentation.id);
+      presentationApi.addToFavorite(presentation.id);
       presentation.favorite.push(userStore.user.id);
     }
   }
@@ -40,7 +43,7 @@ const toggleFavorite = (presentation: Presentation) => {
   <div class="container">
     <div class="row">
       <presentation-preview
-        v-for="presentation in presentations.presentationsPublic.value"
+        v-for="presentation in presentations"
         :key="presentation.id"
         :presentation="presentation"
         :current-route="currentRoute"

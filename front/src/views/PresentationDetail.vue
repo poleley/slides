@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import UiTooltip from "../components/UI/UiTooltip.vue";
-import { type Slide } from "../use/interfaces.js";
+import type { leadCreateMessage, NumberKeyDictionary, Presentation, Question, Slide } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
-import { computed, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import UiDialog from "../components/UI/UiDialog.vue";
 import UiToast from "../components/UI/UiToast.vue";
-import { useLeadForm } from "../use/defaultForm";
-import Question from "../components/UI/PresentationQuestion.vue";
 import { useRouter } from "vue-router";
 import Player from "../components/PresentationPlayer.vue";
 import { answerApi, leadApi, presentationApi, questionApi } from "../use/apiCalls";
+import PresentationQuestion from "../components/UI/PresentationQuestion.vue";
+import { useForm } from "../use/form";
 
-const presentations = presentationApi;
 const userStore = useUserStore();
-const questions = questionApi;
-const answers = answerApi;
 const router = useRouter();
 
+const presentation = ref<Presentation>();
+const question = ref<Question>();
+
 const imgSrc = ref<string>("");
-const slideNum = ref<number>(0);
+const slideNum = ref<number>();
 const isLast = ref<boolean>(false);
 const totalViews = ref<number>(0);
 const totalFavorite = ref<number>(0);
@@ -34,7 +34,8 @@ const slides = ref<Slide[]>([]);
 const answerId = ref<string>("");
 const isLead = ref<boolean>(false);
 const isFavorite = ref<boolean>(false);
-const topics = {
+let leadCreateMessage = ref<leadCreateMessage>({ header: "", body: "" });
+const topics: NumberKeyDictionary = {
   1: "Искусство",
   2: "Бизнес",
   3: "Дизайн",
@@ -47,8 +48,31 @@ const topics = {
   10: "Самообразование",
   11: "Спорт",
   12: "Технологии",
-  13: "Путешествия",
+  13: "Путешествия"
 };
+
+presentationApi.getPresentation(Number(router.currentRoute.value.params.id)).then(
+  (data) => {
+    presentation.value = data;
+  }
+).then(
+  () => {
+    isLead.value = Object.keys(presentation.value!.description.lead).length !== 0;
+    slides.value = presentation.value!.slide_set;
+    slideNum.value = 0;
+    isShowModal.value = slides.value[slideNum.value].id in presentation.value!.description.lead;
+    currentSlideId.value = slides.value[slideNum.value].id;
+    imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
+    isLast.value = slideNum.value === slides.value.length - 1;
+    totalViews.value = presentation.value!.description.views.total_views || 0;
+    totalFavorite.value = presentation.value!.favorite.length || 0;
+    if (userStore.user) {
+      isFavorite.value = presentation.value!.favorite.includes(userStore.user.id);
+      if (presentation.value!.user.id === userStore.user.id)
+        isUserOwner.value = true;
+    }
+  }
+);
 
 const EMAIL_REGEXP =
   /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
@@ -61,33 +85,32 @@ function isEmail(v: string) {
   return EMAIL_REGEXP.test(v);
 }
 
-const leadForm = useLeadForm({
-  firstName: {
-    value: "",
-    validators: { required },
-  },
-  lastName: {
-    value: "",
-    validators: { required },
-  },
-  email: {
-    value: "",
-    validators: { required, isEmail },
-  },
-});
+const leadForm = reactive(useForm({
+    firstName: {
+      validators: { required }
+    },
+    lastName: {
+      validators: { required }
+    },
+    email: {
+      validators: { required, isEmail }
+    }
+  })
+);
 
 watch(slideNum, () => {
-  isShowModal.value =
-    slides.value[slideNum.value].id in
-    presentations.presentation.value!.description.lead;
-  if (slides.value[slideNum.value].question_id !== null) {
-    questions
-      .getQuestion(
-        Number(presentations.presentation.value!.slide_set[slideNum.value].question_id),
+  if (slideNum.value !== undefined) {
+    isShowModal.value =
+      slides.value[slideNum.value].id in presentation.value!.description.lead;
+    if (slides.value[slideNum.value].question_id !== null) {
+      questionApi.getQuestion(
+        Number(presentation.value!.slide_set[slideNum.value].question_id)
       )
-      .then(() => {
-        isShowQuestion.value = true;
-      });
+        .then((data) => {
+          question.value = data;
+          isShowQuestion.value = true;
+        });
+    }
   }
 });
 
@@ -113,13 +136,13 @@ watch(share, () => {
       location.protocol +
       "//" +
       location.host +
-      `/embed/${presentations.presentation.value!.id}/`;
+      `/embed/${presentation.value!.id}/`;
 });
 
 const dateCreated = computed<string>(() => {
-  return new Date(presentations.presentation.value!.date_created).toLocaleDateString(
+  return new Date(presentation.value!.date_created).toLocaleDateString(
     "ru",
-    { dateStyle: "long" },
+    { dateStyle: "long" }
   );
 });
 
@@ -128,55 +151,31 @@ function editPresentation(id: number) {
 }
 
 function deletePresentation(id: number) {
-  presentations.deletePresentation(id).then(() => router.replace({ name: "library" }));
+  presentationApi.deletePresentation(id).then(() => router.replace({ name: "library" }));
 }
-
-presentations.getPresentation(Number(router.currentRoute.value.params.id)).then(() => {
-  isLead.value =
-    Object.keys(presentations.presentation.value!.description.lead).length !== 0;
-  slides.value = presentations.presentation.value!.slide_set;
-  slideNum.value = 0;
-  isShowModal.value =
-    slides.value[slideNum.value].id in
-    presentations.presentation.value!.description.lead;
-  currentSlideId.value = slides.value[slideNum.value].id;
-  imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
-  isLast.value = slideNum.value === slides.value.length - 1;
-  totalViews.value =
-    presentations.presentation.value!.description.views.total_views || 0;
-  totalFavorite.value = presentations.presentation.value!.favorite.length || 0;
-  if (userStore.user) {
-    isFavorite.value = presentations.presentation.value!.favorite.includes(
-      userStore.user.id,
-    );
-    if (presentations.presentation.value!.user.id === userStore.user.id)
-      isUserOwner.value = true;
-  }
-});
 
 function toggleFavorite() {
   if (!userStore.user) {
     router.replace({ name: "signup" });
   } else {
     isFavorite.value = !isFavorite.value;
-    if (presentations.presentation.value !== undefined)
-      if (presentations.presentation.value!.favorite.includes(userStore.user.id)) {
-        presentations.removeFromFavorite(presentations.presentation.value!.id);
-        presentations.presentation.value!.favorite =
-          presentations.presentation.value!.favorite.filter(
-            (id) => id !== userStore.user!.id,
-          );
+    if (presentation.value !== undefined)
+      if (presentation.value!.favorite.includes(userStore.user.id)) {
+        presentationApi.removeFromFavorite(presentation.value!.id);
+        presentation.value!.favorite = presentation.value!.favorite.filter(
+          (id) => id !== userStore.user!.id
+        );
         totalFavorite.value -= 1;
       } else {
-        presentations.addToFavorite(presentations.presentation.value!.id);
-        presentations.presentation.value!.favorite.push(userStore.user.id);
+        presentationApi.addToFavorite(presentation.value!.id);
+        presentation.value!.favorite.push(userStore.user.id);
         totalFavorite.value += 1;
       }
   }
 }
 
 function nextSlide() {
-  if (slideNum.value < slides.value.length - 1) {
+  if (slideNum.value !== undefined && slideNum.value < slides.value.length - 1) {
     slideNum.value += 1;
     imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
     currentSlideId.value = slides.value[slideNum.value].id;
@@ -185,7 +184,7 @@ function nextSlide() {
 }
 
 function prevSlide() {
-  if (slideNum.value > 0) {
+  if (slideNum.value !== undefined && slideNum.value > 0) {
     slideNum.value -= 1;
     imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
     currentSlideId.value = slides.value[slideNum.value].id;
@@ -199,8 +198,6 @@ function copyShare() {
   document.execCommand("copy");
 }
 
-const leads = leadApi;
-
 function hideToast() {
   isShowToast.value = false;
 }
@@ -210,10 +207,11 @@ function leadStart() {
     const formData = {
       first_name: userStore.user.firstName,
       last_name: userStore.user.lastName,
-      email: userStore.user.email,
+      email: userStore.user.email
     };
     if (currentSlideId.value !== undefined)
-      leads.createLead(Number(currentSlideId.value), formData);
+      leadApi.createLead(Number(currentSlideId.value), formData)
+        .then((data) => leadCreateMessage.value = data);
     isShowToast.value = true;
     setTimeout(hideToast, 3000);
   } else {
@@ -231,10 +229,14 @@ function sendLead() {
     const formData = {
       first_name: leadForm.firstName.value,
       last_name: leadForm.lastName.value,
-      email: leadForm.email.value,
+      email: leadForm.email.value
     };
     if (currentSlideId.value !== undefined)
-      leads.createLead(Number(currentSlideId.value), formData);
+      leadApi.createLead(Number(currentSlideId.value), formData).then(
+        (data) => {
+          leadCreateMessage.value = data;
+        }
+      );
     isShowModal.value = false;
     isShowToast.value = true;
     setTimeout(hideToast, 3000);
@@ -250,16 +252,17 @@ watch(slideNum, () => {
 
 function answerTheQuestion() {
   if (answerId.value !== "") {
-    let answer = questions.question.value!.answer_set.find(
-      ({ id }) => id === Number(answerId.value),
+    let answer = question.value!.answer_set.find(
+      ({ id }) => id === Number(answerId.value)
     );
-    slides.value = [...slides.value.slice(0, slideNum.value + 1), ...answer!.slides];
+    if (slideNum.value !== undefined)
+      slides.value = [...slides.value.slice(0, slideNum.value + 1), ...answer!.slides];
     slideNum.value = slides.value.indexOf(answer!.slides[0]);
     currentSlideId.value = slides.value[slideNum.value].id;
     imgSrc.value = `/media/${slides.value[slideNum.value].name}`;
     isLast.value = slideNum.value === slides.value.length - 1;
     isShowQuestion.value = false;
-    answers.chooseAnswer(questions.question.value!.id, Number(answerId.value));
+    answerApi.chooseAnswer(question.value!.id, Number(answerId.value));
     answerId.value = "";
   }
 }
@@ -267,16 +270,16 @@ function answerTheQuestion() {
 
 <template>
   <ui-toast :show="isShowToast">
-    <template #header>{{ leads.leadCreateMessage.value.header }}</template>
-    <template #body>{{ leads.leadCreateMessage.value.body }}</template>
+    <template #header>{{ leadCreateMessage.header }}</template>
+    <template #body>{{ leadCreateMessage.body }}</template>
   </ui-toast>
 
-  <question v-model="isShowQuestion">
+  <presentation-question v-model="isShowQuestion">
     <template #question>
-      {{ questions.question.value?.question_text }}
+      {{ question?.question_text }}
     </template>
     <template #answers>
-      <div v-for="answer in questions.question.value?.answer_set" :key="answer.id">
+      <div v-for="answer in question?.answer_set" :key="answer.id">
         <div class="form-check">
           <input
             :id="String(answer.id)"
@@ -302,10 +305,10 @@ function answerTheQuestion() {
         Ответить
       </button>
     </template>
-  </question>
+  </presentation-question>
 
   <ui-dialog v-model="isShowModal">
-    <template #title> Запросить консультацию </template>
+    <template #title> Запросить консультацию</template>
     <template #body>
       <div class="help-text">Оставьте свои контактные данные и мы свяжемся с вами</div>
       <form @submit.prevent="sendLead">
@@ -438,17 +441,11 @@ function answerTheQuestion() {
 
   <div class="presentation-outer">
     <div class="presentation-inner">
-      <template v-if="presentations.errCode.value === 404">
-        <h2 class="err-title">Презентации не существует</h2>
-      </template>
-      <template v-else-if="presentations.errCode.value === 403">
-        <h2 class="err-title">Презентация не является публичной</h2>
-      </template>
-      <template v-else-if="presentations.presentation.value !== undefined">
+      <template v-if="presentation !== undefined">
         <div class="title-date">
           <div class="w-75">
             <div class="title">
-              {{ presentations.presentation.value?.title }}
+              {{ presentation?.title }}
             </div>
           </div>
           <div class="date">
@@ -457,7 +454,7 @@ function answerTheQuestion() {
         </div>
         <player
           :img-src="imgSrc"
-          :slide-num="slideNum"
+          :slide-num="Number(slideNum)"
           :is-last="isLast"
           :is-embed="false"
           @next="nextSlide"
@@ -501,14 +498,14 @@ function answerTheQuestion() {
             >
               <i
                 class="bi bi-pencil-fill ui-tooltip"
-                @click="editPresentation(presentations.presentation.value?.id)"
+                @click="editPresentation(presentation.id)"
               >
                 <ui-tooltip>Редактировать</ui-tooltip>
               </i>
             </router-link>
             <i
               class="bi bi-trash3-fill ui-tooltip"
-              @click="deletePresentation(presentations.presentation.value?.id)"
+              @click="deletePresentation(presentation.id)"
             >
               <ui-tooltip>Удалить</ui-tooltip>
             </i>
@@ -521,13 +518,13 @@ function answerTheQuestion() {
         </div>
         <div class="info">
           <span
-            v-if="presentations.presentation.value.topic !== undefined"
+            v-if="presentation?.topic !== undefined"
             class="topic"
           >
-            {{ topics[Number(presentations.presentation.value.topic)] }}
+            {{ topics[Number(presentation?.topic)] }}
           </span>
           <i
-            v-if="presentations.presentation.value?.privacy === 1"
+            v-if="presentation?.privacy === 1"
             class="bi bi-share-fill ui-tooltip title-icon"
             @click="isShowShare = true"
           >

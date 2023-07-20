@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import FileInput from "../components/UI/FileInput.vue";
-import { usePresentationForm } from "../use/defaultForm";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import PresentationForm from "../components/PresentationForm.vue";
 import router from "../routers/router";
 import { presentationApi } from "../use/apiCalls";
+import { useForm } from "../use/form";
 
 const MAX_TITLE_LENGTH = 255;
 const MAX_FILE_SIZE = 5242880;
@@ -16,17 +16,17 @@ function required(v: string) {
 function maxTitleLength(v: string) {
   return v.length <= MAX_TITLE_LENGTH;
 }
-function isPdf(v: object | string) {
+function isPdf(v: File | string) {
   if (typeof v === "string") return false;
   const nameSplit = v.name.split(".");
   return nameSplit[nameSplit.length - 1] === "pdf";
 }
-function maxSize(v: object | string) {
+function maxSize(v: File | string) {
   if (typeof v === "string") return false;
   return v.size <= MAX_FILE_SIZE;
 }
 
-const form = usePresentationForm({
+const form = reactive(useForm({
   file: {
     value: "",
     validators: { required, isPdf, maxSize },
@@ -43,7 +43,7 @@ const form = usePresentationForm({
     value: "",
     validators: { required },
   },
-});
+}));
 
 const topicOptions = ref([
   { val: 1, text: "Искусство" },
@@ -61,8 +61,6 @@ const topicOptions = ref([
   { val: 13, text: "Путешествия" },
 ]);
 
-const presentations = presentationApi;
-
 async function submit() {
   if (
     form.valid &&
@@ -76,17 +74,16 @@ async function submit() {
     formData.append("title", form.title.value);
     formData.append("topic", form.topic.value);
     formData.append("privacy", form.privacy.value);
-    await presentations.createPresentation(formData);
+    await presentationApi.createPresentation(formData);
     await router.replace({ path: "library" });
   }
 }
 
-function updateModelValue(value: string, modelValueKey: string) {
-  console.log(value);
-  form[modelValueKey].value = value;
+function updateModelValue(key: Exclude<keyof typeof form, "valid">, value: string) {
+  form[key].value = value;
 }
 
-function updateFormFile(file: FileList) {
+function updateFormFile(file: Exclude<keyof typeof form, "valid">) {
   if ("file" in form) {
     form.file!.value = file;
     form.file!.touched = true;
