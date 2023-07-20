@@ -4,7 +4,7 @@ import UiTooltip from "../components/UI/UiTooltip.vue";
 import { useUserStore } from "../stores";
 import { ref } from "vue";
 import Router from "../routers/router";
-import { type Presentation } from "../use/presentations.js";
+import { type Presentation } from "../use/interfaces.js";
 
 const userStore = useUserStore();
 

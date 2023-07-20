@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import PresentationPreview from "../components/PresentationPreview.vue";
-import { usePresentations } from "../use/presentations";
-import { type Presentation } from "../use/presentations.js";
+import { presentationApi } from "../use/apiCalls";
+import { type Presentation } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
 
-const presentations = usePresentations();
+const presentations = presentationApi;
 
 const userStore = useUserStore();
 

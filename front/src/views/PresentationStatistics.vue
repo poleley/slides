@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { usePresentations } from "../use/presentations";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../stores";
 import { computed, ref } from "vue";
 import { type ChartConfiguration, type ChartItem } from "chart.js/auto";
 import { Chart } from "chart.js/auto";
+import { presentationApi } from "../use/apiCalls";
 
 const router = useRouter();
 const userStore = useUserStore();
-const presentations = usePresentations();
+const presentations = presentationApi;
 
 const labels = ref<string[]>([]);
 const viewsValues = ref<string[]>([]);
@@ -65,7 +65,7 @@ presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(()
     for (let [index, questionGraphic] of questionGraphics.entries()) {
       let answersChosen = [];
       let labels = [];
-      for (let answer of presentations.statistics.value.questions[index].answer_set) {
+      for (let answer of presentations.statistics.value!.questions[index].answer_set) {
         labels.push(answer.answer_text);
         answersChosen.push(answer.chosen_count);
       }
@@ -73,7 +73,7 @@ presentations.getStatistics(Number(router.currentRoute.value.params.id)).then(()
         labels: labels,
         datasets: [
           {
-            label: presentations.statistics.value.questions[index].question_text,
+            label: presentations.statistics.value!.questions[index].question_text,
             data: answersChosen,
             backgroundColor: ["rgba(171,124,54,0.4)"],
             borderWidth: 1,

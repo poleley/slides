@@ -2,11 +2,10 @@
 import { ref, watch } from "vue";
 import UiModal from "../components/UI/UiModal.vue";
 import SlidesInAnswer from "../components/SlidesInAnswer.vue";
-import { useQuestion } from "../use/question";
 import UiTooltip from "../components/UI/UiTooltip.vue";
-import { useAnswer } from "../use/answer";
+import { answerApi, questionApi } from "../use/apiCalls";
 import { useAnswerForm, useQuestionForm } from "../use/oneFieldForm";
-import { type Slide } from "../use/presentations.js";
+import { type Slide } from "../use/interfaces.js";
 
 const props = defineProps<{
   slide: Slide;
@@ -35,8 +34,8 @@ export interface AnswerPreview {
   slidesIds: number[];
 }
 
-const question = useQuestion();
-const answer = useAnswer();
+const question = questionApi;
+const answer = answerApi;
 const answers = ref<AnswerPreview[]>([]);
 
 const formQuestion = useQuestionForm({
@@ -302,6 +301,7 @@ function deleteQuestion() {
         >
         <slides-in-answer
           :slides="slides.slice(slide.ordering + 1)"
+          :selected-slides-ids="[]"
           @change-slides-ids="updateSlidesIds"
         />
       </form>

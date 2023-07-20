@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Player from "../components/PresentationPlayer.vue";
-import { usePresentations } from "../use/presentations";
-import { type Slide } from "../use/presentations.js";
+import { type Slide } from "../use/interfaces.js"
 import { useRouter } from "vue-router";
 import { ref, watch } from "vue";
+import { presentationApi } from "../use/apiCalls";
 
-const presentations = usePresentations();
+const presentations = presentationApi;
 const router = useRouter();
 
 const slideNum = ref<number>(0);

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { usePresentationForm } from "../use/defaultForm";
 import { ref } from "vue";
-import { usePresentations } from "../use/presentations";
 import PresentationForm from "../components/PresentationForm.vue";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
 import { type TopicOption } from "../components/PresentationForm.vue";
 import { type Field } from "../use/signUpForm.js";
+import { presentationApi } from "../use/apiCalls";
 
 const router = useRouter();
 
@@ -21,21 +21,21 @@ function maxTitleLength(v: string) {
   return v.length <= MAX_TITLE_LENGTH;
 }
 
-const presentations = usePresentations();
+const presentations = presentationApi;
 
 const form = usePresentationForm({
   title: {
     value: "",
-    validators: { required, MaxTitleLength: maxTitleLength },
+    validators: { required, MaxTitleLength: maxTitleLength }
   },
   privacy: {
     value: "",
-    validators: { required },
+    validators: { required }
   },
   topic: {
     value: "",
-    validators: { required },
-  },
+    validators: { required }
+  }
 });
 
 const checked = ref<boolean[]>([]);
@@ -68,7 +68,7 @@ const topicOptions = ref<TopicOption[]>([
   { val: 10, text: "Самообразование" },
   { val: 11, text: "Спорт" },
   { val: 12, text: "Технологии" },
-  { val: 13, text: "Путешествия" },
+  { val: 13, text: "Путешествия" }
 ]);
 
 function edit() {
@@ -95,40 +95,42 @@ function updateModelValue(value: string, modelValueKey: Field) {
 <template>
   <div class="edit-outer">
     <div class="edit-inner">
-      <h2 class="fw-bold mb-4">Редактировать презентацию</h2>
-      <form @submit.prevent="edit">
-        <div class="container p-0">
-          <presentation-form
-            :model-value="form"
-            :topic-options="topicOptions"
-            :max-tag-length="MAX_TAG_LENGTH"
-            :max-title-length="MAX_TITLE_LENGTH"
-            :checked2="checked[1]"
-            :checked1="checked[0]"
-            :is-edit="true"
-            @update:model-value="updateModelValue"
-          >
-            <div class="col-3">
-              <router-link
-                :to="{
+      <template v-if="presentationApi.presentation.value !== undefined">
+        <h2 class="fw-bold mb-4">Редактировать презентацию</h2>
+        <form @submit.prevent="edit">
+          <div class="container p-0">
+            <presentation-form
+              :model-value="form"
+              :topic-options="topicOptions"
+              :max-tag-length="MAX_TAG_LENGTH"
+              :max-title-length="MAX_TITLE_LENGTH"
+              :checked2="checked[1]"
+              :checked1="checked[0]"
+              :is-edit="true"
+              @update:model-value="updateModelValue"
+            >
+              <div class="col-3">
+                <router-link
+                  :to="{
                   name: 'interactivity',
                   params: { id: router.currentRoute.value.params.id },
                 }"
-                class="ui-link interactivity"
-              >
-                Настроить интерактивность
-              </router-link>
-            </div>
-          </presentation-form>
-        </div>
-        <button
-          type="submit"
-          class="btn button-submit w-100 mt-3"
-          :disabled="!form.valid"
-        >
-          Сохранить
-        </button>
-      </form>
+                  class="ui-link interactivity"
+                >
+                  Настроить интерактивность
+                </router-link>
+              </div>
+            </presentation-form>
+          </div>
+          <button
+            type="submit"
+            class="btn button-submit w-100 mt-3"
+            :disabled="!form.valid"
+          >
+            Сохранить
+          </button>
+        </form>
+      </template>
     </div>
   </div>
 </template>

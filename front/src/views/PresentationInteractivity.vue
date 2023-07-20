@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import SlidePreview from "../components/SlidePreview.vue";
-import { type Description, type Slide } from "../use/presentations.js";
-import { usePresentations } from "../use/presentations";
+import type { Description, Slide } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
+import { presentationApi } from "../use/apiCalls";
 
 const router = useRouter();
 
-const presentations = usePresentations();
+const presentations = presentationApi;
 const userStore = useUserStore();
 
 const slides = ref<Slide[]>([]);

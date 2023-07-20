@@ -2,9 +2,9 @@
 import FileInput from "../components/UI/FileInput.vue";
 import { usePresentationForm } from "../use/defaultForm";
 import { ref } from "vue";
-import { usePresentations } from "../use/presentations";
 import PresentationForm from "../components/PresentationForm.vue";
 import router from "../routers/router";
+import { presentationApi } from "../use/apiCalls";
 
 const MAX_TITLE_LENGTH = 255;
 const MAX_FILE_SIZE = 5242880;
@@ -61,7 +61,7 @@ const topicOptions = ref([
   { val: 13, text: "Путешествия" },
 ]);
 
-const presentations = usePresentations();
+const presentations = presentationApi;
 
 async function submit() {
   if (

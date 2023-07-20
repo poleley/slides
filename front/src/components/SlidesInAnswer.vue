@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Slide } from "../use/presentations.js";
+import { type Slide } from "../use/interfaces.js";
 
 defineProps<{
   slides: Slide[];

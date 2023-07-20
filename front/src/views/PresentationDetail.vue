@@ -1,23 +1,20 @@
 <script setup lang="ts">
 import UiTooltip from "../components/UI/UiTooltip.vue";
-import { type Slide } from "../use/presentations.js";
-import { usePresentations } from "../use/presentations";
+import { type Slide } from "../use/interfaces.js";
 import { useUserStore } from "../stores";
 import { computed, ref, watch } from "vue";
 import UiDialog from "../components/UI/UiDialog.vue";
 import UiToast from "../components/UI/UiToast.vue";
 import { useLeadForm } from "../use/defaultForm";
-import { useLead } from "../use/leads";
-import { useQuestion } from "../use/question";
 import Question from "../components/UI/PresentationQuestion.vue";
 import { useRouter } from "vue-router";
 import Player from "../components/PresentationPlayer.vue";
-import { useAnswer } from "../use/answer";
+import { answerApi, leadApi, presentationApi, questionApi } from "../use/apiCalls";
 
-const presentations = usePresentations();
+const presentations = presentationApi;
 const userStore = useUserStore();
-const questions = useQuestion();
-const answers = useAnswer();
+const questions = questionApi;
+const answers = answerApi;
 const router = useRouter();
 
 const imgSrc = ref<string>("");
@@ -202,7 +199,7 @@ function copyShare() {
   document.execCommand("copy");
 }
 
-const leads = useLead();
+const leads = leadApi;
 
 function hideToast() {
   isShowToast.value = false;
