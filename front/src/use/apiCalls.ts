@@ -35,24 +35,49 @@ export namespace questionApi {
 }
 
 export namespace answerApi {
+  /**
+   * Создать вариант ответа
+   *
+   * @param question_id id вопроса
+   * @param data Тело запроса
+   */
   export const createAnswer = async (question_id: number, data: unknown) => {
     return await axios
       .post(`/api/v1/question/${question_id}/answer/`, data)
       .then((res) => console.log(res));
   };
 
+  /**
+   * Отредактировать вариант ответа
+   *
+   * @param question_id id вопроса
+   * @param answer_id id варианта ответа
+   * @param data Тело запроса
+   */
   export const editAnswer = async (question_id: number, answer_id: number, data: unknown) => {
     return await axios
       .patch(`/api/v1/question/${question_id}/answer/${answer_id}/`, data)
       .then((res) => console.log(res));
   };
 
+  /**
+   * Удалить вариант ответа
+   *
+   * @param question_id id вопроса
+   * @param answer_id id варианта ответа
+   */
   export const deleteAnswer = async (question_id: number, answer_id: number) => {
     return await axios
       .delete(`/api/v1/question/${question_id}/answer/${answer_id}/`)
       .then((res) => console.log(res));
   };
 
+  /**
+   * Сохранить факт выбора варианта ответа
+   *
+   * @param question_id id вопроса
+   * @param answer_id id варианта ответа
+   */
   export const chooseAnswer = async (question_id: number, answer_id: number) => {
     return await axios
       .patch(`/api/v1/question/${question_id}/answer/${answer_id}/choose/`)
