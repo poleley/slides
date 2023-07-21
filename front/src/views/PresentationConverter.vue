@@ -92,6 +92,9 @@ function updateFormFile(file: Exclude<keyof typeof form, "valid">) {
 </script>
 
 <template>
+  <pre>
+    {{form}}
+  </pre>
   <div :class="$style['file-upload-outer']">
     <div :class="$style['file-upload-inner']">
       <h2 class="fw-bold mb-4">Загрузить презентацию</h2>
@@ -112,7 +115,7 @@ function updateFormFile(file: Exclude<keyof typeof form, "valid">) {
             :checked2="true"
             :checked1="false"
             :is-edit="false"
-            @update:model-value="updateModelValue"
+            @update:model-value-field="updateModelValue"
           />
         </div>
         <button
