@@ -282,7 +282,7 @@ function deleteQuestion() {
       </button>
       <button
         type="submit"
-        class="btn button-submit footer-button"
+        class="btn btn-primary footer-button"
         :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
         @click="editAnswer"
       >
@@ -323,7 +323,7 @@ function deleteQuestion() {
       </button>
       <button
         type="submit"
-        class="btn button-submit footer-button"
+        class="btn btn-primary footer-button"
         :disabled="slidesIds.length === 0 || !formAnswer.answerText.valid"
         @click="createAnswer"
       >
@@ -399,7 +399,7 @@ function deleteQuestion() {
       </button>
       <button
         type="submit"
-        class="btn button-submit footer-button"
+        class="btn btn-primary footer-button"
         :disabled="!formQuestion.questionText.valid || answers.length === 0"
         @click.prevent="createOrEditQuestion"
       >
@@ -421,7 +421,7 @@ function deleteQuestion() {
       <div id="buttons-interactivity" class="align-items-center">
         <div>
           <template v-if="isSlideHasQuestion">
-            <button class="button-submit my-button w-16">
+            <button class="btn-primary my-button w-16">
               <button
                 class="btn button-edit-question"
                 @click.prevent="showDialogQuestion"
@@ -440,7 +440,7 @@ function deleteQuestion() {
           </template>
           <template v-else>
             <button
-              class="btn button-submit text-center w-16"
+              class="btn btn-primary text-center w-16"
               :disabled="isLeadOn"
               @click.prevent="showDialogQuestion"
             >
@@ -451,7 +451,7 @@ function deleteQuestion() {
         <div>
           <button
             v-if="!isLeadOn"
-            class="btn button-submit text-center w-16"
+            class="btn btn-primary text-center w-16"
             :disabled="isSlideHasQuestion"
             @click="$emit('leadOn', props.slide.id)"
           >
@@ -459,7 +459,7 @@ function deleteQuestion() {
           </button>
           <button
             v-else
-            class="btn button-submit text-center w-16"
+            class="btn btn-primary text-center w-16"
             @click="$emit('leadOff', props.slide.id)"
           >
             Отключить сбор контактов

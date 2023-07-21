@@ -87,7 +87,7 @@ async function submit() {
           </div>
         </div>
 
-        <button type="submit" class="btn button-submit" :disabled="!form.valid">
+        <button type="submit" class="btn btn-primary" :disabled="!form.valid">
           Войти
         </button>
       </form>

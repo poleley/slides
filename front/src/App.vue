@@ -9,7 +9,7 @@ const router = useRouter();
 <template>
   <nav
     v-if="router.currentRoute.value.name !== 'embed'"
-    class="navbar navbar-expand-lg navbar-dark"
+    class="navbar navbar-expand-lg navbar-dark bg-primary"
   >
     <div class="container-fluid">
       <button
@@ -70,12 +70,12 @@ const router = useRouter();
                   </router-link>
                 </li>
                 <li>
-                  <a class="dropdown-item" :to="{ name: 'favorite' }">Избранное </a>
+                  <router-link class="dropdown-item" :to="{ name: 'favorite' }">Избранное </router-link>
                 </li>
                 <li>
-                  <a class="dropdown-item" :to="{ name: 'converter' }"
+                  <router-link class="dropdown-item" :to="{ name: 'converter' }"
                     >Загрузить презентацию
-                  </a>
+                  </router-link>
                 </li>
                 <li>
                   <hr class="dropdown-divider" />

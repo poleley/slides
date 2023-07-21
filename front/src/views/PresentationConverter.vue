@@ -117,7 +117,7 @@ function updateFormFile(file: Exclude<keyof typeof form, "valid">) {
         </div>
         <button
           type="submit"
-          class="btn button-submit w-100 mt-3"
+          class="btn btn-primary w-100 mt-3"
           :disabled="!form.valid"
         >
           Загрузить

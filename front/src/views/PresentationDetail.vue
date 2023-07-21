@@ -298,7 +298,7 @@ function answerTheQuestion() {
     <template #footer>
       <button
         type="submit"
-        class="btn button-submit"
+        class="btn btn-primary"
         :disabled="answerId === ''"
         @click.prevent="answerTheQuestion"
       >
@@ -357,7 +357,7 @@ function answerTheQuestion() {
           </template>
         </div>
 
-        <button type="submit" :disabled="!leadForm.valid" class="btn button-submit">
+        <button type="submit" :disabled="!leadForm.valid" class="btn btn-primary">
           Отправить
         </button>
       </form>
@@ -511,7 +511,7 @@ function answerTheQuestion() {
             </i>
           </div>
           <div v-else-if="isLead">
-            <button class="btn button-submit" @click="leadStart">
+            <button class="btn btn-primary" @click="leadStart">
               Оставить контакты
             </button>
           </div>

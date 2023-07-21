@@ -184,7 +184,7 @@ async function submit() {
             </template>
           </div>
         </div>
-        <button type="submit" class="btn button-submit w-100" :disabled="!form.valid">
+        <button type="submit" class="btn btn-primary w-100" :disabled="!form.valid">
           Зарегистрироваться
         </button>
       </form>
